@@ -26,6 +26,9 @@ const characterHooks = [
 	"", // 24 ROY
 ];
 
+/*
+ * Gecko code template by Punkline
+ */
 const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
 const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
 
@@ -33,7 +36,6 @@ const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n8007
  * Stage boundaries and exclusions by megaqwertification
  * https://docs.google.com/document/d/1Dke2FDt5gVqJZyGCLipJYVynHd7EIbuxknme12z_gf4/edit#
  */
-
 const bounds = [
 	{}, // 00 DRMARIO
 	{}, // 01 MARIO
@@ -142,7 +144,10 @@ function withinRectangle(x, y, vs) {
 	return false;
 }
 
-// https://github.com/substack/point-in-polygon
+/*
+ * withinPolygon() function by James Halliday
+ * https://github.com/substack/point-in-polygon
+ */
 function withinPolygon (x, y, vs) {
     var inside = false;
     for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
@@ -169,6 +174,10 @@ function coordsToHex(x, y) {
 	return hex.toUpperCase();
 }
 
+/*
+ * toHex() function by Nina Scholz
+ * https://stackoverflow.com/questions/47164675/convert-float-to-32bit-hex-string-in-javascript
+ */
 function toHex(floatNum) {
 	const getHex = i => ('00' + i.toString(16)).slice(-2);
 	var view = new DataView(new ArrayBuffer(4)), result;
