@@ -4,9 +4,9 @@
 
 function randomize() {
 	var resultBox = document.querySelector('#result');
-	var characterBox = document.querySelector('#character');
+	var stageBox = document.querySelector('#stage');
 
-	if (characterBox.value == "all") {
+	if (stageBox.value == "all") {
 		var result = "";
 		for (let i = 0; i < 25; i++) {
 			if (bounds[i].x1) {
@@ -15,18 +15,20 @@ function randomize() {
 		}
 		resultBox.value = result;
 	} else {
-		resultBox.value = getCode(parseInt(characterBox.value));
+		resultBox.value = getCode(parseInt(stageBox.value));
 	}
 }
 
-function getCode(character) {
-	var result = characterHooks[character] + codeStart;
-	for (let i = 0; i < 10; i++) {
+function getCode(stage) {
+	var result = stageHooks[stage] + codeStart;
+	var numTargets = 10;
+
+	for (let i = 0; i < numTargets; i++) {
 		var invalid = true;
 		while (invalid) {
-			var x = getRandomDecimal(bounds[character].x1, bounds[character].x2);
-			var y = getRandomDecimal(bounds[character].y1, bounds[character].y2);
-			if (coordinatesValid(x, y, character)) {
+			var x = getRandomDecimal(bounds[stage].x1, bounds[stage].x2);
+			var y = getRandomDecimal(bounds[stage].y1, bounds[stage].y2);
+			if (coordinatesValid(x, y, stage)) {
 				invalid = false;
 			}
 		}
@@ -36,18 +38,18 @@ function getCode(character) {
 	return result;
 }
 
-function coordinatesValid(x, y, character) {
+function coordinatesValid(x, y, stage) {
 	// exclusions
-	if (exclusions[character] != null) {
-		for (let i = 0; i < exclusions[character].length; i++) {
-			var characterExclusions = exclusions[character][i];
-			if (characterExclusions.length == 2) {
+	if (exclusions[stage] != null) {
+		for (let i = 0; i < exclusions[stage].length; i++) {
+			var stageExclusions = exclusions[stage][i];
+			if (stageExclusions.length == 2) {
 				// rectangle
-				if (withinRectangle(x, y, exclusions[character][i])) {
+				if (withinRectangle(x, y, exclusions[stage][i])) {
 					return false;
 				}
 			} else {
-				if (withinPolygon(x, y, exclusions[character][i])) {
+				if (withinPolygon(x, y, exclusions[stage][i])) {
 					return false;
 				}
 			}
@@ -119,9 +121,9 @@ function copy() {
 }
 
 /*
- * Character hooks (mostly) found by djwang88
+ * Stage hooks (mostly) found by djwang88
  */
-const characterHooks = [
+const stageHooks = [
 	"C2220568", // 00 DRMARIO
 	"C221F89C", // 01 MARIO
 	"C2221C6C", // 02 LUIGI
@@ -147,6 +149,7 @@ const characterHooks = [
 	"C222416C", // 22 MRGAMEWATCH
 	"C2221F50", // 23 MARTH
 	"C2224450", // 24 ROY
+	"C22238C0", // 25 SHEIK
 ];
 
 /*
@@ -163,9 +166,9 @@ const bounds = [
 	{x1: -130, y1: -130, x2: 130, y2: 130}, // 00 DRMARIO
 	{x1: -150, y1: -100, x2: 130, y2: 150}, // 01 MARIO
 	{x1: -70, y1: -70, x2: 70, y2: 70}, // 02 LUIGI
-	{}, // 03 BOWSER
-	{}, // 04 PEACH
-	{}, // 05 YOSHI
+	{x1: -110, y1: -150, x2: 250, y2: 100}, // 03 BOWSER
+	{x1: -110, y1: -100, x2: 180, y2: 150}, // 04 PEACH
+	{x1: -150, y1: -90, x2: 130, y2: 170}, // 05 YOSHI
 	{}, // 06 DK
 	{}, // 07 CFALCON
 	{}, // 08 GANONDORF
@@ -185,6 +188,7 @@ const bounds = [
 	{}, // 22 MRGAMEWATCH
 	{}, // 23 MARTH
 	{}, // 24 ROY
+	{}, // 25 SHEIK
 ];
 
 var exclusions = [];
@@ -204,6 +208,45 @@ exclusions[1] = [ // MARIO
 exclusions[2] = [ // LUIGI
 	[ [-5, -5], [5, 5] ], // Boundary 1
 ];
+exclusions[3] = [ // BOWSER
+	[ [95, 55], [105, 85] ], // Boundary 1
+	[ [30, 40], [80, 40], [80, 65], [70, 65], [70, 50], [30, 50] ], // Boundary 2
+	[ [-50, -10], [-40, 35] ], // Boundary 3
+	[ [-80, -45], [-70, 10] ], // Boundary 4
+	[ [-105, -100], [-95, 45] ], // Boundary 5
+	[ [-85, -100], [-25, -90] ], // Boundary 6
+	[ [-5, -15], [80, -5] ], // Boundary 7
+	[ [-5, -120], [30, -110] ], // Boundary 8
+	[ [75, -150], [90, -140] ], // Boundary 9
+	[ [35, -90], [130, -90], [130, 5], [120, 5], [120, -25], [100, -25], [100, -25], [100, -40], [80, -40],
+		[70, -50], [70, -70], [50, -70], [50, -80], [35, -80] ] // Boundary 10
+	[ [150, -120], [175, -110] ], // Boundary 11
+	[ [200, -120], [210, -120], [210, -90], [235, -90], [235, -80], [200, -80] ], // Boundary 12
+];
+exclusions[4] = [ // PEACH
+	[ [-55, 0], [-55, -10], [20, -10], [20, -100], [130, -100], [135, -90], [135, -75], [120, -75], [120, -90],
+		[105, -90], [105, -75], [100, -75], [100, -90], [85, -90], [85, -75], [80, -75], [80, -90], [65, -90],
+		[65, -75], [60, -75], [60, -90], [40, -90], [40, -80], [30, -80], [30, -25], [35, -15], [35, 0] ], // Boundary 1
+	[ [45, 83], [45, 75], [40, 65], [40, 50], [55, 50], [55, -10], [50, -20], [50, -55], [110, -55], [110, -45],
+		[60, -45], [60, 50], [55, 65], [55, 78] ], // Boundary 2
+	[ [17, 20], [22, 20], [22, 65], [30, 80], [30, 120], [40, 120], [130, 86.24], [130, 65], [135, 65], [135, 84.38],
+		[145, 80.62], [145, 65], [150, 65], [150, 85], [30, 130], [17, 130] ], // Boundary 3	
+];
+exclusions[5] = [ // YOSHI
+	[ [-85, 150], [-85, 130], [-75, 120], [-40, 120], [-30, 130], [-30, 165], [-40, 165], [-40, 135], [-75, 135],
+		[-75, 150], ], // Boundary 1
+	[ [-155, -10], [-155, -20], [-130, -20], [-120, -10], [-120, 10], [-130, 20], [-145, 20], [-145, 10], [-130, 10],
+		[-130, -10],], // Boundary 2
+	[[-60, 0], [-40, 0], [-30, 10], [-30, 20], [-50, 20], [-50, 55], [-80, 55], [-80, 45], [-60, 45], ], // Boundary 3
+	[ [-15, 40], [25, 40], [25, 50], [15, 55], [-5, 55], [-15, 50], ], // Boundary 4
+	[ [45, 140], [55, 165] ], // Boundary 5
+	[ [40, 10], [70, 20] ], // Boundary 6
+	[ [-5, -40], [5, -50], [25, -50], [35, -40], [35, -30], [-5, -30], ], // Boundary 7
+	[ [-95, -45], [-55, -45], [-55, -90], [130, -90], [130, -20], [100, -20], [66.63, -55.51], [31.63, -70],
+		[-1.63, -70], [-36.63, -55.51], [-55, -40], [-105, -40], [-105, -80], [-80, -80], [-80, -70],
+		[-95, -70], ], // Boundary 8
+];
+	
 exclusions[10] = [ // FOX
 	[ [-120, -100], [-60, -100], [-60, -40], [-15, -40], [-15, -105], [-5, -105], [-5, 0], [15, 0], [15, 10], 
 		[-15, 10], [-15, -30], [-60, -30], [-60, 10], [-80, 10], [-80, -90], [-120, -90] ], // Boundary 1
@@ -218,6 +261,7 @@ exclusions[10] = [ // FOX
 	[ [-20, -145], [-5, -130] ], // Boundary 10
 	[ [-45, -130], [-30, -120] ], // Boundary 11
 ];
+
 exclusions[16] = [ // LINK
 	[ [100, -10], [110, 0] ], // Boundary 1
 	[ [80, -55], [100, -45], [100, -35], [ 80,-45 ] ], // Boundary 2
@@ -229,11 +273,3 @@ exclusions[16] = [ // LINK
 		[40, -95], [40, -100], [50, -100], [50, -95], [60, -95], [60, -100], [70, -100], [70, -95], [80, -95], 
 		[80, -100], [90, -100], [90, -90], [10, -90], [10, 10], [15, 10], [15, 20], [-5, 20], [-5, 10] ], // Boundary 5
 ];
-
-/**
- * TESTING NOTES
- * 00 DRMARIO: 
- * 01 MARIO: 
- * 10 FOX: good
- * 16 LINK: target occasionally hidden deep in starting pillar
- **/
