@@ -29,6 +29,11 @@ const characterHooks = [
 const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
 const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
 
+/*
+ * Stage boundaries and exclusions by megaqwertification
+ * https://docs.google.com/document/d/1Dke2FDt5gVqJZyGCLipJYVynHd7EIbuxknme12z_gf4/edit#
+ */
+
 const bounds = [
 	{}, // 00 DRMARIO
 	{}, // 01 MARIO
@@ -40,7 +45,7 @@ const bounds = [
 	{}, // 07 CFALCON
 	{}, // 08 GANONDORF
 	{}, // 09 FALCO
-	{x1: -100, y1: -100, x2: 100, y2: 100}, // 10 FOX
+	{x1: -150, y1: -150, x2: 150, y2: 150}, // 10 FOX
 	{}, // 11 NESS
 	{}, // 12 ICECLIMBERS
 	{}, // 13 KIRBY
@@ -58,10 +63,18 @@ const bounds = [
 ];
 
 var exclusions = [];
-exclusions[10] = [ // 10 FOX
-	[ [-55, 80], [-15, 120] ],
-	[ [115, -30], [145, 20] ],
-	[ [-80, -100], [-60, 10] ],
+exclusions[10] = [ // FOX
+	[ [-120, -100], [-60, -100], [-60, -40], [-15, -40], [-15, -105], [-5, -105], [-5, 0], [15, 0], [15, 10], [-15, 10], [-15, -30], [-60, -30], [-60, 10], [-80, 10], [-80, -90], [-120, -90] ], // Boundary 1
+	[ [-55, 80], [-15, 120] ], // Boundary 2
+	[ [35, 80], [45, 80], [45, 130], [75, 130], [75, 65], [85, 65], [85, 140], [35, 140] ], // Boundary 3
+	[ [115, -30], [145, 20] ], // Boundary 4
+	[ [40, -50], [75, -40] ], // Boundary 5
+	[ [45, -90], [70, -70] ], // Boundary 6
+	[ [80, -120], [105, -110] ], // Boundary 7
+	[ [45, -150], [70, -130] ], // Boundary 8
+	[ [5, -130], [35, -120] ], // Boundary 9
+	[ [-20, -145], [-5, -130] ], // Boundary 10
+	[ [-45, -130], [-30, -120] ], // Boundary 11
 ];
 
 function randomize() {
@@ -143,16 +156,6 @@ function withinPolygon (x, y, vs) {
 
     return inside;
 };
-
-/*
-var polygon = [ [ 1, 1 ], [ 1, 2 ], [ 2, 2 ], [ 2, 1 ] ];
-
-console.dir([
-    inside([ 1.5, 1.5 ], polygon),
-    inside([ 4.9, 1.2 ], polygon),
-    inside([ 1.8, 1.1 ], polygon)
-]);
-*/
 
 function getRandomDecimal(min, max) {
 	// two decimal places
