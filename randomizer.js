@@ -165,5 +165,11 @@ function toHex(floatNum) {
 	return(result);
 }
 
+function copy() {
+	var text = document.querySelector('#result');
+	text.select();
+	document.execCommand('copy');
+}
+
 // TODO "all" option for generating a single massive code
 // TODO handle other quadrilateral bounds

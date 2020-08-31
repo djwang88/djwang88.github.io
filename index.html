@@ -15,8 +15,12 @@
             <option value="10">Fox</option>
             <option value="16">Link</option>
         </select>
-        <p><button id="button" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
-        <p><textarea id="result" style="height: 380px"></textarea></p>
+        <p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
+        <p>
+            <label for="result">Gecko code:</label><br>
+            <textarea id="result" style="height: 500px"></textarea>
+        </p>
+        <p><button id="copy" onclick="copy()">Copy to clipboard</button></p>
     </body>
 </html>
 <script src="randomizer.js"></script>
