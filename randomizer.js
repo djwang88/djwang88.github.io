@@ -20,9 +20,18 @@ function randomize() {
 }
 
 function getCode(stage) {
-	var result = stageHooks[stage] + codeStart;
+	var start = codeStart;
+	var end = codeEnd;
 	var numTargets = 10;
 
+	if (stage == 25) {
+		// Sheik-specific code
+		start = codeStartSheik;
+		end = codeEndSheik;
+		numTargets = 3;
+	}
+
+	var result = stageHooks[stage] + codeStart;
 	for (let i = 0; i < numTargets; i++) {
 		var invalid = true;
 		while (invalid) {
@@ -157,6 +166,8 @@ const stageHooks = [
  */
 const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
 const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
+const codeStartSheik = " 00000012\n3C00801C 60004210\n7C0803A6 4E800021\n48000020 4E800021";
+const codeEndSheik = "\n4BFFFFE5 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
@@ -175,7 +186,7 @@ const bounds = [
 	{}, // 09 FALCO
 	{x1: -150, y1: -150, x2: 150, y2: 150}, // 10 FOX
 	{}, // 11 NESS
-	{}, // 12 ICECLIMBERS
+	{x1: -120, y1: 0, x2: 120, y2: 500}, // 12 ICECLIMBERS
 	{}, // 13 KIRBY
 	{}, // 14 SAMUS
 	{}, // 15 ZELDA
@@ -184,11 +195,11 @@ const bounds = [
 	{}, // 18 PICHU
 	{}, // 19 PIKACHU
 	{}, // 20 JIGGLYPUFF
-	{}, // 21 MEWTWO
-	{}, // 22 MRGAMEWATCH
+	{x1: -120, y1: -120, x2: 130, y2: 100}, // 21 MEWTWO
+	{x1: -79, y1: -29.5, x2: 76, y2: 57.44}, // 22 MRGAMEWATCH
 	{}, // 23 MARTH
 	{}, // 24 ROY
-	{}, // 25 SHEIK
+	{x1: -100, y1: 0, x2: 100, y2: 80}, // 25 SHEIK
 ];
 
 var exclusions = [];
@@ -270,6 +281,13 @@ exclusions[10] = [ // FOX
 	[ [-45, -130], [-30, -120] ], // Boundary 11
 ];
 
+exclusions[12] = [ // ICECLIMBERS
+	[ [-120, 0], [-80, 0], [-80, 200], [-60, 200], [-60, 340], [-50, 340], [-50, 430], [-25, 430], [-25, 440],
+		[-100, 440], [-100, 340], [-120, 340], ], // Boundary 1
+	[ [120, 0], [80, 0], [80, 200], [60, 200], [60, 340], [50, 340], [50, 430], [25, 430], [25, 440], [100, 440],
+		[100, 340], [120, 340], ], // Boundary 2
+];
+
 exclusions[16] = [ // LINK
 	[ [100, -10], [110, 0] ], // Boundary 1
 	[ [80, -55], [100, -45], [100, -35], [ 80,-45 ] ], // Boundary 2
@@ -280,4 +298,21 @@ exclusions[16] = [ // LINK
 		[-10, -90], [0, -90], [0, -100], [10, -100], [10, -95], [20, -95], [20, -100], [30, -100], [30, -95], 
 		[40, -95], [40, -100], [50, -100], [50, -95], [60, -95], [60, -100], [70, -100], [70, -95], [80, -95], 
 		[80, -100], [90, -100], [90, -90], [10, -90], [10, 10], [15, 10], [15, 20], [-5, 20], [-5, 10] ], // Boundary 5
+];
+
+exclusions[21] = [ // MEWTWO
+	[ [-92.5, 42.5], [-77.5, 57.5], [-82.5, 62.5], [-97.5, 47.5] ], // Boundary 1
+	[ [-60, 55], [-50, 85] ], // Boundary 2
+	[ [-20, 55], [-10, 85] ], // Boundary 3
+	[ [107.5, 47.5], [92.5, 62.5], [87.5, 57.5], [102.5, 42.5] ], // Boundary 4
+	[ [120, -55], [130, 0] ], // Boundary 5
+	[ [70, -170], [100, -80] ], // Boundary 6
+	[ [-30, -170], [0, -80] ], // Boundary 7
+	[ [-120, -55], [-110, 0] ], // Boundary 8
+];
+
+exclusions[22] = [ // MRGAMEWATCH
+];
+
+exclusions[25] = [ // SHEIK
 ];
