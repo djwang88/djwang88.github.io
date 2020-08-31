@@ -74,8 +74,8 @@ function randomize() {
 	for (let i = 0; i < 10; i++) {
 		var invalid = true;
 		while (invalid) {
-			var x = getRndInteger(bounds[character].x1, bounds[character].x2);
-			var y = getRndInteger(bounds[character].y1, bounds[character].y2);
+			var x = getDecimal(bounds[character].x1, bounds[character].x2);
+			var y = getDecimal(bounds[character].y1, bounds[character].y2);
 			if (coordinatesValid(x, y, character)) {
 				invalid = false;
 			}
@@ -110,12 +110,16 @@ function withinBounds(x, y, bounds) {
 	return false;
 }
 
-function getRndInteger(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
+function getDecimal(min, max) {
+	// random number to two decimal places
+	min = min * 100;
+	max = max * 100;
+	return Math.floor((Math.floor(Math.random() * (max - min + 1)) + min)) / 100;
 }
 
 function coordsToHex(x, y) {
-	return "\n" + toHex(x) + " " + toHex(y);
+	var hex = "\n" + toHex(x) + " " + toHex(y)
+	return hex.toUpperCase();
 }
 
 function toHex(floatNum) {

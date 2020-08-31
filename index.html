@@ -1,4 +1,13 @@
 <html>
+    <head>
+        <style>
+            .button {
+                height: 30px;
+                background-color: white;
+                font-size: 14px;
+            }
+        </style>
+    </head>
     <body>
         <h2>Break the Targets Stage Randomizer  </h2>
         <label for="character">Character: </label>
@@ -6,8 +15,8 @@
             <option value="10">Fox</option>
             <option value="16">Link</option>
         </select>
-        <p><button id="button" onclick="randomize()">Randomize!</button></p>
-        <p><textarea id="result" style="height: 380px;"></textarea></p>
+        <p><button id="button" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
+        <p><textarea id="result" style="height: 380px"></textarea></p>
     </body>
 </html>
 <script src="randomizer.js"></script>
