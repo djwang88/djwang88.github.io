@@ -8,7 +8,7 @@ function randomize() {
 
 	if (stageBox.value == "all") {
 		var result = "";
-		for (let i = 0; i < 25; i++) {
+		for (let i = 0; i < 26; i++) {
 			if (bounds[i].x1) {
 				result += getCode(i) + "\n";
 			}
@@ -31,7 +31,7 @@ function getCode(stage) {
 		numTargets = 3;
 	}
 
-	var result = stageHooks[stage] + codeStart;
+	var result = stageHooks[stage] + start;
 	for (let i = 0; i < numTargets; i++) {
 		var invalid = true;
 		while (invalid) {
@@ -43,7 +43,7 @@ function getCode(stage) {
 		}
 		result += coordsToHex(x, y);
 	}
-	result += codeEnd;
+	result += end;
 	return result;
 }
 
