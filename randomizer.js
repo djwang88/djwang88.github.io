@@ -66,10 +66,22 @@ exclusions[10] = [ // 10 FOX
 
 function randomize() {
 	var resultBox = document.querySelector('#result');
-
 	var characterBox = document.querySelector('#character');
-	var character = parseInt(characterBox.value);
 
+	if (characterBox.value == "all") {
+		var result = "";
+		for (let i = 0; i < 25; i++) {
+			if (characterHooks[i]) {
+				result += getCode(i) + "\n";
+			}
+		}
+		resultBox.value = result;
+	} else {
+		resultBox.value = getCode(parseInt(characterBox.value));
+	}
+}
+
+function getCode(character) {
 	var result = characterHooks[character] + codeStart;
 	for (let i = 0; i < 10; i++) {
 		var invalid = true;
@@ -83,7 +95,7 @@ function randomize() {
 		result += coordsToHex(x, y);
 	}
 	result += codeEnd;
-	resultBox.value = result;
+	return result;
 }
 
 function coordinatesValid(x, y, character) {
@@ -170,6 +182,3 @@ function copy() {
 	text.select();
 	document.execCommand('copy');
 }
-
-// TODO "all" option for generating a single massive code
-// TODO handle other quadrilateral bounds
