@@ -5,6 +5,15 @@
                 height: 30px;
                 font-size: 14px;
             }
+            
+            .copyButton {
+                width: 200px;
+            }
+
+            .codeArea {
+                height: 500px;
+                width: 200px;
+            }
         </style>
     </head>
     <body>
@@ -46,17 +55,16 @@
         <p></p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
         <p>
             <label for="result"><b>Gecko code:</b></label><br>
-            <textarea id="result" style="height: 500px"></textarea>
-            <textarea id="overflow" style="height: 500px; display: none;"></textarea>
+            <textarea id="result" class="codeArea"></textarea>
+            <textarea id="overflow" style="display: none;" class="codeArea"></textarea>
         </p>
         <p>
-            <button id="copy" onclick="copy()">Copy to clipboard</button>
-            &nbsp;&nbsp;&nbsp;
-            <button id="overflow-copy" onclick="overflowCopy()" style="display: none;">Copy second code to clipboard</button>
+            <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
+            <button id="overflow-copy" onclick="overflowCopy()" style="display: none;" class="copyButton">Copy code to clipboard</button>
         </p>
         <p id="overflow-note" style="color: red; display: none;">
             <span>
-                Because gecko codes are limited to a line length, the all stages code has been separated into two 13-stage codes.<br>
+                Because Gecko codes are limited in length, the all stages code has been separated into two 13-stage codes.<br>
                 (<b>Dr. Mario</b> through <b>Ice Climbers</b> // <b>Kirby</b> through <b>Sheik (Seak)</b>)<br><br>
                 To do an all stage run, copy both codes as "Randomizer 1" and "Randomizer 2", then <b>enable one at a time</b> for the codes to work.<br>
             </span>
