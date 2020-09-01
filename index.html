@@ -43,8 +43,18 @@
         <p>
             <label for="result">Gecko code:</label><br>
             <textarea id="result" style="height: 500px"></textarea>
+            <textarea id="overflow" style="height: 500px; display: none;"></textarea>
         </p>
-        <p><button id="copy" onclick="copy()">Copy to clipboard</button></p>
+        <p>
+            <button id="copy" onclick="copy()">Copy to clipboard</button>
+            &nbsp;&nbsp;&nbsp;
+            <button id="overflow-copy" onclick="overflowCopy()" style="display: none;">Copy second code to clipboard</button>
+        </p>
+        <p id="overflow-note" style="color: red; display: none;">
+            <span>
+                Because gecko codes are limited to a line length, the all stages code has been separated into two 13-stage codes.<br>
+                (<b>Dr. Mario</b> through <b>Ice Climbers</b> // <b>Kirby</b> through <b>Sheik (Seak)</b>)</span>
+        </p>
         <p>
             <br>
             Randomizer developed by <b>djwang88</b><br>

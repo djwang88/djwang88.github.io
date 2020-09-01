@@ -5,15 +5,30 @@
 function randomize() {
 	var resultBox = document.querySelector('#result');
 	var stageBox = document.querySelector('#stage');
+	var overflowBox = document.querySelector('#overflow');
+	var overflowText = document.querySelector('#overflow-note');
+	var overflowCopy = document.querySelector('#overflow-copy');
 
 	if (stageBox.value == "all") {
 		var result = "";
-		for (let i = 0; i < 26; i++) {
+		for (let i = 0; i < 13; i++) {
 			result += getCode(i) + "\n";
 		}
 		resultBox.value = result;
+
+		var overflow = "";
+		for (let i = 13; i < 26; i++) {
+			overflow += getCode(i) + "\n";
+		}
+		overflowBox.value = overflow;
+		overflowBox.style.display = "inline";
+		overflowText.style.display = "inline";
+		overflowCopy.style.display = "inline";
 	} else {
 		resultBox.value = getCode(parseInt(stageBox.value));
+		overflowBox.style.display = "none";
+		overflowText.style.display = "none";
+		overflowCopy.style.display = "none";
 	}
 }
 
@@ -142,6 +157,12 @@ function toHex(floatNum) {
 
 function copy() {
 	var text = document.querySelector('#result');
+	text.select();
+	document.execCommand('copy');
+}
+
+function overflowCopy() {
+	var text = document.querySelector('#overflow');
 	text.select();
 	document.execCommand('copy');
 }
