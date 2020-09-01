@@ -8,8 +8,12 @@
         </style>
     </head>
     <body>
-        <h2>Break the Targets Stage Randomizer</h2>
-        <label for="stage">Stage: </label>
+        <h1>Break the Targets Stage Randomizer</h1>
+        <p>
+            * Randomizes target positions, with stage-specific exclusion rules to prevent collisions<br>
+            * Inserts new positions into a Gecko code template, which can then be used in Dolphin<br>
+        </p>
+        <label for="stage"><b>Stage: </b></label>
         <select id="stage">
             <option value="all">All Stages</option>
             <option value="0">Dr. Mario</option>
@@ -41,7 +45,7 @@
         </select>
         <p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
         <p>
-            <label for="result">Gecko code:</label><br>
+            <label for="result"><b>Gecko code:</b></label><br>
             <textarea id="result" style="height: 500px"></textarea>
             <textarea id="overflow" style="height: 500px; display: none;"></textarea>
         </p>
@@ -58,9 +62,14 @@
             </span>
         </p>
         <p>
-            <br>
-            Randomizer developed by <b>djwang88</b><br>
-            Stage mappings by <b>megaqwertification</b><br>
+            <b>Known issues:</b><br>
+            * The two moving targets in Mewtwo's stage aren't affected<br>
+            * Targets <b>intentionally</b> can generate partially inside walls
+        </p>
+        <p>
+            _______________________________________________________________________________<br>
+            Randomizer designed and built by <b>djwang88</b><br>
+            Stage mappings determined by <b>megaqwertification</b><br>
             Gecko code developed by <b>Punkline</b><br>
         </p>
     </body>

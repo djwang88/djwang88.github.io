@@ -126,7 +126,7 @@ function withinPolygon (x, y, vs) {
     }
 
     return inside;
-};
+}
 
 function getRandomDecimal(min, max) {
 	// two decimal places
