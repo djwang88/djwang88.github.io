@@ -8,10 +8,10 @@
         </style>
     </head>
     <body>
-        <h1>Break the Targets Stage Randomizer</h1>
+        <h1>SSBM Break the Targets Stage Randomizer</h1>
         <p>
             * Randomizes target positions, with stage-specific exclusion rules to prevent collisions<br>
-            * Inserts new positions into a Gecko code template, which can then be used in Dolphin<br>
+            * Inserts new positions into a Gecko code template, which can then be used with Dolphin or Wii Homebrew<br>
         </p>
         <label for="stage"><b>Stage: </b></label>
         <select id="stage">
@@ -43,7 +43,7 @@
             <option value="24">Roy</option>
             <option value="25">Sheik (Seak)</option>
         </select>
-        <p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
+        <p></p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
         <p>
             <label for="result"><b>Gecko code:</b></label><br>
             <textarea id="result" style="height: 500px"></textarea>
