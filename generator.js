@@ -94,18 +94,19 @@ function getCode(stage) {
 	var result = stageHooks[stage] + start;
 
 	if (customizeSpawn) {
-		var x = parseInt(document.querySelector('#xs').value);
-		var y = parseInt(document.querySelector('#ys').value);
+		var x = parseFloat(document.querySelector('#xs').value);
+		var y = parseFloat(document.querySelector('#ys').value);
+		if (isNaN(x) || isNaN(y)) {
+			return "Please input valid coordinates.";
+		}
 		result += coordsToHex(x, y);
 	}
 
 	for (let i = 1; i <= numTargets; i++) {
-		try {
-			var asdf = document.querySelector('#x' + i);
-			var x = parseInt(document.querySelector('#x' + i).value);
-			var y = parseInt(document.querySelector('#y' + i).value);
-		} catch (e) {
-			return "Please fill in valid coordinates.";
+		var x = parseFloat(document.querySelector('#x' + i).value);
+		var y = parseFloat(document.querySelector('#y' + i).value);
+		if (isNaN(x) || isNaN(y)) {
+			return "Please input valid coordinates.";
 		}
 		result += coordsToHex(x, y);
 	}
