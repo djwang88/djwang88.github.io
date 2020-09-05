@@ -3,7 +3,7 @@
         <style>
             .button {
                 height: 30px;
-                font-size: 14px;
+                font-size: 20px;
             }
             
             .copyButton {
@@ -23,7 +23,7 @@
             * Inserts new target coordinates into a Gecko code template, which can then be used with Dolphin or Wii Homebrew<br>
         </p>
         <label for="stage"><b>Stage: </b></label>
-        <select id="stage">
+        <select id="stage" onchange="showHideSpawn()">
             <option value="all">All Stages</option>
             <option value="0">Dr. Mario</option>
             <option value="1">Mario</option>
@@ -52,7 +52,8 @@
             <option value="24">Roy</option>
             <option value="25">Sheik (Seak)</option>
         </select>
-        <p></p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
+        <div id="spawn-div" style="display: none; margin-top: 5px"><input id="spawn" type="checkbox">Randomize Spawn Location</div>
+        <p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
         <p>
             <label for="result"><b>Gecko code:</b></label><br>
             <textarea id="result" class="codeArea"></textarea>
