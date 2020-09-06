@@ -1,6 +1,10 @@
 <html>
     <head>
         <style>
+            body {
+                margin-left: 10px;
+            }
+
             .button {
                 height: 30px;
                 font-size: 20px;
@@ -24,7 +28,8 @@
         </p>
         <label for="stage"><b>Stage: </b></label>
         <select id="stage" onchange="showHideSpawn()">
-            <option value="all">All Stages</option>
+            <option value="all">(All Stages)</option>
+            <option value="random">(Random Stage)</option>
             <option value="0">Dr. Mario</option>
             <option value="1">Mario</option>
             <option value="2">Luigi</option>
@@ -53,7 +58,7 @@
             <option value="25">Sheik (Seak)</option>
         </select>
         <div id="spawn-div" style="display: none; margin-top: 5px"><input id="spawn" type="checkbox">Randomize Spawn Location</div>
-        <p><button id="randomize" onclick="randomize()" class="button"><b>RANDOMIZE</b></button></p>
+        <p><button id="randomize" onclick="randomize()" class="button">RANDOMIZE</button></p>
         <p>
             <label for="result"><b>Gecko code:</b></label><br>
             <textarea id="result" class="codeArea"></textarea>
@@ -61,7 +66,7 @@
         </p>
         <p>
             <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
-            <button id="overflow-copy" onclick="overflowCopy()" style="display: none;" class="copyButton">Copy code to clipboard</button>
+            <button id="overflow-copy" onclick="copyOverflow()" style="display: none;" class="copyButton">Copy code to clipboard</button>
         </p>
         <p id="overflow-note" style="color: red; display: none;">
             <span>

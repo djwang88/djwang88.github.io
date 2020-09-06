@@ -2,13 +2,15 @@
  * Randomizer developed by djwang88
  */
 
-function randomize() {
-	var resultBox = document.querySelector('#result');
-	var stageBox = document.querySelector('#stage');
-	var overflowBox = document.querySelector('#overflow');
-	var overflowText = document.querySelector('#overflow-note');
-	var overflowCopy = document.querySelector('#overflow-copy');
+var resultBox = document.querySelector('#result');
+var stageBox = document.querySelector('#stage');
+var overflowBox = document.querySelector('#overflow');
+var overflowText = document.querySelector('#overflow-note');
+var overflowCopy = document.querySelector('#overflow-copy');
+var spawnBox = document.querySelector('#spawn');
+var spawnDiv = document.querySelector('#spawn-div');
 
+function randomize() {
 	if (stageBox.value == "all") {
 		var result = "";
 		for (let i = 0; i < 13; i++) {
@@ -21,15 +23,28 @@ function randomize() {
 			overflow += getCode(i) + "\n";
 		}
 		overflowBox.value = overflow;
-		overflowBox.style.display = "inline";
-		overflowText.style.display = "inline";
-		overflowCopy.style.display = "inline";
+		showOverflow();
+	} else if (stageBox.value == "random") {
+		var index = Math.floor(Math.random() * stageHooks.length);
+		resultBox.value = getCode(index);
+		stageBox.value = index.toString();
+		hideOverflow();
 	} else {
 		resultBox.value = getCode(parseInt(stageBox.value));
-		overflowBox.style.display = "none";
-		overflowText.style.display = "none";
-		overflowCopy.style.display = "none";
+		hideOverflow();
 	}
+}
+
+function showOverflow() {
+	overflowBox.style.display = "inline";
+	overflowText.style.display = "inline";
+	overflowCopy.style.display = "inline";
+}
+
+function hideOverflow() {
+	overflowBox.style.display = "none";
+	overflowText.style.display = "none";
+	overflowCopy.style.display = "none";
 }
 
 function getCode(stage) {
@@ -44,7 +59,6 @@ function getCode(stage) {
 		numTargets = 3;
 	}
 
-	var spawnBox = document.querySelector('#spawn');
 	if (spawnBox.checked) {
 		start = codeStartSpawn;
 		end = codeEndSpawn;
@@ -73,19 +87,9 @@ function getCode(stage) {
 }
 
 function coordinatesValid(x, y, stage) {
-	// exclusions
 	if (exclusions[stage] != null) {
 		for (let i = 0; i < exclusions[stage].length; i++) {
 			var vs = exclusions[stage][i];
-
-			// if (exceptions[stage] != null) {
-			// 	for (let j = 0; j < exceptions[stage].length; j++) {
-			// 		var ex = exceptions[stage][i];
-			// 		if (withinBounds(x, y, ex)) {
-			// 			var asdf = 0;
-			// 		}
-			// 	}
-			// }
 			if (withinBounds(x, y, vs)) {
 				if (exceptions[stage] != null) {
 					for (let j = 0; j < exceptions[stage].length; j++) {
@@ -99,13 +103,11 @@ function coordinatesValid(x, y, stage) {
 			}
 		}
 	}
-
 	return true;
 }
 
 function withinBounds(x, y, vs) {
 	if (vs.length == 2) {
-		// rectangle
 		return withinRectangle(x, y, vs);
 	} else {
 		return withinPolygon(x, y, vs);
@@ -168,24 +170,19 @@ function toHex(floatNum) {
 }
 
 function copy() {
-	var text = document.querySelector('#result');
-	text.select();
+	resultBox.select();
 	document.execCommand('copy');
 }
 
-function overflowCopy() {
-	var text = document.querySelector('#overflow');
-	text.select();
+function copyOverflow() {
+	overflowBox.select();
 	document.execCommand('copy');
 }
 
 function showHideSpawn() {
-	var spawnDiv = document.querySelector('#spawn-div');
-	var spawnBox = document.querySelector('#spawn');
 	spawnDiv.style.display = "none";
 	spawnBox.checked = false;
 
-	var stageBox = document.querySelector('#stage');
 	if (stageBox.value != "all") {
 		var stage = parseInt(stageBox.value);
 		if (stage == LINK) {
@@ -273,34 +270,37 @@ const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\
  * https://docs.google.com/document/d/1Dke2FDt5gVqJZyGCLipJYVynHd7EIbuxknme12z_gf4/edit#
  */
 const bounds = [
-	{x1: -130, y1: -130, x2: 130, y2: 130}, // 00 DRMARIO
-	{x1: -150, y1: -100, x2: 130, y2: 150}, // 01 MARIO
-	{x1: -70, y1: -70, x2: 70, y2: 70}, // 02 LUIGI
-	{x1: -110, y1: -150, x2: 250, y2: 100}, // 03 BOWSER
-	{x1: -110, y1: -100, x2: 180, y2: 150}, // 04 PEACH
-	{x1: -150, y1: -90, x2: 130, y2: 170}, // 05 YOSHI
-	{x1: -190, y1: 0, x2: 130, y2: 200}, // 06 DK
-	{x1: -160, y1: -130, x2: 170, y2: 110}, // 07 CFALCON
-	{x1: -90, y1: -20, x2: 90, y2: 110}, // 08 GANONDORF
-	{x1: -140, y1: -70, x2: 110, y2: 100}, // 09 FALCO
-	{x1: -150, y1: -150, x2: 150, y2: 150}, // 10 FOX
-	{x1: -150, y1: -140, x2: 150, y2: 120}, // 11 NESS
-	{x1: -120, y1: 0, x2: 120, y2: 500}, // 12 ICECLIMBERS
-	{x1: -150, y1: -70, x2: 130, y2: 180}, // 13 KIRBY
-	{x1: -130, y1: -110, x2: 90, y2: 130}, // 14 SAMUS
-	{x1: -130, y1: -100, x2: 115, y2: 115}, // 15 ZELDA
-	{x1: -150, y1: -100, x2: 150, y2: 100}, // 16 LINK
-	{x1: -190, y1: -40, x2: 120, y2: 210}, // 17 YLINK
-	{x1: -160, y1: -80, x2: 145, y2: 110}, // 18 PICHU
-	{x1: -130, y1: -90, x2: 175, y2: 115}, // 19 PIKACHU
-	{x1: -150, y1: -75, x2: 130, y2: 90}, // 20 JIGGLYPUFF
-	{x1: -120, y1: -120, x2: 130, y2: 100}, // 21 MEWTWO
-	{x1: -79, y1: -29.5, x2: 76, y2: 57.44}, // 22 MRGAMEWATCH
-	{x1: -150, y1: -80, x2: 120, y2: 140}, // 23 MARTH
-	{x1: -155, y1: -30, x2: 110, y2: 140}, // 24 ROY
-	{x1: -100, y1: 0, x2: 100, y2: 80}, // 25 SHEIK
+	{x1: -130, y1: -130,  x2: 130, y2: 130  }, // 00 DRMARIO
+	{x1: -150, y1: -100,  x2: 130, y2: 150  }, // 01 MARIO
+	{x1: -70,  y1: -70,   x2: 70,  y2: 70   }, // 02 LUIGI
+	{x1: -110, y1: -150,  x2: 250, y2: 100  }, // 03 BOWSER
+	{x1: -110, y1: -100,  x2: 180, y2: 150  }, // 04 PEACH
+	{x1: -150, y1: -90,   x2: 130, y2: 170  }, // 05 YOSHI
+	{x1: -190, y1: 0,     x2: 130, y2: 200  }, // 06 DK
+	{x1: -160, y1: -130,  x2: 170, y2: 110  }, // 07 CFALCON
+	{x1: -90,  y1: -20,   x2: 90,  y2: 110  }, // 08 GANONDORF
+	{x1: -140, y1: -70,   x2: 110, y2: 100  }, // 09 FALCO
+	{x1: -150, y1: -150,  x2: 150, y2: 150  }, // 10 FOX
+	{x1: -150, y1: -140,  x2: 150, y2: 120  }, // 11 NESS
+	{x1: -120, y1: 0,     x2: 120, y2: 500  }, // 12 ICECLIMBERS
+	{x1: -150, y1: -70,   x2: 130, y2: 180  }, // 13 KIRBY
+	{x1: -130, y1: -110,  x2: 90,  y2: 130  }, // 14 SAMUS
+	{x1: -130, y1: -100,  x2: 115, y2: 115  }, // 15 ZELDA
+	{x1: -150, y1: -100,  x2: 150, y2: 100  }, // 16 LINK
+	{x1: -190, y1: -40,   x2: 120, y2: 210  }, // 17 YLINK
+	{x1: -160, y1: -80,   x2: 145, y2: 110  }, // 18 PICHU
+	{x1: -130, y1: -90,   x2: 175, y2: 115  }, // 19 PIKACHU
+	{x1: -150, y1: -75,   x2: 130, y2: 90   }, // 20 JIGGLYPUFF
+	{x1: -120, y1: -120,  x2: 130, y2: 100  }, // 21 MEWTWO
+	{x1: -79,  y1: -29.5, x2: 76,  y2: 57.44}, // 22 MRGAMEWATCH
+	{x1: -150, y1: -80,   x2: 120, y2: 140  }, // 23 MARTH
+	{x1: -155, y1: -30,   x2: 110, y2: 140  }, // 24 ROY
+	{x1: -100, y1: 0,     x2: 100, y2: 80   }, // 25 SHEIK
 ];
 
+/*
+ * Two-coordinate pairs are assumed to be bottom-left and top-right corners of a rectangle
+ */
 var exclusions = [];
 exclusions[DRMARIO] = [
 	[ [-95, -25], [-80, 90] ], // Boundary 1
@@ -552,7 +552,47 @@ exceptions[ROY] = [
 ];
 
 /*
- * Spawn points (including original)
+ * Spawn points by djwang88 and megaqwertification (with feedback from the Break the Targets community)
  */
 spawns = [];
-spawns[LINK] = [ [5, 21.06], [45, 90], [40, -50], [-52, 42] ]; /* [105, 5] */
+spawns[LINK] = [
+	[5, 21.06], // 1
+	[-52, 42], // 2
+	[45, 90], // 3
+	[40, -50], // 4
+	[75, 5], // 5
+	// [105, 5], // far right platform
+];
+
+// [-65, -110] drmario
+// [0, 1.9] mario
+// [1, -10] luigi
+// [99.25, -7.1] bowser
+// [-20, 10] peach
+// [-40, 35] yoshi
+// [0, 11] dk
+// [125, -105] cf
+// [0, 0] ganondorf
+// [-5, 55] falco
+// [-100, -75] fox
+// [10, -115] ness
+// [0, 0] ice climbers
+// [-127.5, 105] kirby
+// [0, -5] samus
+// [0, -28.94] zelda
+// [5, 21.06] link
+// [-90, 40] young link
+// [24.59, -16.07] pichu
+// [0, -65] pikachu
+// [82.5, 20] jigglypuff
+// [5, -30] mewtwo
+// [20, -35] g&w
+// [-5, -60] marth
+// [15, 0] roy
+// [0, 0] sheik
+
+/**
+ * Changelog
+ *   (2020-09-01) Fixed Zelda bounds (y2)
+ *   (2020-09-04) Fixed Pichu exclusions (Boundary 5)
+ **/
