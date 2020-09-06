@@ -12,6 +12,8 @@ var spawnDiv = document.querySelector('#spawn-div');
 
 function randomize() {
 	if (stageBox.value == "all") {
+		// resultBox.value = getAllStagesCode();
+		// hideOverflow();
 		var result = "";
 		for (let i = 0; i < 13; i++) {
 			result += getCode(i) + "\n";
@@ -83,6 +85,38 @@ function getCode(stage) {
 		result += coordsToHex(x, y);
 	}
 	result += end;
+	return result;
+}
+
+function getAllStagesCode() {
+	var result = codeStartAllStages;
+	for (let i = 0; i < 26; i++) {
+		result += getStageData(i);
+	}
+	result += codeEndAllStages;
+	return result;
+}
+
+function getStageData(stage) {
+	var result = stageHeaders[stage] + "\n";
+	result += coordsToHalfWords(spawns[stage][0][0], spawns[stage][0][1]) + " ";
+	var numTargets = 10;
+	for (let i = 0; i < numTargets; i++) {
+		var invalid = true;
+		while (invalid) {
+			var x = getRandomDecimal(bounds[stage].x1, bounds[stage].x2);
+			var y = getRandomDecimal(bounds[stage].y1, bounds[stage].y2);
+			if (coordinatesValid(x, y, stage)) {
+				invalid = false;
+			}
+		}
+		result += coordsToHalfWords(x, y);
+		if (isEven(i)) {
+			result += "\n";
+		} else {
+			result += " ";
+		}
+	}
 	return result;
 }
 
@@ -169,6 +203,36 @@ function toHex(floatNum) {
 	return(result);
 }
 
+function coordsToHalfWords(x, y) {
+	return toHalfWord(x) + toHalfWord(y);
+}
+
+/*
+ * Signed halfword conversion formula by Punkline
+ */
+function toHalfWord(floatNum) {
+	var floatView = new Float32Array(1);
+	var int32View = new Int32Array(floatView.buffer);
+
+	floatView[0] = floatNum;
+	var hex = int32View[0];
+
+	var mask = ((1 << 16) - 1);
+	var exp = ((hex >> 23) & 0xFF) - 127;
+	var frac = (hex & 0x7FFFFF) | 0x800000;
+	var fixed = frac >> (23 - (exp + 4));
+	var pad = '0';
+	if (hex >> 31) {
+		pad = 'F';
+		fixed = -fixed & mask;
+	}
+	return fixed.toString(16).padStart(4, pad).toUpperCase();
+}
+
+function isEven(num) {
+	return (num % 2 == 0);
+}
+
 function copy() {
 	resultBox.select();
 	document.execCommand('copy');
@@ -188,6 +252,17 @@ function showHideSpawn() {
 		if (stage == LINK) {
 			spawnDiv.style.display = "block";
 		}
+	}
+}
+
+function convertToHex() {
+	var xcoord = document.querySelector('#xcoord').value;
+	var ycoord = document.querySelector('#ycoord').value;
+	var hexresult = document.querySelector('#hexresult');
+	if (xcoord && ycoord) {
+		xcoord = parseFloat(xcoord);
+		ycoord = parseFloat(ycoord);
+		hexresult.value = toHalfWord(xcoord) + " " + toHalfWord(ycoord);
 	}
 }
 
@@ -253,6 +328,35 @@ const stageHooks = [
 	"C22238C0", // 25 SHEIK
 ];
 
+const stageHeaders = [
+	"04170025", // 00 DRMARIO
+	"04170021", // 01 MARIO
+	"0417002C", // 02 LUIGI
+	"0417002A", // 03 BOWSER
+	"04170030", // 04 PEACH
+	"04170036", // 05 YOSHI
+	"04170024", // 06 DK
+	"04170022", // 07 CFALCON
+	"0417003A", // 08 GANONDORF
+	"04170026", // 09 FALCO
+	"04170027", // 10 FOX
+	"0417002F", // 11 NESS
+	"04170028", // 12 ICECLIMBERS
+	"04170029", // 13 KIRBY
+	"04170034", // 14 SAMUS
+	"04170037", // 15 ZELDA
+	"0417002B", // 16 LINK
+	"04170023", // 17 YLINK
+	"04170031", // 18 PICHU
+	"04170032", // 19 PIKACHU
+	"04170033", // 20 JIGGLYPUFF
+	"0417002E", // 21 MEWTWO
+	"04170038", // 22 MRGAMEWATCH
+	"0417002D", // 23 MARTH
+	"04170039", // 24 ROY
+	"04170035", // 25 SHEIK
+];
+
 /*
  * Gecko code template by Punkline
  */
@@ -264,6 +368,9 @@ const codeEndSheik = "\n4BFFFFE5 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\
 
 const codeStartSpawn = " 0000001D\n3C00801C 60004210\n7C0803A6 4E800021\n48000060 4E800021";
 const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000"
+
+const codeStartAllStages = "C21C4228 000000AF\n93C10018 480004EC\n4E800021 ";
+const codeEndAllStages = "00000000\n4BFFFB19 7FC802A6\n39400000 808D9348\n7D3E506E 712800FF\n41820058 38C00008\n5520877F 2C800006\n41820010 38C00002\n41860008 38C00004\n50C9063E 7C882000\n5527C63F 40A20008\n38E0000A 50E9442E\n41860020 75200010\n41A20008 38E70001\n7D4639D6 394A0007\n554A003A 4BFFFFA4\n38BE0004 7CA62850\n91210008 90A1000C\n60000000 00000000\nC21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
@@ -553,43 +660,92 @@ exceptions[ROY] = [
 
 /*
  * Spawn points by djwang88 and megaqwertification (with feedback from the Break the Targets community)
+ * Vanilla spawn point is always first
  */
 spawns = [];
+spawns[DRMARIO] = [
+	[-65, -110],
+];
+spawns[MARIO] = [
+	[0, 1.9],
+];
+spawns[LUIGI] = [
+	[1, -10],
+];
+spawns[BOWSER] = [
+	[99.25, -7.1],
+];
+spawns[PEACH] = [
+	[-20, 10],
+];
+spawns[YOSHI] = [
+	[-40, 35],
+];
+spawns[DK] = [
+	[0, 11],
+];
+spawns[CFALCON] = [
+	[125, -105],
+];
+spawns[GANONDORF] = [
+	[0, 0],
+];
+spawns[FALCO] = [
+	[-5, 55],
+];
+spawns[FOX] = [
+	[-100, -75],
+];
+spawns[NESS] = [
+	[10, -115],
+];
+spawns[ICECLIMBERS] = [
+	[0, 0],
+];
+spawns[KIRBY] = [
+	[-127.5, 105],
+];
+spawns[SAMUS] = [
+	[0, -5],
+];
+spawns[ZELDA] = [
+	[0, -28.94],
+];
 spawns[LINK] = [
-	[5, 21.06], // 1
+	[5, 21.06],
 	[-52, 42], // 2
 	[45, 90], // 3
 	[40, -50], // 4
 	[75, 5], // 5
 	// [105, 5], // far right platform
 ];
-
-// [-65, -110] drmario
-// [0, 1.9] mario
-// [1, -10] luigi
-// [99.25, -7.1] bowser
-// [-20, 10] peach
-// [-40, 35] yoshi
-// [0, 11] dk
-// [125, -105] cf
-// [0, 0] ganondorf
-// [-5, 55] falco
-// [-100, -75] fox
-// [10, -115] ness
-// [0, 0] ice climbers
-// [-127.5, 105] kirby
-// [0, -5] samus
-// [0, -28.94] zelda
-// [5, 21.06] link
-// [-90, 40] young link
-// [24.59, -16.07] pichu
-// [0, -65] pikachu
-// [82.5, 20] jigglypuff
-// [5, -30] mewtwo
-// [20, -35] g&w
-// [-5, -60] marth
-// [15, 0] roy
-// [0, 0] sheik
+spawns[YLINK] = [
+	[-90, 40],
+];
+spawns[PICHU] = [
+	[24.59, -16.07],
+];
+spawns[PIKACHU] = [
+	[0, -65],
+];
+spawns[JIGGLYPUFF] = [
+	[82.5, 20],
+];
+spawns[MEWTWO] = [
+	[5, -30],
+];
+spawns[MRGAMEWATCH] = [
+	[20, -35],
+];
+spawns[MARTH] = [
+	[-5, -60],
+];
+spawns[ROY] = [
+	[15, 0],
+];
+spawns[SHEIK] = [
+	[0, 0],
+];
 
 /*
  * Changelog
