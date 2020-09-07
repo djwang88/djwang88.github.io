@@ -12,20 +12,8 @@ var spawnDiv = document.querySelector('#spawn-div');
 
 function randomize() {
 	if (stageBox.value == "all") {
-		// resultBox.value = getAllStagesCode();
-		// hideOverflow();
-		var result = "";
-		for (let i = 0; i < 13; i++) {
-			result += getCode(i) + "\n";
-		}
-		resultBox.value = result;
-
-		var overflow = "";
-		for (let i = 13; i < 26; i++) {
-			overflow += getCode(i) + "\n";
-		}
-		overflowBox.value = overflow;
-		showOverflow();
+		resultBox.value = getAllStagesCode();
+		hideOverflow();
 	} else if (stageBox.value == "random") {
 		var index = Math.floor(Math.random() * stageHooks.length);
 		resultBox.value = getCode(index);
@@ -95,6 +83,24 @@ function getAllStagesCode() {
 	}
 	result += codeEndAllStages;
 	return result;
+}
+
+/*
+ * Original (split) code
+ */
+function getOldAllStagesCode() {
+	var result = "";
+	for (let i = 0; i < 13; i++) {
+		result += getCode(i) + "\n";
+	}
+	resultBox.value = result;
+
+	var overflow = "";
+	for (let i = 13; i < 26; i++) {
+		overflow += getCode(i) + "\n";
+	}
+	overflowBox.value = overflow;
+	showOverflow();
 }
 
 function getStageData(stage) {
@@ -211,6 +217,10 @@ function coordsToHalfWords(x, y) {
  * Signed halfword conversion formula by Punkline
  */
 function toHalfWord(floatNum) {
+	if (floatNum == 0) {
+		return '0000';
+	}
+
 	var floatView = new Float32Array(1);
 	var int32View = new Int32Array(floatView.buffer);
 
@@ -668,10 +678,10 @@ spawns[DRMARIO] = [
 	[-65, -110],
 ];
 spawns[MARIO] = [
-	[0, 40], // original [0, 1.9]
+	[0, 30], // original [0, 1.9]
 ];
 spawns[LUIGI] = [
-	[1, 20], // original [1, -10]
+	[0, 10], // original [1, -10]
 ];
 spawns[BOWSER] = [
 	[50, 70], // original [99.25, -7.1]
@@ -742,19 +752,20 @@ spawns[MARTH] = [
 	[-5, -60],
 ];
 spawns[ROY] = [
-	[15, 0],
+	[0, 15],
 ];
 spawns[SHEIK] = [
 	[0, 0],
 ];
 
 /*
- * Changelog
- *   [2020-09-01] Fixed Zelda bounds (y2)
- *   [2020-09-04] Fixed Pichu exclusions (Boundary 5)
- *   [2020-09-06] Random stage feature
- * 	 [2020-09-06] Fixed Link exclusions (Boundary 5) (discovered by chaos6)
- *   [2020-09-06] Fixed Young Link exceptions (discovered by chaos6)
+ * CHANGELOG
+ * [2020-09-01] Fixed Zelda bounds (y2)
+ * [2020-09-04] Fixed Pichu exclusions (Boundary 5)
+ * [2020-09-06] Random stage feature
+ * [2020-09-06] Fixed Link exclusions (Boundary 5) (discovered by chaos6)
+ * [2020-09-06] Fixed Young Link exceptions (discovered by chaos6)
+ * [2020-09-06] New randomizer, using halfwords
  */
 
  // adjust roy spawn (and mario/luigi a little too high?)
