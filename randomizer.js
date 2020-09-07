@@ -93,6 +93,10 @@ function getRegularCode(stage) {
 }
 
 function getModularCode(stage, spawn, numTargets) {
+	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
+		return "Number of targets must be a number between 1 and 255."
+	}
+
 	// build injection code
 	var instructions = [];
 	instructions = instructions.concat(modularInjectionStart);
