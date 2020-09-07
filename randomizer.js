@@ -13,13 +13,14 @@
  * [2020-09-06] New randomizer template using halfwords (fixes Mewtwo) (version 0.2)
  * [2020-09-06] Arbitrary targets feature for individual stages & modular code builder
  * [2020-09-07] Adjusted Samus bounds (increased x2)
+ * [2020-09-07] Arbitrary targets feature for all stages code
  */
 
 var resultBox = document.querySelector('#result');
 var stageBox = document.querySelector('#stage');
-var overflowBox = document.querySelector('#overflow');
-var overflowText = document.querySelector('#overflow-note');
-var overflowCopy = document.querySelector('#overflow-copy');
+// var overflowBox = document.querySelector('#overflow');
+// var overflowText = document.querySelector('#overflow-note');
+// var overflowCopy = document.querySelector('#overflow-copy');
 var spawnBox = document.querySelector('#spawn');
 var spawnDiv = document.querySelector('#spawn-div');
 var numTargetsBox = document.querySelector('#num-targets');
@@ -28,34 +29,37 @@ var numTargetsDiv = document.querySelector('#num-targets-div');
 function randomize() {
 	if (stageBox.value == "all") {
 		resultBox.value = getAllStagesCode();
-		hideOverflow();
+		// hideOverflow();
 	} else if (stageBox.value == "random") {
 		var stage = Math.floor(Math.random() * stageHooks.length);
 		resultBox.value = getCode(stage);
 		stageBox.value = stage.toString();
-		hideOverflow();
+		// hideOverflow();
 	} else {
 		resultBox.value = getCode(parseInt(stageBox.value));
-		hideOverflow();
+		// hideOverflow();
 	}
 }
 
-function showOverflow() {
-	overflowBox.style.display = "inline";
-	overflowText.style.display = "inline";
-	overflowCopy.style.display = "inline";
-}
+// function showOverflow() {
+// 	overflowBox.style.display = "inline";
+// 	overflowText.style.display = "inline";
+// 	overflowCopy.style.display = "inline";
+// }
 
-function hideOverflow() {
-	overflowBox.style.display = "none";
-	overflowText.style.display = "none";
-	overflowCopy.style.display = "none";
-}
+// function hideOverflow() {
+// 	overflowBox.style.display = "none";
+// 	overflowText.style.display = "none";
+// 	overflowCopy.style.display = "none";
+// }
 
 function getCode(stage) {
 	var numTargets = parseInt(numTargetsBox.value);
-	if (numTargets != 10) {
-		return getModularCode(stage, false, numTargets);
+	var spawn = false;
+	if (numTargets != 10 ||
+		// TODO: spawn rules
+		stage == MEWTWO) {
+		return getModularCode([stage], false, numTargets);
 	} else {
 		return getRegularCode(stage);
 	}
@@ -93,7 +97,7 @@ function getRegularCode(stage) {
 	return result;
 }
 
-function getModularCode(stage, spawn, numTargets) {
+function getModularCode(stages, spawn, numTargets) {
 	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
 		return "Number of targets must be a number between 1 and 255."
 	}
@@ -103,17 +107,20 @@ function getModularCode(stage, spawn, numTargets) {
 	instructions = instructions.concat(modularInjectionStart);
 
 	var stageData = [];
-	stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
-	if (spawn) {
-		stageData.push(getSpawnHalfWords());
-	}
-	for (let i = 0; i < numTargets; i++) {
-		var coords = getValidCoordinates(stage);
-		stageData.push(coordsToHalfWords(coords.x, coords.y));
+	for (let i = 0; i < stages.length; i++) {
+		var stage = stages[i];
+		stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
+		if (spawn) {
+			stageData.push(getSpawnHalfWords());
+		}
+		for (let i = 0; i < numTargets; i++) {
+			var coords = getValidCoordinates(stage);
+			stageData.push(coordsToHalfWords(coords.x, coords.y));
+		}
 	}
 	stageData.push(modularZero);
-
 	instructions = instructions.concat(stageData);
+
 	instructions = instructions.concat(modularInjectionEnd);
 	if (isEven(instructions.length)) {
 		instructions.push(modularNop);
@@ -138,12 +145,13 @@ function getModularCode(stage, spawn, numTargets) {
 }
 
 function getAllStagesCode() {
-	var result = codeStartAllStages;
+	var numTargets = parseInt(numTargetsBox.value);
+	// TODO: warning if more than 20 targets
+	var stages = [];
 	for (let i = 0; i < 26; i++) {
-		result += getStageData(i);
+		stages.push(i);
 	}
-	result += codeEndAllStages;
-	return result;
+	return getModularCode(stages, false, numTargets);
 }
 
 /*
@@ -164,21 +172,24 @@ function getOldAllStagesCode() {
 	showOverflow();
 }
 
-function getStageData(stage) {
-	var result = getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, 0, stage) + "\n";
-	result += getSpawnHalfWords(stage) + " ";
-	var numTargets = 10;
-	for (let i = 0; i < numTargets; i++) {
-		var coords = getValidCoordinates(stage);
-		result += coordsToHalfWords(coords.x, coords.y);
-		if (isEven(i)) {
-			result += "\n";
-		} else {
-			result += " ";
-		}
-	}
-	return result;
-}
+/*
+ * Old utility function for all stages code
+ */
+// function getStageData(stage) {
+// 	var result = getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, 0, stage) + "\n";
+// 	result += getSpawnHalfWords(stage) + " ";
+// 	var numTargets = 10;
+// 	for (let i = 0; i < numTargets; i++) {
+// 		var coords = getValidCoordinates(stage);
+// 		result += coordsToHalfWords(coords.x, coords.y);
+// 		if (isEven(i)) {
+// 			result += "\n";
+// 		} else {
+// 			result += " ";
+// 		}
+// 	}
+// 	return result;
+// }
 
 /*
  * Header structure designed by Punkline
@@ -345,11 +356,11 @@ function copyOverflow() {
 }
 
 function onChangeStage() {
-	if (stageBox.value == "all") {
-		numTargetsDiv.style.display = "none";
-	} else {
-		numTargetsDiv.style.display = "block";
-	}
+	// if (stageBox.value == "all") {
+	// 	numTargetsDiv.style.display = "none";
+	// } else {
+	// 	numTargetsDiv.style.display = "block";
+	// }
 
 	// spawnDiv.style.display = "none";
 	// spawnBox.checked = false;
@@ -481,8 +492,8 @@ const codeEndSheik = "\n4BFFFFE5 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\
 const codeStartSpawn = " 0000001D\n3C00801C 60004210\n7C0803A6 4E800021\n48000060 4E800021";
 const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000"
 
-const codeStartAllStages = "C21C4228 000000AF\n93C10018 480004EC\n4E800021 ";
-const codeEndAllStages = "00000000\n4BFFFB19 7FC802A6\n39400000 808D9348\n7D3E506E 712800FF\n41820058 38C00008\n5520877F 2C800006\n41820010 38C00002\n41860008 38C00004\n50C9063E 7C882000\n5527C63F 40A20008\n38E0000A 50E9442E\n41860020 75200010\n41A20008 38E70001\n7D4639D6 394A0007\n554A003A 4BFFFFA4\n38BE0004 7CA62850\n91210008 90A1000C\n60000000 00000000\nC21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
+// const codeStartAllStages = "C21C4228 000000AF\n93C10018 480004EC\n4E800021 ";
+// const codeEndAllStages = "00000000\n4BFFFB19 7FC802A6\n39400000 808D9348\n7D3E506E 712800FF\n41820058 38C00008\n5520877F 2C800006\n41820010 38C00002\n41860008 38C00004\n50C9063E 7C882000\n5527C63F 40A20008\n38E0000A 50E9442E\n41860020 75200010\n41A20008 38E70001\n7D4639D6 394A0007\n554A003A 4BFFFFA4\n38BE0004 7CA62850\n91210008 90A1000C\n60000000 00000000\nC21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
 const modularSizePlaceholder = "XXXX";
 const modularOffsetPlaceholder = "YYYYYY";
@@ -550,7 +561,7 @@ const bounds = [
 	{x1: -150, y1: -140,  x2: 150, y2: 120  }, // 11 NESS
 	{x1: -120, y1: 0,     x2: 120, y2: 500  }, // 12 ICECLIMBERS
 	{x1: -150, y1: -70,   x2: 130, y2: 180  }, // 13 KIRBY
-	{x1: -130, y1: -110,  x2: 130,  y2: 130  }, // 14 SAMUS
+	{x1: -130, y1: -110,  x2: 130, y2: 130  }, // 14 SAMUS
 	{x1: -130, y1: -100,  x2: 115, y2: 115  }, // 15 ZELDA
 	{x1: -150, y1: -100,  x2: 150, y2: 100  }, // 16 LINK
 	{x1: -190, y1: -40,   x2: 120, y2: 210  }, // 17 YLINK
