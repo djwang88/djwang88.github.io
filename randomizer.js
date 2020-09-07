@@ -217,10 +217,11 @@ function toHalfWord(floatNum) {
 	floatView[0] = floatNum;
 	var hex = int32View[0];
 
+	var scale = 6;
 	var mask = ((1 << 16) - 1);
 	var exp = ((hex >> 23) & 0xFF) - 127;
 	var frac = (hex & 0x7FFFFF) | 0x800000;
-	var fixed = frac >> (23 - (exp + 4));
+	var fixed = frac >> (23 - (exp + scale));
 	var pad = '0';
 	if (hex >> 31) {
 		pad = 'F';
@@ -329,32 +330,32 @@ const stageHooks = [
 ];
 
 const stageHeaders = [
-	"04170025", // 00 DRMARIO
-	"04170021", // 01 MARIO
-	"0417002C", // 02 LUIGI
-	"0417002A", // 03 BOWSER
-	"04170030", // 04 PEACH
-	"04170036", // 05 YOSHI
-	"04170024", // 06 DK
-	"04170022", // 07 CFALCON
-	"0417003A", // 08 GANONDORF
-	"04170026", // 09 FALCO
-	"04170027", // 10 FOX
-	"0417002F", // 11 NESS
-	"04170028", // 12 ICECLIMBERS
-	"04170029", // 13 KIRBY
-	"04170034", // 14 SAMUS
-	"04170037", // 15 ZELDA
-	"0417002B", // 16 LINK
-	"04170023", // 17 YLINK
-	"04170031", // 18 PICHU
-	"04170032", // 19 PIKACHU
-	"04170033", // 20 JIGGLYPUFF
-	"0417002E", // 21 MEWTWO
-	"04170038", // 22 MRGAMEWATCH
-	"0417002D", // 23 MARTH
-	"04170039", // 24 ROY
-	"04170035", // 25 SHEIK
+	"06170025", // 00 DRMARIO
+	"06170021", // 01 MARIO
+	"0617002C", // 02 LUIGI
+	"0617002A", // 03 BOWSER
+	"06170030", // 04 PEACH
+	"06170036", // 05 YOSHI
+	"06170024", // 06 DK
+	"06170022", // 07 CFALCON
+	"0617003A", // 08 GANONDORF
+	"06170026", // 09 FALCO
+	"06170027", // 10 FOX
+	"0617002F", // 11 NESS
+	"06170028", // 12 ICECLIMBERS
+	"06170029", // 13 KIRBY
+	"06170034", // 14 SAMUS
+	"06170037", // 15 ZELDA
+	"0617002B", // 16 LINK
+	"06170023", // 17 YLINK
+	"06170031", // 18 PICHU
+	"06170032", // 19 PIKACHU
+	"06170033", // 20 JIGGLYPUFF
+	"0617002E", // 21 MEWTWO
+	"06170038", // 22 MRGAMEWATCH
+	"0617002D", // 23 MARTH
+	"06170039", // 24 ROY
+	"06170035", // 25 SHEIK
 ];
 
 /*
@@ -667,13 +668,13 @@ spawns[DRMARIO] = [
 	[-65, -110],
 ];
 spawns[MARIO] = [
-	[0, 1.9],
+	[0, 40], // original [0, 1.9]
 ];
 spawns[LUIGI] = [
-	[1, -10],
+	[1, 20], // original [1, -10]
 ];
 spawns[BOWSER] = [
-	[99.25, -7.1],
+	[50, 70], // original [99.25, -7.1]
 ];
 spawns[PEACH] = [
 	[-20, 10],
@@ -755,3 +756,5 @@ spawns[SHEIK] = [
  * 	 [2020-09-06] Fixed Link exclusions (Boundary 5) (discovered by chaos6)
  *   [2020-09-06] Fixed Young Link exceptions (discovered by chaos6)
  */
+
+ // adjust roy spawn (and mario/luigi a little too high?)
