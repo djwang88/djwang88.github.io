@@ -80,7 +80,7 @@
                     <td>
                         <label for="result"><b>Gecko code:</b></label><br>
                         <textarea id="result" class="codeArea"></textarea>
-                        <textarea id="overflow" style="display: none;" class="codeArea"></textarea>
+                        <!-- <textarea id="overflow" style="display: none;" class="codeArea"></textarea> -->
                     </td>
                     <td id="character-randomizer-div" style="display: none"><b>Character randomizer:</b></label><br>
                         <textarea id="character-randomizer-result" class="codeArea"></textarea>
@@ -91,15 +91,21 @@
         </p>
         <p>
             <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
-            <button id="overflow-copy" onclick="copyOverflow()" style="display: none;" class="copyButton">Copy code to clipboard</button>
+            <button id="character-randomizer-copy" onclick="copyCharacterRandomizer()" style="display: none;" class="copyButton">Copy code to clipboard</button>
+            <!-- <button id="overflow-copy" onclick="copyOverflow()" style="display: none;" class="copyButton">Copy code to clipboard</button> -->
         </p>
-        <p id="overflow-note" style="color: red; display: none;">
+        <p id="character-randomizer-note" style="color: red; display: none;">
+            <span>
+                Because target bounds were designed with the stage's default character in mind, it's possible to generate unwinnable character & stage combinations.
+            </span>
+        </p>
+        <!-- <p id="overflow-note" style="color: red; display: none;">
             <span>
                 Because Gecko codes are limited in length, the all stages code has been separated into two 13-stage codes.<br>
                 (<b>Dr. Mario</b> through <b>Ice Climbers</b> // <b>Kirby</b> through <b>Sheik (Seak)</b>)<br><br>
                 To do an all stage run, copy both codes as "Randomizer 1" and "Randomizer 2", then <b>enable one at a time</b> for the codes to work.<br>
             </span>
-        </p>
+        </p> -->
         <!-- <p>
             <b>Known issues:</b><br>
             * The two moving targets in Mewtwo's stage aren't affected<br>

@@ -33,6 +33,8 @@ var characterRandomizerCheckboxDiv = document.querySelector('#character-randomiz
 var characterRandomizerCheckbox = document.querySelector('#character-randomizer-checkbox');
 var characterRandomizerDiv = document.querySelector('#character-randomizer-div');
 var characterRandomizerBox = document.querySelector('#character-randomizer-result');
+var characterRandomizerCopy = document.querySelector('#character-randomizer-copy');
+var characterRandomizerNote = document.querySelector('#character-randomizer-note');
 
 function randomize() {
 	if (stageBox.value == "all") {
@@ -380,10 +382,15 @@ function copy() {
 	document.execCommand('copy');
 }
 
-function copyOverflow() {
-	overflowBox.select();
+function copyCharacterRandomizer() {
+	characterRandomizerBox.select();
 	document.execCommand('copy');
 }
+
+// function copyOverflow() {
+// 	overflowBox.select();
+// 	document.execCommand('copy');
+// }
 
 function onChangeStage() {
 	if (stageBox.value == "all") {
@@ -425,8 +432,12 @@ function optionsActive() {
 function showHideCharacterRandomizer() {
 	if (characterRandomizerCheckbox.checked) {
 		characterRandomizerDiv.style.display = "block";
+		characterRandomizerCopy.style.display = "inline";
+		characterRandomizerNote.style.display = "inline";
 	} else {
 		characterRandomizerDiv.style.display = "none";
+		characterRandomizerCopy.style.display = "none";
+		characterRandomizerNote.style.display = "none";
 	}
 }
 
