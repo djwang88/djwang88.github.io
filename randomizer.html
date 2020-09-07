@@ -27,7 +27,7 @@
             * Inserts new target coordinates into a Gecko code template, which can then be used with Dolphin or Wii Homebrew<br>
         </p>
         <label for="stage"><b>Stage: </b></label>
-        <select id="stage" onchange="showHideSpawn()">
+        <select id="stage" onchange="onChangeStage()">
             <option value="all">(All Stages)</option>
             <option value="random">(Random Stage)</option>
             <option value="0">Dr. Mario</option>
@@ -57,7 +57,13 @@
             <option value="24">Roy</option>
             <option value="25">Sheik (Seak)</option>
         </select>
-        <div id="spawn-div" style="display: none; margin-top: 5px"><input id="spawn" type="checkbox">Randomize Spawn Location</div>
+        <div id="num-targets-div" style="margin-top: 5px">
+            <label for="num-targets">Number of Targets: </label>
+            <input id="num-targets" style="width: 50px" value="10">
+        </div>
+        <div id="spawn-div" style="display: none; margin-top: 5px">
+            <input id="spawn" type="checkbox">Randomize Spawn Location
+        </div>
         <p><button id="randomize" onclick="randomize()" class="button">RANDOMIZE</button></p>
         <p>
             <label for="result"><b>Gecko code:</b></label><br>
@@ -75,11 +81,11 @@
                 To do an all stage run, copy both codes as "Randomizer 1" and "Randomizer 2", then <b>enable one at a time</b> for the codes to work.<br>
             </span>
         </p>
-        <p>
+        <!-- <p>
             <b>Known issues:</b><br>
             * The two moving targets in Mewtwo's stage aren't affected<br>
             * Targets <b>intentionally</b> can generate partially inside walls
-        </p>
+        </p> -->
         <p>
             _______________________________________________________________________________<br>
             Designed and built by <b>djwang88</b><br>

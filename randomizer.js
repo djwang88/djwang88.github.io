@@ -1,5 +1,17 @@
 /*
  * Randomizer developed by djwang88
+ * Current version: 0.2
+ * ---------
+ * CHANGELOG
+ * ---------
+ * [2020-09-01] First version (version 0.1)
+ * [2020-09-01] Fixed Zelda bounds (y2)
+ * [2020-09-04] Fixed Pichu exclusions (Boundary 5)
+ * [2020-09-06] Random stage feature
+ * [2020-09-06] Fixed Link exclusion (Boundary 5) (discovered by chaos6)
+ * [2020-09-06] Fixed Young Link exception (discovered by chaos6)
+ * [2020-09-06] New randomizer template using halfwords (fixes Mewtwo) (version 0.2)
+ * [2020-09-06] Arbitrary targets feature for individual stages & modular code builder
  */
 
 var resultBox = document.querySelector('#result');
@@ -9,15 +21,17 @@ var overflowText = document.querySelector('#overflow-note');
 var overflowCopy = document.querySelector('#overflow-copy');
 var spawnBox = document.querySelector('#spawn');
 var spawnDiv = document.querySelector('#spawn-div');
+var numTargetsBox = document.querySelector('#num-targets');
+var numTargetsDiv = document.querySelector('#num-targets-div');
 
 function randomize() {
 	if (stageBox.value == "all") {
 		resultBox.value = getAllStagesCode();
 		hideOverflow();
 	} else if (stageBox.value == "random") {
-		var index = Math.floor(Math.random() * stageHooks.length);
-		resultBox.value = getCode(index);
-		stageBox.value = index.toString();
+		var stage = Math.floor(Math.random() * stageHooks.length);
+		resultBox.value = getCode(stage);
+		stageBox.value = stage.toString();
 		hideOverflow();
 	} else {
 		resultBox.value = getCode(parseInt(stageBox.value));
@@ -38,9 +52,18 @@ function hideOverflow() {
 }
 
 function getCode(stage) {
+	var numTargets = parseInt(numTargetsBox.value);
+	if (numTargets != 10) {
+		return getModularCode(stage, false, numTargets);
+	} else {
+		return getRegularCode(stage);
+	}
+}
+
+function getRegularCode(stage) {
+	var numTargets = 10;
 	var start = codeStart;
 	var end = codeEnd;
-	var numTargets = 10;
 
 	if (stage == 25) {
 		// Sheik-specific code
@@ -49,30 +72,63 @@ function getCode(stage) {
 		numTargets = 3;
 	}
 
-	if (spawnBox.checked) {
-		start = codeStartSpawn;
-		end = codeEndSpawn;
-	}
+	// if (spawnBox.checked) {
+	// 	start = codeStartSpawn;
+	// 	end = codeEndSpawn;
+	// }
 
 	var result = stageHooks[stage] + start;
 
-	if (spawnBox.checked) {
-		var index = Math.floor(Math.random() * spawns[stage].length);
-		result += coordsToHex(spawns[stage][index][0], spawns[stage][index][1]);
-	}
+	// if (spawnBox.checked) {
+	// 	var index = Math.floor(Math.random() * spawns[stage].length);
+	// 	result += coordsToHex(spawns[stage][index][0], spawns[stage][index][1]);
+	// }
 
 	for (let i = 0; i < numTargets; i++) {
-		var invalid = true;
-		while (invalid) {
-			var x = getRandomDecimal(bounds[stage].x1, bounds[stage].x2);
-			var y = getRandomDecimal(bounds[stage].y1, bounds[stage].y2);
-			if (coordinatesValid(x, y, stage)) {
-				invalid = false;
-			}
-		}
-		result += coordsToHex(x, y);
+		var coords = getValidCoordinates(stage);
+		result += coordsToHex(coords.x, coords.y);
 	}
 	result += end;
+	return result;
+}
+
+function getModularCode(stage, spawn, numTargets) {
+	// build injection code
+	var instructions = [];
+	instructions = instructions.concat(modularInjectionStart);
+
+	var stageData = [];
+	stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
+	if (spawn) {
+		stageData.push(getSpawnHalfWords());
+	}
+	for (let i = 0; i < numTargets; i++) {
+		var coords = getValidCoordinates(stage);
+		stageData.push(coordsToHalfWords(coords.x, coords.y));
+	}
+	stageData.push(modularZero);
+
+	instructions = instructions.concat(stageData);
+	instructions = instructions.concat(modularInjectionEnd);
+	if (isEven(instructions.length)) {
+		instructions.push(modularNop);
+	}
+	instructions.push(modularZero);
+
+	// build string
+	var result = "";
+	for (let i = 0; i < instructions.length; i++) {
+		result += instructions[i];
+		result += isEven(i) ? ' ' : '\n';
+	}
+
+	// calculate size (minus header) and offset
+	var size = (instructions.length - 2) / 2;
+	var offset = (stageData.length * 4) + 8;
+	result = result.replace(modularSizePlaceholder, size.toString(16).padStart(4, '0'));
+	result = result.replace(modularOffsetPlaceholder, offset.toString(16).padStart(6, '0'));
+	result += modularEnd;
+
 	return result;
 }
 
@@ -104,19 +160,12 @@ function getOldAllStagesCode() {
 }
 
 function getStageData(stage) {
-	var result = stageHeaders[stage] + "\n";
-	result += coordsToHalfWords(spawns[stage][0][0], spawns[stage][0][1]) + " ";
+	var result = getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, 0, stage) + "\n";
+	result += getSpawnHalfWords(stage) + " ";
 	var numTargets = 10;
 	for (let i = 0; i < numTargets; i++) {
-		var invalid = true;
-		while (invalid) {
-			var x = getRandomDecimal(bounds[stage].x1, bounds[stage].x2);
-			var y = getRandomDecimal(bounds[stage].y1, bounds[stage].y2);
-			if (coordinatesValid(x, y, stage)) {
-				invalid = false;
-			}
-		}
-		result += coordsToHalfWords(x, y);
+		var coords = getValidCoordinates(stage);
+		result += coordsToHalfWords(coords.x, coords.y);
 		if (isEven(i)) {
 			result += "\n";
 		} else {
@@ -124,6 +173,34 @@ function getStageData(stage) {
 		}
 	}
 	return result;
+}
+
+/*
+ * Header structure designed by Punkline
+ * 0xFF000000 = scale (compression scale value) (signed)
+ * 0x00100000 = spawn (custom spawn) (boolean)
+ * 0x00070000 = compression (compression type) (unsigned)
+ * 0x0000FF00 = numTargets (target count value) (unsigned)
+ * 0x000000FF = stage (stage ID) (unsigned)
+ */
+function getStageHeader(scale, spawn, compression, numTargets, stage) {
+	return scale.toString(16).padStart(2, '0') +
+		(spawn ? '1' : '0') + 
+		compression.toString(16) +
+		numTargets.toString(16).padStart(2, '0') +
+		stageIds[stage];
+}
+
+function getValidCoordinates(stage) {
+	var invalid = true;
+	while (invalid) {
+		var x = getRandomDecimal(bounds[stage].x1, bounds[stage].x2);
+		var y = getRandomDecimal(bounds[stage].y1, bounds[stage].y2);
+		if (coordinatesValid(x, y, stage)) {
+			invalid = false;
+		}
+	}
+	return {x: x, y: y};
 }
 
 function coordinatesValid(x, y, stage) {
@@ -215,6 +292,7 @@ function coordsToHalfWords(x, y) {
 
 /*
  * Signed halfword conversion formula by Punkline
+ * Using scale of 6 (can handle coordinates <512)
  */
 function toHalfWord(floatNum) {
 	if (floatNum == 0) {
@@ -240,6 +318,13 @@ function toHalfWord(floatNum) {
 	return fixed.toString(16).padStart(4, pad).toUpperCase();
 }
 
+/*
+ * TODO: Randomize this spawn
+ */
+function getSpawnHalfWords(stage) {
+	return coordsToHalfWords(spawns[stage][0][0], spawns[stage][0][1]);
+}
+
 function isEven(num) {
 	return (num % 2 == 0);
 }
@@ -254,16 +339,22 @@ function copyOverflow() {
 	document.execCommand('copy');
 }
 
-function showHideSpawn() {
-	spawnDiv.style.display = "none";
-	spawnBox.checked = false;
-
-	if (stageBox.value != "all") {
-		var stage = parseInt(stageBox.value);
-		if (stage == LINK) {
-			spawnDiv.style.display = "block";
-		}
+function onChangeStage() {
+	if (stageBox.value == "all") {
+		numTargetsDiv.style.display = "none";
+	} else {
+		numTargetsDiv.style.display = "block";
 	}
+
+	// spawnDiv.style.display = "none";
+	// spawnBox.checked = false;
+
+	// if (stageBox.value != "all") {
+	// 	var stage = parseInt(stageBox.value);
+	// 	if (stage == LINK) {
+	// 		spawnDiv.style.display = "block";
+	// 	}
+	// }
 }
 
 function convertToHex() {
@@ -339,33 +430,38 @@ const stageHooks = [
 	"C22238C0", // 25 SHEIK
 ];
 
-const stageHeaders = [
-	"06170025", // 00 DRMARIO
-	"06170021", // 01 MARIO
-	"0617002C", // 02 LUIGI
-	"0617002A", // 03 BOWSER
-	"06170030", // 04 PEACH
-	"06170036", // 05 YOSHI
-	"06170024", // 06 DK
-	"06170022", // 07 CFALCON
-	"0617003A", // 08 GANONDORF
-	"06170026", // 09 FALCO
-	"06170027", // 10 FOX
-	"0617002F", // 11 NESS
-	"06170028", // 12 ICECLIMBERS
-	"06170029", // 13 KIRBY
-	"06170034", // 14 SAMUS
-	"06170037", // 15 ZELDA
-	"0617002B", // 16 LINK
-	"06170023", // 17 YLINK
-	"06170031", // 18 PICHU
-	"06170032", // 19 PIKACHU
-	"06170033", // 20 JIGGLYPUFF
-	"0617002E", // 21 MEWTWO
-	"06170038", // 22 MRGAMEWATCH
-	"0617002D", // 23 MARTH
-	"06170039", // 24 ROY
-	"06170035", // 25 SHEIK
+const DEFAULT_SCALE = 6;
+const COMPRESSION_WORD = 0;
+const COMPRESSION_BYTE = 6;
+const COMPRESSION_HWORD = 7;
+
+const stageIds = [
+	"25", // 00 DRMARIO
+	"21", // 01 MARIO
+	"2C", // 02 LUIGI
+	"2A", // 03 BOWSER
+	"30", // 04 PEACH
+	"36", // 05 YOSHI
+	"24", // 06 DK
+	"22", // 07 CFALCON
+	"3A", // 08 GANONDORF
+	"26", // 09 FALCO
+	"27", // 10 FOX
+	"2F", // 11 NESS
+	"28", // 12 ICECLIMBERS
+	"29", // 13 KIRBY
+	"34", // 14 SAMUS
+	"37", // 15 ZELDA
+	"2B", // 16 LINK
+	"23", // 17 YLINK
+	"31", // 18 PICHU
+	"32", // 19 PIKACHU
+	"33", // 20 JIGGLYPUFF
+	"2E", // 21 MEWTWO
+	"38", // 22 MRGAMEWATCH
+	"2D", // 23 MARTH
+	"39", // 24 ROY
+	"35", // 25 SHEIK
 ];
 
 /*
@@ -382,6 +478,53 @@ const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\
 
 const codeStartAllStages = "C21C4228 000000AF\n93C10018 480004EC\n4E800021 ";
 const codeEndAllStages = "00000000\n4BFFFB19 7FC802A6\n39400000 808D9348\n7D3E506E 712800FF\n41820058 38C00008\n5520877F 2C800006\n41820010 38C00002\n41860008 38C00004\n50C9063E 7C882000\n5527C63F 40A20008\n38E0000A 50E9442E\n41860020 75200010\n41A20008 38E70001\n7D4639D6 394A0007\n554A003A 4BFFFFA4\n38BE0004 7CA62850\n91210008 90A1000C\n60000000 00000000\nC21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
+
+const modularSizePlaceholder = "XXXX";
+const modularOffsetPlaceholder = "YYYYYY";
+const modularInjectionStart = [
+	"C21C4228",
+	"0000" + modularSizePlaceholder,
+	"93C10018",
+	"48000009",
+	"48" + modularOffsetPlaceholder,
+	"4E800021",
+];
+const modularInjectionEnd = [
+	"7FC802A6",
+	"39400000",
+	"808D9348",
+	"7D3E506E",
+	"712800FF",
+	"41820058",
+	"38C00008",
+	"5520877F",
+	"2C800006",
+	"41820010",
+	"38C00002",
+	"41860008",
+	"38C00004",
+	"50C9063E",
+	"7C882000",
+	"5527C63F",
+	"40A20008",
+	"38E0000A",
+	"50E9442E",
+	"41860020",
+	"75200010",
+	"41A20008",
+	"38E70001",
+	"7D4639D6",
+	"394A0007",
+	"554A003A",
+	"4BFFFFA4",
+	"38BE0004",
+	"7CA62850",
+	"91210008",
+	"90A1000C",
+]
+const modularNop = "60000000";
+const modularZero = "00000000";
+const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
@@ -757,15 +900,3 @@ spawns[ROY] = [
 spawns[SHEIK] = [
 	[0, 0],
 ];
-
-/*
- * CHANGELOG
- * [2020-09-01] Fixed Zelda bounds (y2)
- * [2020-09-04] Fixed Pichu exclusions (Boundary 5)
- * [2020-09-06] Random stage feature
- * [2020-09-06] Fixed Link exclusions (Boundary 5) (discovered by chaos6)
- * [2020-09-06] Fixed Young Link exceptions (discovered by chaos6)
- * [2020-09-06] New randomizer, using halfwords
- */
-
- // adjust roy spawn (and mario/luigi a little too high?)
