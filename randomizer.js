@@ -14,6 +14,7 @@
  * [2020-09-06] Arbitrary targets feature for individual stages & modular code builder
  * [2020-09-07] Adjusted Samus bounds (increased x2)
  * [2020-09-07] Arbitrary targets feature for all stages code
+ * [2020-09-07] Updated short codes to handle Mewtwo's targets
  */
 
 var resultBox = document.querySelector('#result');
@@ -25,6 +26,8 @@ var spawnBox = document.querySelector('#spawn');
 var spawnDiv = document.querySelector('#spawn-div');
 var numTargetsBox = document.querySelector('#num-targets');
 var numTargetsDiv = document.querySelector('#num-targets-div');
+var optionsButton = document.querySelector('#show-options');
+var optionsDiv = document.querySelector('#options-div');
 
 function randomize() {
 	if (stageBox.value == "all") {
@@ -54,18 +57,21 @@ function randomize() {
 // }
 
 function getCode(stage) {
-	var numTargets = parseInt(numTargetsBox.value);
+	var numTargets = stage != SHEIK ? 10 : 3;
 	var spawn = false;
-	if (numTargets != 10 ||
-		// TODO: spawn rules
-		stage == MEWTWO) {
-		return getModularCode([stage], false, numTargets);
+	if (optionsActive()) {
+		numTargets = parseInt(numTargetsBox.value);
+		spawn = false;
+	}
+	if ((stage != SHEIK && numTargets != 10) ||
+		(stage == SHEIK && numTargets != 3)) {
+		return getModularCode([stage], spawn, numTargets);
 	} else {
-		return getRegularCode(stage);
+		return getRegularCode(stage, spawn);
 	}
 }
 
-function getRegularCode(stage) {
+function getRegularCode(stage, spawn) {
 	var numTargets = 10;
 	var start = codeStart;
 	var end = codeEnd;
@@ -77,17 +83,17 @@ function getRegularCode(stage) {
 		numTargets = 3;
 	}
 
-	// if (spawnBox.checked) {
-	// 	start = codeStartSpawn;
-	// 	end = codeEndSpawn;
-	// }
+	if (spawn) {
+		start = codeStartSpawn;
+		end = codeEndSpawn;
+	}
 
 	var result = stageHooks[stage] + start;
 
-	// if (spawnBox.checked) {
-	// 	var index = Math.floor(Math.random() * spawns[stage].length);
-	// 	result += coordsToHex(spawns[stage][index][0], spawns[stage][index][1]);
-	// }
+	if (spawn) {
+		var index = Math.floor(Math.random() * spawns[stage].length);
+		result += coordsToHex(spawns[stage][index][0], spawns[stage][index][1]);
+	}
 
 	for (let i = 0; i < numTargets; i++) {
 		var coords = getValidCoordinates(stage);
@@ -334,11 +340,9 @@ function toHalfWord(floatNum) {
 	return fixed.toString(16).padStart(4, pad).toUpperCase();
 }
 
-/*
- * TODO: Randomize this spawn
- */
 function getSpawnHalfWords(stage) {
-	return coordsToHalfWords(spawns[stage][0][0], spawns[stage][0][1]);
+	var index = Math.floor(Math.random() * spawns[stage].length);
+	return coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]);
 }
 
 function isEven(num) {
@@ -371,6 +375,20 @@ function onChangeStage() {
 	// 		spawnDiv.style.display = "block";
 	// 	}
 	// }
+}
+
+function showOptions() {
+	optionsDiv.style.display = "block";
+	optionsButton.style.display = "none";
+}
+
+function hideOptions() {
+	optionsDiv.style.display = "none";
+	optionsButton.style.display = "block";
+}
+
+function optionsActive() {
+	return optionsDiv.style.display != "none";
 }
 
 function convertToHex() {
@@ -483,14 +501,20 @@ const stageIds = [
 /*
  * Gecko code template by Punkline
  */
+// const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
+// const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
+
 const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
-const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
+const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 80C50028\nC4080008 C0280004\nD0060038 D026003C\n80C70DD4 D0060050\nD0260060 80060014\n64000080 90060014\n80A50008 2C050000\n4180FFBC 00000000";
 
 const codeStartSheik = " 00000012\n3C00801C 60004210\n7C0803A6 4E800021\n48000020 4E800021";
 const codeEndSheik = "\n4BFFFFE5 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
 
+// const codeStartSpawn = " 0000001D\n3C00801C 60004210\n7C0803A6 4E800021\n48000060 4E800021";
+// const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000"
+
 const codeStartSpawn = " 0000001D\n3C00801C 60004210\n7C0803A6 4E800021\n48000060 4E800021";
-const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000"
+const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 80C50028\nC4080008 C0280004\nD0060038 D026003C\n80C70DD4 D0060050\nD0260060 80060014\n64000080 90060014\n80A50008 2C050000\n4180FFBC 00000000";
 
 // const codeStartAllStages = "C21C4228 000000AF\n93C10018 480004EC\n4E800021 ";
 // const codeEndAllStages = "00000000\n4BFFFB19 7FC802A6\n39400000 808D9348\n7D3E506E 712800FF\n41820058 38C00008\n5520877F 2C800006\n41820010 38C00002\n41860008 38C00004\n50C9063E 7C882000\n5527C63F 40A20008\n38E0000A 50E9442E\n41860020 75200010\n41A20008 38E70001\n7D4639D6 394A0007\n554A003A 4BFFFFA4\n38BE0004 7CA62850\n91210008 90A1000C\n60000000 00000000\nC21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";

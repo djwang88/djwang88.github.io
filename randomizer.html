@@ -57,14 +57,20 @@
             <option value="24">Roy</option>
             <option value="25">Sheik (Seak)</option>
         </select>
-        <div id="num-targets-div" style="margin-top: 5px">
-            <label for="num-targets">Number of Targets: </label>
-            <input id="num-targets" style="width: 50px" value="10">
-        </div>
         <div id="spawn-div" style="display: none; margin-top: 5px">
             <input id="spawn" type="checkbox">Randomize Spawn Location
         </div>
         <p><button id="randomize" onclick="randomize()" class="button">RANDOMIZE</button></p>
+        <div id="show-options">
+            <button onclick="showOptions()">Advanced Options</button>
+        </div>
+        <div id="options-div" style="display: none">
+            <div id="num-targets-div" style="margin-top: 5px">
+                <label for="num-targets">Number of Targets: </label>
+                <input id="num-targets" style="width: 50px" value="10">
+            </div>
+            <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
+        </div>
         <p>
             <label for="result"><b>Gecko code:</b></label><br>
             <textarea id="result" class="codeArea"></textarea>
