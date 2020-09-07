@@ -66,15 +66,28 @@
         </div>
         <div id="options-div" style="display: none">
             <div id="num-targets-div" style="margin-top: 5px">
-                <label for="num-targets">Number of Targets: </label>
+                <label for="num-targets">Number of targets: </label>
                 <input id="num-targets" style="width: 50px" value="10">
+                <div id="character-randomizer-checkbox-div" style="display: none">
+                    <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideCharacterRandomizer()">Character randomizer
+                </div>
             </div>
             <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
         </div>
         <p>
-            <label for="result"><b>Gecko code:</b></label><br>
-            <textarea id="result" class="codeArea"></textarea>
-            <textarea id="overflow" style="display: none;" class="codeArea"></textarea>
+            <table>
+                <tr>
+                    <td>
+                        <label for="result"><b>Gecko code:</b></label><br>
+                        <textarea id="result" class="codeArea"></textarea>
+                        <textarea id="overflow" style="display: none;" class="codeArea"></textarea>
+                    </td>
+                    <td id="character-randomizer-div" style="display: none"><b>Character randomizer:</b></label><br>
+                        <textarea id="character-randomizer-result" class="codeArea"></textarea>
+                    </td>
+                </tr>
+
+            </table>
         </p>
         <p>
             <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>

@@ -15,6 +15,7 @@
  * [2020-09-07] Adjusted Samus bounds (increased x2)
  * [2020-09-07] Arbitrary targets feature for all stages code
  * [2020-09-07] Updated short codes to handle Mewtwo's targets
+ * [2020-09-07] Added character randomizer feature
  */
 
 var resultBox = document.querySelector('#result');
@@ -28,10 +29,19 @@ var numTargetsBox = document.querySelector('#num-targets');
 var numTargetsDiv = document.querySelector('#num-targets-div');
 var optionsButton = document.querySelector('#show-options');
 var optionsDiv = document.querySelector('#options-div');
+var characterRandomizerCheckboxDiv = document.querySelector('#character-randomizer-checkbox-div');
+var characterRandomizerCheckbox = document.querySelector('#character-randomizer-checkbox');
+var characterRandomizerDiv = document.querySelector('#character-randomizer-div');
+var characterRandomizerBox = document.querySelector('#character-randomizer-result');
 
 function randomize() {
 	if (stageBox.value == "all") {
 		resultBox.value = getAllStagesCode();
+		if (optionsActive() && characterRandomizerCheckbox.checked) {
+			characterRandomizerBox.value = getCharacterRandomizerCode();
+		} else {
+			characterRandomizerBox.value = "";
+		}
 		// hideOverflow();
 	} else if (stageBox.value == "random") {
 		var stage = Math.floor(Math.random() * stageHooks.length);
@@ -160,26 +170,42 @@ function getAllStagesCode() {
 	return getModularCode(stages, false, numTargets);
 }
 
-/*
- * Original (split) code
- */
-function getOldAllStagesCode() {
-	var result = "";
-	for (let i = 0; i < 13; i++) {
-		result += getCode(i) + "\n";
+function getCharacterRandomizerCode() {
+	var result = characterRandomizerStart;
+	var randomized = [];
+	while (randomized.length < characterIds.length) {
+		var index = Math.floor(Math.random() * characterIds.length);
+		if (randomized.indexOf(characterIds[index]) == -1) {
+			randomized.push(characterIds[index]);
+		}
 	}
-	resultBox.value = result;
-
-	var overflow = "";
-	for (let i = 13; i < 26; i++) {
-		overflow += getCode(i) + "\n";
+	for (let i = 0; i < randomized.length; i++) {
+		result += "2C0400" + randomized[i] + "\n418200CC ";
 	}
-	overflowBox.value = overflow;
-	showOverflow();
+	result += characterRandomizerEnd;
+	return result;
 }
 
 /*
- * Old utility function for all stages code
+ * Original (split) code
+ */
+// function getOldAllStagesCode() {
+// 	var result = "";
+// 	for (let i = 0; i < 13; i++) {
+// 		result += getCode(i) + "\n";
+// 	}
+// 	resultBox.value = result;
+
+// 	var overflow = "";
+// 	for (let i = 13; i < 26; i++) {
+// 		overflow += getCode(i) + "\n";
+// 	}
+// 	overflowBox.value = overflow;
+// 	showOverflow();
+// }
+
+/*
+ * Old utility function for new all stages code
  */
 // function getStageData(stage) {
 // 	var result = getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, 0, stage) + "\n";
@@ -360,6 +386,11 @@ function copyOverflow() {
 }
 
 function onChangeStage() {
+	if (stageBox.value == "all") {
+		characterRandomizerCheckboxDiv.style.display = "block";
+	} else {
+		characterRandomizerCheckboxDiv.style.display = "none";
+	}
 	// if (stageBox.value == "all") {
 	// 	numTargetsDiv.style.display = "none";
 	// } else {
@@ -389,6 +420,14 @@ function hideOptions() {
 
 function optionsActive() {
 	return optionsDiv.style.display != "none";
+}
+
+function showHideCharacterRandomizer() {
+	if (characterRandomizerCheckbox.checked) {
+		characterRandomizerDiv.style.display = "block";
+	} else {
+		characterRandomizerDiv.style.display = "none";
+	}
 }
 
 function convertToHex() {
@@ -498,8 +537,37 @@ const stageIds = [
 	"35", // 25 SHEIK
 ];
 
+const characterIds = [
+	"00", // CFALCON
+	"01", // DK
+	"02", // FOX
+	"03", // MRGAMEWATCH
+	"04", // KIRBY
+	"05", // BOWSER
+	"06", // LINK
+	"07", // LUIGI
+	"08", // MARIO
+	"09", // MARTH
+	"0A", // MEWTWO
+	"0B", // NESS
+	"0C", // PEACH
+	"0D", // PIKACHU
+	"0F", // JIGGLYPUFF
+	"10", // SAMUS
+	"11", // YOSHI
+	"12", // ZELDA/SHEIK
+	"14", // FALCO
+	"15", // YLINK
+	"16", // DRMARIO
+	"17", // ROY
+	"18", // PICHU
+	"19", // GANONDORF
+	"20", // POPO
+]
+
 /*
- * Gecko code template by Punkline
+ * Assembly code by Punkline
+ * Gecko code templates by djwang88
  */
 // const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
 // const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
@@ -565,6 +633,12 @@ const modularInjectionEnd = [
 const modularNop = "60000000";
 const modularZero = "00000000";
 const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
+
+/*
+ * Assembly code by djwang88
+ */
+const characterRandomizerStart = "C216E7F4 00000034\n889F0060 "
+const characterRandomizerEnd = "A07F000E\n480000CC 38600021\n480000C4 38600022\n480000BC 38600023\n480000B4 38600024\n480000AC 38600025\n480000A4 38600026\n4800009C 38600027\n48000094 38600028\n4800008C 38600029\n48000084 3860002A\n4800007C 3860002B\n48000074 3860002C\n4800006C 3860002D\n48000064 3860002E\n4800005C 3860002F\n48000054 38600030\n4800004C 38600031\n48000044 38600032\n4800003C 38600033\n48000034 38600034\n4800002C 38600036\n48000024 38600037\n4800001C 38600038\n48000014 38600039\n4800000C 3860003A\n60000000 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
@@ -854,7 +928,7 @@ exceptions[ROY] = [
 
 /*
  * Spawn points by djwang88 and megaqwertification (with feedback from the Break the Targets community)
- * Vanilla spawn point is always first
+ * Vanilla spawn point is assumed to be first
  */
 spawns = [];
 spawns[DRMARIO] = [
