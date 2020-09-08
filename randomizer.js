@@ -956,6 +956,7 @@ exceptions[ROY] = [
 /*
  * Spawn points by djwang88 and megaqwertification (with feedback from the Break the Targets community)
  * Vanilla spawn point is assumed to be first
+ * https://docs.google.com/document/d/19G9saXWbFKIWBrVeNEu-Ng2oTuj1y8Kk8cYQ5Lb6MfM/edit
  */
 spawns = [];
 spawns[DRMARIO] = [

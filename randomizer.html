@@ -21,11 +21,7 @@
         </style>
     </head>
     <body>
-        <h1>SSBM Target Test Stage Randomizer</h1>
-        <p>
-            * Generates random (fixed) target positions, with stage-specific exclusion rules to prevent collisions<br>
-            * Inserts new target coordinates into a Gecko code template, which can then be used with Dolphin or Wii Homebrew<br>
-        </p>
+        <h1 style="margin-bottom: 12px">SSBM Target Test Stage Randomizer</h1>
         <label for="stage"><b>Stage: </b></label>
         <select id="stage" onchange="onChangeStage()">
             <option value="all">(All Stages)</option>
@@ -110,6 +106,12 @@
             * The two moving targets in Mewtwo's stage aren't affected<br>
             * Targets <b>intentionally</b> can generate partially inside walls
         </p> -->
+        <p>
+            * Generates random (fixed) target positions, with stage-specific exclusion rules to prevent collisions<br>
+            * Dynamically builds a Gecko code, which can be used with Dolphin or Wii Homebrew<br>
+            * Optionally randomizes spawn location from a set of fixed spawn points<br>
+            * Optionally generates a mismatch randomizer code that maps each character to a random stage
+        </p>
         <p>
             _______________________________________________________________________________<br>
             Designed and built by <b>djwang88</b><br>
