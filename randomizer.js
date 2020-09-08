@@ -7,6 +7,7 @@
  * [2020-09-01] First version (version 0.1)
  * [2020-09-01] Fixed Zelda bounds (decreased y2)
  * [2020-09-04] Fixed Pichu exclusions (Boundary 5)
+ * [2020-09-05] Spawn randomizer proof of concept (Link)
  * [2020-09-06] Random stage feature
  * [2020-09-06] Fixed Link exclusion (Boundary 5) (discovered by chaos6)
  * [2020-09-06] Fixed Young Link exception (discovered by chaos6)
@@ -19,6 +20,8 @@
  * [2020-09-07] Added spawn randomizer feature (version 0.5)
  * [2020-09-07] Adjusted Ness bounds (decreased y2)
  * [2020-09-07] Adjusted Link bounds (decreased x2)
+ * [2020-09-08] New compact mismatch randomizer template
+ * [2020-09-08] Adjusted Dr. Mario, Peach spawns
  */
 
 var resultBox = document.querySelector('#result');
@@ -918,7 +921,7 @@ spawns = [];
 spawns[DRMARIO] = [
 	[-65, -110],
 	[-40, -35], // 2
-	[-92.5, 105], // 3
+	[-88, 105], // 3
 	[5, 105], // 4
 	[37.5, -25], // 5
 	[115, -20], // 6
@@ -945,7 +948,7 @@ spawns[BOWSER] = [
 ];
 spawns[PEACH] = [
 	[-20, 10],
-	[-25, -55], // 2
+	[-35, -65], // 2
 	[75, 35], // 3
 	[90, 115], // 4
 	[82.5, -60], // 5
