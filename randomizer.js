@@ -17,6 +17,8 @@
  * [2020-09-07] Updated short codes to handle Mewtwo's targets
  * [2020-09-07] Added character randomizer feature (version 0.4)
  * [2020-09-07] Added spawn randomizer feature (version 0.5)
+ * [2020-09-07] Adjusted Ness bounds (decreased y2)
+ * [2020-09-07] Adjusted Link bounds (decreased x2)
  */
 
 var resultBox = document.querySelector('#result');
@@ -683,12 +685,12 @@ const bounds = [
 	{x1: -90,  y1: -20,   x2: 90,  y2: 110  }, // 08 GANONDORF
 	{x1: -140, y1: -70,   x2: 110, y2: 100  }, // 09 FALCO
 	{x1: -150, y1: -150,  x2: 150, y2: 150  }, // 10 FOX
-	{x1: -150, y1: -140,  x2: 150, y2: 120  }, // 11 NESS
+	{x1: -150, y1: -140,  x2: 150, y2: 100  }, // 11 NESS
 	{x1: -120, y1: 0,     x2: 120, y2: 500  }, // 12 ICECLIMBERS
 	{x1: -150, y1: -70,   x2: 130, y2: 180  }, // 13 KIRBY
 	{x1: -130, y1: -110,  x2: 130, y2: 130  }, // 14 SAMUS
 	{x1: -130, y1: -100,  x2: 115, y2: 115  }, // 15 ZELDA
-	{x1: -150, y1: -100,  x2: 150, y2: 100  }, // 16 LINK
+	{x1: -150, y1: -100,  x2: 120, y2: 100  }, // 16 LINK
 	{x1: -190, y1: -40,   x2: 120, y2: 210  }, // 17 YLINK
 	{x1: -160, y1: -80,   x2: 145, y2: 110  }, // 18 PICHU
 	{x1: -130, y1: -90,   x2: 175, y2: 115  }, // 19 PIKACHU
