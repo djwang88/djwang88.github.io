@@ -13,9 +13,10 @@
  * [2020-09-06] New randomizer template using halfwords (fixes Mewtwo) (version 0.2)
  * [2020-09-06] Arbitrary targets feature for individual stages & modular code builder
  * [2020-09-07] Adjusted Samus bounds (increased x2)
- * [2020-09-07] Arbitrary targets feature for all stages code
+ * [2020-09-07] Arbitrary targets feature for all stages code (version 0.3)
  * [2020-09-07] Updated short codes to handle Mewtwo's targets
- * [2020-09-07] Added character randomizer feature
+ * [2020-09-07] Added character randomizer feature (version 0.4)
+ * [2020-09-07] Added spawn randomizer feature (version 0.5)
  */
 
 var resultBox = document.querySelector('#result');
@@ -24,7 +25,7 @@ var stageBox = document.querySelector('#stage');
 // var overflowText = document.querySelector('#overflow-note');
 // var overflowCopy = document.querySelector('#overflow-copy');
 var spawnBox = document.querySelector('#spawn');
-var spawnDiv = document.querySelector('#spawn-div');
+// var spawnDiv = document.querySelector('#spawn-div');
 var numTargetsBox = document.querySelector('#num-targets');
 var numTargetsDiv = document.querySelector('#num-targets-div');
 var optionsButton = document.querySelector('#show-options');
@@ -37,8 +38,13 @@ var characterRandomizerCopy = document.querySelector('#character-randomizer-copy
 var characterRandomizerNote = document.querySelector('#character-randomizer-note');
 
 function randomize() {
+	var spawn = false;
+	if (optionsActive() && spawnBox.checked) {
+		spawn = true;
+	}
+
 	if (stageBox.value == "all") {
-		resultBox.value = getAllStagesCode();
+		resultBox.value = getAllStagesCode(spawn);
 		if (optionsActive() && characterRandomizerCheckbox.checked) {
 			characterRandomizerBox.value = getCharacterRandomizerCode();
 		} else {
@@ -47,11 +53,11 @@ function randomize() {
 		// hideOverflow();
 	} else if (stageBox.value == "random") {
 		var stage = Math.floor(Math.random() * stageHooks.length);
-		resultBox.value = getCode(stage);
+		resultBox.value = getCode(stage, spawn);
 		stageBox.value = stage.toString();
 		// hideOverflow();
 	} else {
-		resultBox.value = getCode(parseInt(stageBox.value));
+		resultBox.value = getCode(parseInt(stageBox.value), spawn);
 		// hideOverflow();
 	}
 }
@@ -68,12 +74,10 @@ function randomize() {
 // 	overflowCopy.style.display = "none";
 // }
 
-function getCode(stage) {
+function getCode(stage, spawn) {
 	var numTargets = stage != SHEIK ? 10 : 3;
-	var spawn = false;
 	if (optionsActive()) {
 		numTargets = parseInt(numTargetsBox.value);
-		spawn = false;
 	}
 	if ((stage != SHEIK && numTargets != 10) ||
 		(stage == SHEIK && numTargets != 3)) {
@@ -104,6 +108,18 @@ function getRegularCode(stage, spawn) {
 
 	if (spawn) {
 		var index = Math.floor(Math.random() * spawns[stage].length);
+		var x = spawns[stage][index][0];
+		var y = spawns[stage][index][1];
+
+		// handle the bizarre spawn differentials for the short code
+		if (stage == MARIO) {
+			y -= 28;
+		} else if (stage == LUIGI) {
+			y -= 20;
+		} else if (stage == BOWSER) {
+			x += 50;
+			y -= 77;
+		}
 		result += coordsToHex(spawns[stage][index][0], spawns[stage][index][1]);
 	}
 
@@ -129,7 +145,7 @@ function getModularCode(stages, spawn, numTargets) {
 		var stage = stages[i];
 		stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
 		if (spawn) {
-			stageData.push(getSpawnHalfWords());
+			stageData.push(getSpawnHalfWords(stage));
 		}
 		for (let i = 0; i < numTargets; i++) {
 			var coords = getValidCoordinates(stage);
@@ -155,21 +171,21 @@ function getModularCode(stages, spawn, numTargets) {
 	// calculate size (minus header) and offset
 	var size = (instructions.length - 2) / 2;
 	var offset = (stageData.length * 4) + 8;
-	result = result.replace(modularSizePlaceholder, size.toString(16).padStart(4, '0'));
-	result = result.replace(modularOffsetPlaceholder, offset.toString(16).padStart(6, '0'));
+	result = result.replace(modularSizePlaceholder, size.toString(16).padStart(4, '0').toUpperCase());
+	result = result.replace(modularOffsetPlaceholder, offset.toString(16).padStart(6, '0').toUpperCase());
 	result += modularEnd;
 
 	return result;
 }
 
-function getAllStagesCode() {
+function getAllStagesCode(spawn) {
 	var numTargets = parseInt(numTargetsBox.value);
 	// TODO: warning if more than 20 targets
 	var stages = [];
 	for (let i = 0; i < 26; i++) {
 		stages.push(i);
 	}
-	return getModularCode(stages, false, numTargets);
+	return getModularCode(stages, spawn, numTargets);
 }
 
 function getCharacterRandomizerCode() {
@@ -397,6 +413,8 @@ function onChangeStage() {
 		characterRandomizerCheckboxDiv.style.display = "block";
 	} else {
 		characterRandomizerCheckboxDiv.style.display = "none";
+		characterRandomizerCheckbox.checked = false;
+		showHideCharacterRandomizer();
 	}
 	// if (stageBox.value == "all") {
 	// 	numTargetsDiv.style.display = "none";
@@ -432,11 +450,9 @@ function optionsActive() {
 function showHideCharacterRandomizer() {
 	if (characterRandomizerCheckbox.checked) {
 		characterRandomizerDiv.style.display = "block";
-		characterRandomizerCopy.style.display = "inline";
 		characterRandomizerNote.style.display = "inline";
 	} else {
 		characterRandomizerDiv.style.display = "none";
-		characterRandomizerCopy.style.display = "none";
 		characterRandomizerNote.style.display = "none";
 	}
 }
@@ -944,51 +960,120 @@ exceptions[ROY] = [
 spawns = [];
 spawns[DRMARIO] = [
 	[-65, -110],
+	[-40, -35], // 2
+	[-92.5, 105], // 3
+	[5, 105], // 4
+	[37.5, -25], // 5
+	[115, -20], // 6
+	[-20, 45], // 7
 ];
 spawns[MARIO] = [
-	[0, 30], // original [0, 1.9]
+	[0, 30], // original [0, 1.9] (y-28)
+	[-120, 107.5], // 2 [-120, 79.5]
+	[72.5, 82.5], // 3 [72.5, 54.5]
+	[50, -9.5], // 4 [50, -37.5]
+	[-78, 58], // 5 [-78, 30]
 ];
 spawns[LUIGI] = [
-	[0, 10], // original [1, -10]
+	[0, 10], // original [1, -10] (y-20)
+	[-55, -60], // 2 [-55, -80]
+	[35, -60], // 3 [35, -80]
 ];
 spawns[BOWSER] = [
-	[50, 70], // original [99.25, -7.1]
+	[50, 70], // original [99.25, -7.1] (x+50, y-77)
+	[50, 10], // 2 [100, -67]
+	[-88, 20], // 3 [-38, -57]
+	[-55, -75], // 4 [-5, -152]
+	[90, -25], // 5 [140, -102]
 ];
 spawns[PEACH] = [
 	[-20, 10],
+	[-25, -55], // 2
+	[75, 35], // 3
+	[90, 115], // 4
+	[82.5, -60], // 5
 ];
 spawns[YOSHI] = [
 	[-40, 35],
+	[-137.5, 35], // 2
+	[50, 35], // 3
+	[-55, 150], // 4
+	[115, -5], // 5
+	[15, -15], // 6
 ];
 spawns[DK] = [
 	[0, 11],
+	[-145, 85], // 2
+	[-120, 175], // 3
+	[-155, 205], // 4
+	[30, 165], // 5
+	[180, 95], // 6
 ];
 spawns[CFALCON] = [
 	[125, -105],
+	[120, 125], // 2
+	[-120, 105], // 3
+	[-120, 5], // 4
+	[-35, 5], // 5
+	[120, -5], // 6
+	[0, -95], // 7
 ];
 spawns[GANONDORF] = [
 	[0, 0],
+	[-60, 15], // 2
+	[60, 15], // 3
 ];
 spawns[FALCO] = [
 	[-5, 55],
+	[-5, 55], // 2
+	[-85, -15], // 3
+	[88, -55], // 4
 ];
 spawns[FOX] = [
 	[-100, -75],
+	[-37.5, -15], // 2
+	[-35, 135], // 3
+	[60, 155], // 4
+	[130, 35], // 5
+	[57.5, -25], // 6
+	[20, -105], // 7
 ];
 spawns[NESS] = [
 	[10, -115],
+	[-95, -65], // 2
+	[-135.5, 15], // 3
+	[70, 65], // 4
+	[130, 15], // 5
+	[-15, 15], // 6
 ];
 spawns[ICECLIMBERS] = [
 	[0, 0],
+	[-50, 70], // 2
+	[-20, 370], // 3	// maybe -25
+	[62.5, 455], // 4
 ];
 spawns[KIRBY] = [
 	[-127.5, 105],
+	[-40, 125], // 2
+	[-5, 125], // 3
+	[-85, 175], // 4
+	[105, 75], // 5
+	[65, 35], // 6
 ];
 spawns[SAMUS] = [
 	[0, -5],
+	[-45, 75], // 2
+	[40, 125], // 3
+	[-85, -5], // 4
+	[115, -5], // 5
+	[30, -45], // 6
 ];
 spawns[ZELDA] = [
 	[0, -28.94],
+	[0, 95], // 2
+	[-112, 10], // 3
+	[-47.5, -70], // 4
+	[70, 10], // 5
 ];
 spawns[LINK] = [
 	[5, 21.06],
@@ -1000,28 +1085,59 @@ spawns[LINK] = [
 ];
 spawns[YLINK] = [
 	[-90, 40],
+	[-110, 135], // 2
+	[-30, 175], // 3
+	[-15, 85], // 4
+	[85, 185], // 5
 ];
 spawns[PICHU] = [
 	[24.59, -16.07],
+	[-140, 25], // 2
+	[5, 95], // 3
+	[120, 65], // 4
 ];
 spawns[PIKACHU] = [
 	[0, -65],
+	[-100, 0], // 2
+	[-105, 115], // 3
+	[135, -35], // 4
+	[-30, 55], // 5
+	[95, 5], // 6
 ];
 spawns[JIGGLYPUFF] = [
 	[82.5, 20],
+	[-132, 45], // 2
+	[-20, 20], // 3
+	[100, 80], // 4
+	[110, -50], // 5
 ];
 spawns[MEWTWO] = [
 	[5, -30],
+	[-35, 70], // 2
+	[-115, 10], // 3
+	[125, 10], // 4
+	[85, -70], // 5
 ];
 spawns[MRGAMEWATCH] = [
 	[20, -35],
+	[-72, 27], // 2
+	[52, 15], // 3
 ];
 spawns[MARTH] = [
 	[-5, -60],
+	[-5, 80], // 2
+	[-140, 20], // 3
+	[70, 60], // 4
+	[65, 115], // 5
 ];
 spawns[ROY] = [
 	[0, 15],
+	[65, 15], // 2
+	[84.5, 132] // 3
+	[-140, 5], // 4
 ];
 spawns[SHEIK] = [
 	[0, 0],
+	[-90, 0], // 2
+	[80, 0], // 3
 ];
