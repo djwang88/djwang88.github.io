@@ -23,11 +23,7 @@
 
 var resultBox = document.querySelector('#result');
 var stageBox = document.querySelector('#stage');
-// var overflowBox = document.querySelector('#overflow');
-// var overflowText = document.querySelector('#overflow-note');
-// var overflowCopy = document.querySelector('#overflow-copy');
 var spawnBox = document.querySelector('#spawn');
-// var spawnDiv = document.querySelector('#spawn-div');
 var numTargetsBox = document.querySelector('#num-targets');
 var numTargetsDiv = document.querySelector('#num-targets-div');
 var optionsButton = document.querySelector('#show-options');
@@ -52,29 +48,14 @@ function randomize() {
 		} else {
 			characterRandomizerBox.value = "";
 		}
-		// hideOverflow();
 	} else if (stageBox.value == "random") {
 		var stage = Math.floor(Math.random() * stageHooks.length);
 		resultBox.value = getCode(stage, spawn);
 		stageBox.value = stage.toString();
-		// hideOverflow();
 	} else {
 		resultBox.value = getCode(parseInt(stageBox.value), spawn);
-		// hideOverflow();
 	}
 }
-
-// function showOverflow() {
-// 	overflowBox.style.display = "inline";
-// 	overflowText.style.display = "inline";
-// 	overflowCopy.style.display = "inline";
-// }
-
-// function hideOverflow() {
-// 	overflowBox.style.display = "none";
-// 	overflowText.style.display = "none";
-// 	overflowCopy.style.display = "none";
-// }
 
 function getCode(stage, spawn) {
 	var numTargets = stage != SHEIK ? 10 : 3;
@@ -95,7 +76,7 @@ function getRegularCode(stage, spawn) {
 	var end = codeEnd;
 
 	if (stage == 25) {
-		// Sheik-specific code
+		// sheik-specific code
 		start = codeStartSheik;
 		end = codeEndSheik;
 		numTargets = 3;
@@ -113,7 +94,7 @@ function getRegularCode(stage, spawn) {
 		var x = spawns[stage][index][0];
 		var y = spawns[stage][index][1];
 
-		// handle the bizarre spawn differentials for the short code
+		// handle bizarre spawn differentials for the short code
 		if (stage == MARIO) {
 			y -= 28;
 		} else if (stage == LUIGI) {
@@ -190,58 +171,60 @@ function getAllStagesCode(spawn) {
 	return getModularCode(stages, spawn, numTargets);
 }
 
+// function getCharacterRandomizerCode() {
+// 	var result = characterRandomizerStart;
+// 	var randomized = [];
+// 	while (randomized.length < characterIds.length) {
+// 		var index = Math.floor(Math.random() * characterIds.length);
+// 		if (randomized.indexOf(characterIds[index]) == -1) {
+// 			randomized.push(characterIds[index]);
+// 		}
+// 	}
+// 	for (let i = 0; i < randomized.length; i++) {
+// 		result += "2C0400" + randomized[i] + "\n418200CC ";
+// 	}
+// 	result += characterRandomizerEnd;
+// 	return result;
+// }
+
 function getCharacterRandomizerCode() {
 	var result = characterRandomizerStart;
 	var randomized = [];
-	while (randomized.length < characterIds.length) {
-		var index = Math.floor(Math.random() * characterIds.length);
-		if (randomized.indexOf(characterIds[index]) == -1) {
-			randomized.push(characterIds[index]);
+
+	// subtract one for sheik's stage
+	var numStages = stageIds.length - 1;
+	while (randomized.length < numStages) {
+		var index = Math.floor(Math.random() * numStages);
+		if (randomized.indexOf(stageIds[index]) == -1) {
+			randomized.push(stageIds[index]);
 		}
 	}
-	for (let i = 0; i < randomized.length; i++) {
-		result += "2C0400" + randomized[i] + "\n418200CC ";
+	var randomizedCounter = 0;
+	for (let i = 0; i <= 0x20; i++) {
+		if (i == 0x0E || // ice climbers
+			i == 0x13 || // jigglypuff
+			i == 0x1A || // master hand
+			i == 0x1B || // wireframe male
+			i == 0x1C || // wireframe female
+			i == 0x1D || // giga bowser
+			i == 0x1E || // crazy hand
+			i == 0x1F    // sandbag
+			) {
+			result += "01";
+		} else {
+			result += randomized[randomizedCounter];
+			randomizedCounter++;
+		}
+		if ((i + 1) % 8 == 0) {
+			result += ' ';
+		} else if ((i + 1) % 4 == 0) {
+			result += '\n';
+		}
 	}
+	result += "000000\n";
 	result += characterRandomizerEnd;
 	return result;
 }
-
-/*
- * Original (split) code
- */
-// function getOldAllStagesCode() {
-// 	var result = "";
-// 	for (let i = 0; i < 13; i++) {
-// 		result += getCode(i) + "\n";
-// 	}
-// 	resultBox.value = result;
-
-// 	var overflow = "";
-// 	for (let i = 13; i < 26; i++) {
-// 		overflow += getCode(i) + "\n";
-// 	}
-// 	overflowBox.value = overflow;
-// 	showOverflow();
-// }
-
-/*
- * Old utility function for new all stages code
- */
-// function getStageData(stage) {
-// 	var result = getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, 0, stage) + "\n";
-// 	result += getSpawnHalfWords(stage) + " ";
-// 	var numTargets = 10;
-// 	for (let i = 0; i < numTargets; i++) {
-// 		var coords = getValidCoordinates(stage);
-// 		result += coordsToHalfWords(coords.x, coords.y);
-// 		if (isEven(i)) {
-// 			result += "\n";
-// 		} else {
-// 			result += " ";
-// 		}
-// 	}
-// 	return result;
-// }
 
 /*
  * Header structure designed by Punkline
@@ -405,11 +388,6 @@ function copyCharacterRandomizer() {
 	document.execCommand('copy');
 }
 
-// function copyOverflow() {
-// 	overflowBox.select();
-// 	document.execCommand('copy');
-// }
-
 function onChangeStage() {
 	if (stageBox.value == "all") {
 		characterRandomizerCheckboxDiv.style.display = "block";
@@ -418,21 +396,6 @@ function onChangeStage() {
 		characterRandomizerCheckbox.checked = false;
 		showHideCharacterRandomizer();
 	}
-	// if (stageBox.value == "all") {
-	// 	numTargetsDiv.style.display = "none";
-	// } else {
-	// 	numTargetsDiv.style.display = "block";
-	// }
-
-	// spawnDiv.style.display = "none";
-	// spawnBox.checked = false;
-
-	// if (stageBox.value != "all") {
-	// 	var stage = parseInt(stageBox.value);
-	// 	if (stage == LINK) {
-	// 		spawnDiv.style.display = "block";
-	// 	}
-	// }
 }
 
 function showOptions() {
@@ -598,23 +561,14 @@ const characterIds = [
  * Assembly code by Punkline
  * Gecko code templates by djwang88
  */
-// const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
-// const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
-
 const codeStart = " 00000019\n3C00801C 60004210\n7C0803A6 4E800021\n48000058 4E800021";
 const codeEnd = "\n4BFFFFAD 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 80C50028\nC4080008 C0280004\nD0060038 D026003C\n80C70DD4 D0060050\nD0260060 80060014\n64000080 90060014\n80A50008 2C050000\n4180FFBC 00000000";
 
 const codeStartSheik = " 00000012\n3C00801C 60004210\n7C0803A6 4E800021\n48000020 4E800021";
 const codeEndSheik = "\n4BFFFFE5 806DC18C\n7D0802A6 3908FFF8\n80A30024 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000";
 
-// const codeStartSpawn = " 0000001D\n3C00801C 60004210\n7C0803A6 4E800021\n48000060 4E800021";
-// const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 38000000\n80C50028 C4080008\nC0280004 9006007C\nD0060038 D026003C\n80C70DD4 9006007C\nD0060050 D0260060\n80A50008 2C050000\n4180FFBC 00000000"
-
 const codeStartSpawn = " 0000001D\n3C00801C 60004210\n7C0803A6 4E800021\n48000060 4E800021";
 const codeEndSpawn = "\n4BFFFFA5 806DC18C\n7D0802A6 80A30024\n3C008049 6003E6C8\n80C30280 C0080000\nD0060038 C0080004\nD006003C 80E5002C\n80070010 2C0000D1\n40820030 80C50028\nC4080008 C0280004\nD0060038 D026003C\n80C70DD4 D0060050\nD0260060 80060014\n64000080 90060014\n80A50008 2C050000\n4180FFBC 00000000";
-
-// const codeStartAllStages = "C21C4228 000000AF\n93C10018 480004EC\n4E800021 ";
-// const codeEndAllStages = "00000000\n4BFFFB19 7FC802A6\n39400000 808D9348\n7D3E506E 712800FF\n41820058 38C00008\n5520877F 2C800006\n41820010 38C00002\n41860008 38C00004\n50C9063E 7C882000\n5527C63F 40A20008\n38E0000A 50E9442E\n41860020 75200010\n41A20008 38E70001\n7D4639D6 394A0007\n554A003A 4BFFFFA4\n38BE0004 7CA62850\n91210008 90A1000C\n60000000 00000000\nC21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
 const modularSizePlaceholder = "XXXX";
 const modularOffsetPlaceholder = "YYYYYY";
@@ -663,11 +617,11 @@ const modularNop = "60000000";
 const modularZero = "00000000";
 const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
-/*
- * Assembly code by djwang88
- */
-const characterRandomizerStart = "C216E7F4 00000034\n889F0060 "
-const characterRandomizerEnd = "A07F000E\n480000CC 38600021\n480000C4 38600022\n480000BC 38600023\n480000B4 38600024\n480000AC 38600025\n480000A4 38600026\n4800009C 38600027\n48000094 38600028\n4800008C 38600029\n48000084 3860002A\n4800007C 3860002B\n48000074 3860002C\n4800006C 3860002D\n48000064 3860002E\n4800005C 3860002F\n48000054 38600030\n4800004C 38600031\n48000044 38600032\n4800003C 38600033\n48000034 38600034\n4800002C 38600036\n48000024 38600037\n4800001C 38600038\n48000014 38600039\n4800000C 3860003A\n60000000 00000000";
+// const characterRandomizerStart = "C216E7F4 00000034\n889F0060 "
+// const characterRandomizerEnd = "A07F000E\n480000CC 38600021\n480000C4 38600022\n480000BC 38600023\n480000B4 38600024\n480000AC 38600025\n480000A4 38600026\n4800009C 38600027\n48000094 38600028\n4800008C 38600029\n48000084 3860002A\n4800007C 3860002B\n48000074 3860002C\n4800006C 3860002D\n48000064 3860002E\n4800005C 3860002F\n48000054 38600030\n4800004C 38600031\n48000044 38600032\n4800003C 38600033\n48000034 38600034\n4800002C 38600036\n48000024 38600037\n4800001C 38600038\n48000014 38600039\n4800000C 3860003A\n60000000 00000000";
+
+const characterRandomizerStart = "C216E7F4 00000008\n48000009 4800002C\n4E800021 ";
+const characterRandomizerEnd = "7CA802A6 889F0060\n7C6520AE 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
