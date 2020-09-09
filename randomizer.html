@@ -17,80 +17,89 @@
                 height: 500px;
                 width: 160px;
             }
+
+            td {
+                vertical-align: top;
+            }
         </style>
     </head>
     <body>
         <h1 style="margin-bottom: 12px">SSBM Target Test Stage Randomizer</h1>
-        <label for="stage"><b>Stage: </b></label>
-        <select id="stage" onchange="onChangeStage()">
-            <option value="all">(All Stages)</option>
-            <option value="random">(Random Stage)</option>
-            <option value="0">Dr. Mario</option>
-            <option value="1">Mario</option>
-            <option value="2">Luigi</option>
-            <option value="3">Bowser</option>
-            <option value="4">Peach</option>
-            <option value="5">Yoshi</option>
-            <option value="6">Donkey Kong</option>
-            <option value="7">Captain Falcon</option>
-            <option value="8">Ganondorf</option>
-            <option value="9">Falco</option>
-            <option value="10">Fox</option>
-            <option value="11">Ness</option>
-            <option value="12">Ice Climbers</option>
-            <option value="13">Kirby</option>
-            <option value="14">Samus</option>
-            <option value="15">Zelda</option>
-            <option value="16">Link</option>
-            <option value="17">Young Link</option>
-            <option value="18">Pichu</option>
-            <option value="19">Pikachu</option>
-            <option value="20">Jigglypuff</option>
-            <option value="21">Mewtwo</option>
-            <option value="22">Mr. Game & Watch</option>
-            <option value="23">Marth</option>
-            <option value="24">Roy</option>
-            <option value="25">Sheik (Seak)</option>
-        </select>
-        <p><button id="randomize" onclick="randomize()" class="button">RANDOMIZE</button></p>
-        <div id="show-options">
-            <button onclick="showOptions()">Advanced Options</button>
-        </div>
-        <div id="options-div" style="display: none">
-            <div id="num-targets-div" style="margin-top: 5px">
-                <div>
-                    <label for="num-targets">Number of targets: </label>
-                    <input id="num-targets" style="width: 50px" value="10">
-                </div>
-                <div style="margin-top: 3px">
-                    <input id="spawn" type="checkbox">Randomize spawn location
-                </div>
-                <div id="character-randomizer-checkbox-div">
-                    <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideCharacterRandomizer()">Generate mismatch randomizer code
-                </div>
-            </div>
-            <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
-        </div>
-        <p>
-            <table>
-                <tr>
-                    <td>
-                        <label for="result"><b>Gecko code:</b></label><br>
+        <table style="margin-bottom: 5px">
+            <tr>
+                <td style="min-width: 170px">
+                    <div id="gecko">
+                        <label for="result"><b>Randomizer code:</b></label><br>
                         <textarea readonly="readonly" id="result" class="codeArea"></textarea>
                         <!-- <textarea id="overflow" style="display: none;" class="codeArea"></textarea> -->
                         <div style="margin-top: 5px"><button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button></div>
-                    </td>
-                    <td id="character-randomizer-div" style="display: none"><b>Mismatch randomizer:</b></label><br>
-                        <textarea readonly="readonly" id="character-randomizer-result" class="codeArea"></textarea>
+                    </div>
+                </td>
+                <td style="min-width: 210px">
+                    <div id="chooser">
+                        <label for="stage"><b>Stage: </b></label>
+                        <select id="stage" onchange="onChangeStage()">
+                            <option value="all">(All Stages)</option>
+                            <option value="random">(Random Stage)</option>
+                            <option value="0">Dr. Mario</option>
+                            <option value="1">Mario</option>
+                            <option value="2">Luigi</option>
+                            <option value="3">Bowser</option>
+                            <option value="4">Peach</option>
+                            <option value="5">Yoshi</option>
+                            <option value="6">Donkey Kong</option>
+                            <option value="7">Captain Falcon</option>
+                            <option value="8">Ganondorf</option>
+                            <option value="9">Falco</option>
+                            <option value="10">Fox</option>
+                            <option value="11">Ness</option>
+                            <option value="12">Ice Climbers</option>
+                            <option value="13">Kirby</option>
+                            <option value="14">Samus</option>
+                            <option value="15">Zelda</option>
+                            <option value="16">Link</option>
+                            <option value="17">Young Link</option>
+                            <option value="18">Pichu</option>
+                            <option value="19">Pikachu</option>
+                            <option value="20">Jigglypuff</option>
+                            <option value="21">Mewtwo</option>
+                            <option value="22">Mr. Game & Watch</option>
+                            <option value="23">Marth</option>
+                            <option value="24">Roy</option>
+                            <option value="25">Sheik (Seak)</option>
+                        </select>
+                        <p><button id="randomize" onclick="randomize()" class="button">RANDOMIZE</button></p>
+                        <div id="show-options">
+                            <button onclick="showOptions()">Advanced Options</button>
+                        </div>
+                    </div>
+                    <div id="options-div" style="display: none">
+                        <div id="num-targets-div" style="margin-top: 5px">
+                            <div>
+                                <label for="num-targets">Number of targets: </label>
+                                <input id="num-targets" style="width: 50px" value="10">
+                            </div>
+                            <div style="margin-top: 3px">
+                                <input id="spawn" type="checkbox">Randomize spawn location
+                            </div>
+                            <div id="character-randomizer-checkbox-div">
+                                <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideCharacterRandomizer()">Mismatch randomizer code
+                            </div>
+                        </div>
+                        <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
+                    </div>
+                    <br>
+                    <div id="character-randomizer-div" style="display: none"><b>Mismatch code:</b></label><br>
+                        <textarea readonly="readonly" id="character-randomizer-result" style="min-height: 200px"></textarea>
                         <div style="margin-top: 5px"><button id="character-randomizer-copy" onclick="copyCharacterRandomizer()" class="copyButton">Copy code to clipboard</button></div>
-                    </td>
-                </tr>
+                    </div>
+                </td>
 
-            </table>
-        </p>
+            </tr>
+        </table>
         <p id="character-randomizer-note" style="color: red; display: none;">
             <span>
-                Because target bounds are designed with the stage's default character in mind, it's possible to generate unwinnable character & stage combinations.
+                Because target bounds are designed with the stage's default character in mind, it's possible <br>to generate unwinnable character & stage combinations.
             </span>
         </p>
         <p>
@@ -99,13 +108,15 @@
             * Dynamically builds a Gecko code, which can be used with Dolphin or Wii Homebrew<br>
             * Optionally places an arbitrary number of targets between 1 and 255<br>
             * Optionally randomizes spawn location from a set of fixed spawn points<br>
-            * Optionally generates a mismatch randomizer code that maps each character to a random stage
+            * Optionally generates a mismatch randomizer code that maps each character to a random stage<br>
+            * <a href="setupguide.html">Visual setup guide</a>
         </p>
         <p>
             _______________________________________________________________________________<br>
-            Designed and built by <b>djwang88</b><br>
+            Randomizer designed and built by <b>djwang88</b><br>
             Stage mappings determined by <b>megaqwertification</b><br>
             Gecko code developed by <b>Punkline</b><br>
+            Playtesting by the <b><a href="https://discord.gg/AfEaYaE">Smash Stadium Discord</a></b>
         </p>
     </body>
 </html>

@@ -26,6 +26,7 @@
  * [2020-09-09] Added Ice Climbers exclusion (Boundary 3)
  * [2020-09-09] Adjusted Falco bounds (increased y2) and fixed exclusion (Boundary 6)
  * [2020-09-09] Adjusted Captain Falcon bounds (increased y2)
+ * [2020-09-09] Fixed Kirby spawn (5)
  */
 
 var resultBox = document.querySelector('#result');
@@ -408,11 +409,14 @@ function onChangeStage() {
 function showOptions() {
 	optionsDiv.style.display = "block";
 	optionsButton.style.display = "none";
+	showHideCharacterRandomizer();
 }
 
 function hideOptions() {
 	optionsDiv.style.display = "none";
 	optionsButton.style.display = "block";
+	characterRandomizerDiv.style.display = "none";
+	characterRandomizerNote.style.display = "none";
 }
 
 function optionsActive() {
