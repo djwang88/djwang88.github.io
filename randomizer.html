@@ -14,7 +14,7 @@
             }
 
             .codeArea {
-                height: 500px;
+                height: 400px;
                 width: 160px;
             }
 
@@ -29,9 +29,8 @@
             <tr>
                 <td style="min-width: 170px">
                     <div id="gecko">
-                        <label for="result"><b>Randomizer code:</b></label><br>
+                        <label for="result"><b>Gecko code:</b></label><br>
                         <textarea readonly="readonly" id="result" class="codeArea"></textarea>
-                        <!-- <textarea id="overflow" style="display: none;" class="codeArea"></textarea> -->
                         <div style="margin-top: 5px"><button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button></div>
                     </div>
                 </td>
@@ -83,16 +82,12 @@
                                 <input id="spawn" type="checkbox">Randomize spawn location
                             </div>
                             <div id="character-randomizer-checkbox-div">
-                                <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideCharacterRandomizer()">Mismatch randomizer code
+                                <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideCharacterRandomizer()">Randomize character/stage mappings
                             </div>
                         </div>
                         <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
                     </div>
                     <br>
-                    <div id="character-randomizer-div" style="display: none"><b>Mismatch code:</b></label><br>
-                        <textarea readonly="readonly" id="character-randomizer-result" style="min-height: 200px"></textarea>
-                        <div style="margin-top: 5px"><button id="character-randomizer-copy" onclick="copyCharacterRandomizer()" class="copyButton">Copy code to clipboard</button></div>
-                    </div>
                 </td>
 
             </tr>
@@ -108,8 +103,10 @@
             * Dynamically builds a Gecko code, which can be used with Dolphin or Wii Homebrew<br>
             * Optionally places an arbitrary number of targets between 1 and 255<br>
             * Optionally randomizes spawn location from a set of fixed spawn points<br>
-            * Optionally generates a mismatch randomizer code that maps each character to a random stage<br>
-            * <a href="setupguide.html">Visual setup guide</a>
+            * Optionally maps every character to a random stage
+        </p>
+        <p>
+            For help getting set up, check out the <a href="setupguide.html"><b>Visual Setup Guide</b></a>.
         </p>
         <p>
             _______________________________________________________________________________<br>

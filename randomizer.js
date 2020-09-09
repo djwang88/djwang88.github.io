@@ -38,9 +38,6 @@ var optionsButton = document.querySelector('#show-options');
 var optionsDiv = document.querySelector('#options-div');
 var characterRandomizerCheckboxDiv = document.querySelector('#character-randomizer-checkbox-div');
 var characterRandomizerCheckbox = document.querySelector('#character-randomizer-checkbox');
-var characterRandomizerDiv = document.querySelector('#character-randomizer-div');
-var characterRandomizerBox = document.querySelector('#character-randomizer-result');
-var characterRandomizerCopy = document.querySelector('#character-randomizer-copy');
 var characterRandomizerNote = document.querySelector('#character-randomizer-note');
 
 function randomize() {
@@ -50,12 +47,12 @@ function randomize() {
 	}
 
 	if (stageBox.value == "all") {
-		resultBox.value = getAllStagesCode(spawn);
+		var code = getAllStagesCode(spawn);
 		if (optionsActive() && characterRandomizerCheckbox.checked) {
-			characterRandomizerBox.value = getCharacterRandomizerCode();
-		} else {
-			characterRandomizerBox.value = "";
+			code += '\n';
+			code += getCharacterRandomizerCode();
 		}
+		resultBox.value = code;
 	} else if (stageBox.value == "random") {
 		var stage = Math.floor(Math.random() * stageHooks.length);
 		resultBox.value = getCode(stage, spawn);
@@ -178,22 +175,6 @@ function getAllStagesCode(spawn) {
 	}
 	return getModularCode(stages, spawn, numTargets);
 }
-
-// function getCharacterRandomizerCode() {
-// 	var result = characterRandomizerStart;
-// 	var randomized = [];
-// 	while (randomized.length < characterIds.length) {
-// 		var index = Math.floor(Math.random() * characterIds.length);
-// 		if (randomized.indexOf(characterIds[index]) == -1) {
-// 			randomized.push(characterIds[index]);
-// 		}
-// 	}
-// 	for (let i = 0; i < randomized.length; i++) {
-// 		result += "2C0400" + randomized[i] + "\n418200CC ";
-// 	}
-// 	result += characterRandomizerEnd;
-// 	return result;
-// }
 
 function getCharacterRandomizerCode() {
 	var result = characterRandomizerStart;
@@ -391,46 +372,27 @@ function copy() {
 	document.execCommand('copy');
 }
 
-function copyCharacterRandomizer() {
-	characterRandomizerBox.select();
-	document.execCommand('copy');
-}
-
 function onChangeStage() {
 	if (stageBox.value == "all") {
 		characterRandomizerCheckboxDiv.style.display = "block";
 	} else {
 		characterRandomizerCheckboxDiv.style.display = "none";
 		characterRandomizerCheckbox.checked = false;
-		showHideCharacterRandomizer();
 	}
 }
 
 function showOptions() {
 	optionsDiv.style.display = "block";
 	optionsButton.style.display = "none";
-	showHideCharacterRandomizer();
 }
 
 function hideOptions() {
 	optionsDiv.style.display = "none";
 	optionsButton.style.display = "block";
-	characterRandomizerDiv.style.display = "none";
-	characterRandomizerNote.style.display = "none";
 }
 
 function optionsActive() {
 	return optionsDiv.style.display != "none";
-}
-
-function showHideCharacterRandomizer() {
-	if (characterRandomizerCheckbox.checked) {
-		characterRandomizerDiv.style.display = "block";
-		characterRandomizerNote.style.display = "inline";
-	} else {
-		characterRandomizerDiv.style.display = "none";
-		characterRandomizerNote.style.display = "none";
-	}
 }
 
 function convertToHex() {
@@ -627,9 +589,6 @@ const modularInjectionEnd = [
 const modularNop = "60000000";
 const modularZero = "00000000";
 const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
-
-// const characterRandomizerStart = "C216E7F4 00000034\n889F0060 "
-// const characterRandomizerEnd = "A07F000E\n480000CC 38600021\n480000C4 38600022\n480000BC 38600023\n480000B4 38600024\n480000AC 38600025\n480000A4 38600026\n4800009C 38600027\n48000094 38600028\n4800008C 38600029\n48000084 3860002A\n4800007C 3860002B\n48000074 3860002C\n4800006C 3860002D\n48000064 3860002E\n4800005C 3860002F\n48000054 38600030\n4800004C 38600031\n48000044 38600032\n4800003C 38600033\n48000034 38600034\n4800002C 38600036\n48000024 38600037\n4800001C 38600038\n48000014 38600039\n4800000C 3860003A\n60000000 00000000";
 
 const characterRandomizerStart = "C216E7F4 00000008\n48000009 4800002C\n4E800021 ";
 const characterRandomizerEnd = "7CA802A6 889F0060\n7C6520AE 00000000";
