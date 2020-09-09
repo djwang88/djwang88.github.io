@@ -36,7 +36,16 @@
         </p>
         <table>
             <tr>
-                <td style="width: 220px">
+                <td style="width: 170px">
+                    <p>
+                        <label for="result"><b>Gecko code:</b></label><br>
+                        <textarea id="result" class="codeArea"></textarea>
+                    </p>
+                    <p>
+                        <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
+                    </p>
+                </td>
+                <td>
                     <p>
                         <label for="stage"><b>Stage: </b></label>
                         <select id="stage" onchange="onSelect()">
@@ -142,15 +151,6 @@
                         </div>
                     </p>
                     <p></p><button id="generate" onclick="generate()" class="button"><b>GENERATE</b></button></p>
-                </td>
-                <td>
-                    <p>
-                        <label for="result"><b>Gecko code:</b></label><br>
-                        <textarea id="result" class="codeArea"></textarea>
-                    </p>
-                    <p>
-                        <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
-                    </p>
                 </td>
             </tr>
         </table>
