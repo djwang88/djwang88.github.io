@@ -22,6 +22,10 @@
             th {
                 font-weight: normal;
             }
+
+            td {
+                vertical-align: top;
+            }
         </style>
     </head>
     <body>
@@ -30,118 +34,128 @@
             <!-- * Generates random (fixed) target positions, with stage-specific exclusion rules to prevent collisions<br> -->
             * Inserts target coordinates into a Gecko code template, which can then be used with Dolphin or Wii Homebrew<br>
         </p>
-        <p>
-            <label for="stage"><b>Stage: </b></label>
-            <select id="stage" onchange="onSelect()">
-                <option value="0">Dr. Mario</option>
-                <option value="1">Mario</option>
-                <option value="2">Luigi</option>
-                <option value="3">Bowser</option>
-                <option value="4">Peach</option>
-                <option value="5">Yoshi</option>
-                <option value="6">Donkey Kong</option>
-                <option value="7">Captain Falcon</option>
-                <option value="8">Ganondorf</option>
-                <option value="9">Falco</option>
-                <option value="10">Fox</option>
-                <option value="11">Ness</option>
-                <option value="12">Ice Climbers</option>
-                <option value="13">Kirby</option>
-                <option value="14">Samus</option>
-                <option value="15">Zelda</option>
-                <option value="16">Link</option>
-                <option value="17">Young Link</option>
-                <option value="18">Pichu</option>
-                <option value="19">Pikachu</option>
-                <option value="20">Jigglypuff</option>
-                <option value="21">Mewtwo</option>
-                <option value="22">Mr. Game & Watch</option>
-                <option value="23">Marth</option>
-                <option value="24">Roy</option>
-                <option value="25">Sheik (Seak)</option>
-            </select>
-        </p>
-        <p>
-            <label><b>Target Coordinates:</b></label>
-            <table>
-                <tr>
-                    <th></th>
-                    <th>x</th>
-                    <th>y</th>
-                </tr>
-                <tr id="c1">
-                    <td>Target 1</td>
-                    <td><input class="coord" id="x1"></td>
-                    <td><input class="coord" id="y1"></td>
-                </tr>
-                <tr id="c2">
-                    <td>Target 2</td>
-                    <td><input class="coord" id="x2"></td>
-                    <td><input class="coord" id="y2"></td>
-                </tr>
-                <tr id="c3">
-                    <td>Target 3</td>
-                    <td><input class="coord" id="x3"></td>
-                    <td><input class="coord" id="y3"></td>
-                </tr>
-                <tr id="c4">
-                    <td>Target 4</td>
-                    <td><input class="coord" id="x4"></td>
-                    <td><input class="coord" id="y4"></td>
-                </tr>
-                <tr id="c5">
-                    <td>Target 5</td>
-                    <td><input class="coord" id="x5"></td>
-                    <td><input class="coord" id="y5"></td>
-                </tr>
-                <tr id="c6">
-                    <td>Target 6</td>
-                    <td><input class="coord" id="x6"></td>
-                    <td><input class="coord" id="y6"></td>
-                </tr>
-                <tr id="c7">
-                    <td>Target 7</td>
-                    <td><input class="coord" id="x7"></td>
-                    <td><input class="coord" id="y7"></td>
-                </tr>
-                <tr id="c8">
-                    <td>Target 8</td>
-                    <td><input class="coord" id="x8"></td>
-                    <td><input class="coord" id="y8"></td>
-                </tr>
-                <tr id="c9">
-                    <td>Target 9</td>
-                    <td><input class="coord" id="x9"></td>
-                    <td><input class="coord" id="y9"></td>
-                </tr>
-                <tr id="c10">
-                    <td>Target 10</td>
-                    <td><input class="coord" id="x10"></td>
-                    <td><input class="coord" id="y10"></td>
-                </tr>
-            </table>
-        </p>
-        <p>
-            <div id="include-spawn">
-                <button onclick="addSpawn()">Customize Player Spawn Location</button>
-            </div>
-            <div id="spawn-coordinates" style="display: none">
-                <label><b>Player Spawn Coordinates:</b></label>
-                <br>&nbsp;
-                x:<input class="coord" id="xs"></td>
-                y:<input class="coord" id="ys"></td>
-                <br>
-                <button onclick="cancelSpawn()" style="margin-top: 8px">Cancel</button>
-            </div>
-        </p>
-        <p></p><button id="generate" onclick="generate()" class="button"><b>GENERATE</b></button></p>
-        <p>
-            <label for="result"><b>Gecko code:</b></label><br>
-            <textarea id="result" class="codeArea"></textarea>
-        </p>
-        <p>
-            <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
-        </p>
+        <table>
+            <tr>
+                <td style="width: 220px">
+                    <p>
+                        <label for="stage"><b>Stage: </b></label>
+                        <select id="stage" onchange="onSelect()">
+                            <option value="0">Dr. Mario</option>
+                            <option value="1">Mario</option>
+                            <option value="2">Luigi</option>
+                            <option value="3">Bowser</option>
+                            <option value="4">Peach</option>
+                            <option value="5">Yoshi</option>
+                            <option value="6">Donkey Kong</option>
+                            <option value="7">Captain Falcon</option>
+                            <option value="8">Ganondorf</option>
+                            <option value="9">Falco</option>
+                            <option value="10">Fox</option>
+                            <option value="11">Ness</option>
+                            <option value="12">Ice Climbers</option>
+                            <option value="13">Kirby</option>
+                            <option value="14">Samus</option>
+                            <option value="15">Zelda</option>
+                            <option value="16">Link</option>
+                            <option value="17">Young Link</option>
+                            <option value="18">Pichu</option>
+                            <option value="19">Pikachu</option>
+                            <option value="20">Jigglypuff</option>
+                            <option value="21">Mewtwo</option>
+                            <option value="22">Mr. Game & Watch</option>
+                            <option value="23">Marth</option>
+                            <option value="24">Roy</option>
+                            <option value="25">Sheik (Seak)</option>
+                        </select>
+                    </p>
+                    <p>
+                        <label><b>Target Coordinates:</b></label>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>x</th>
+                                <th>y</th>
+                            </tr>
+                            <tr id="c1">
+                                <td>Target 1</td>
+                                <td><input class="coord" id="x1"></td>
+                                <td><input class="coord" id="y1"></td>
+                            </tr>
+                            <tr id="c2">
+                                <td>Target 2</td>
+                                <td><input class="coord" id="x2"></td>
+                                <td><input class="coord" id="y2"></td>
+                            </tr>
+                            <tr id="c3">
+                                <td>Target 3</td>
+                                <td><input class="coord" id="x3"></td>
+                                <td><input class="coord" id="y3"></td>
+                            </tr>
+                            <tr id="c4">
+                                <td>Target 4</td>
+                                <td><input class="coord" id="x4"></td>
+                                <td><input class="coord" id="y4"></td>
+                            </tr>
+                            <tr id="c5">
+                                <td>Target 5</td>
+                                <td><input class="coord" id="x5"></td>
+                                <td><input class="coord" id="y5"></td>
+                            </tr>
+                            <tr id="c6">
+                                <td>Target 6</td>
+                                <td><input class="coord" id="x6"></td>
+                                <td><input class="coord" id="y6"></td>
+                            </tr>
+                            <tr id="c7">
+                                <td>Target 7</td>
+                                <td><input class="coord" id="x7"></td>
+                                <td><input class="coord" id="y7"></td>
+                            </tr>
+                            <tr id="c8">
+                                <td>Target 8</td>
+                                <td><input class="coord" id="x8"></td>
+                                <td><input class="coord" id="y8"></td>
+                            </tr>
+                            <tr id="c9">
+                                <td>Target 9</td>
+                                <td><input class="coord" id="x9"></td>
+                                <td><input class="coord" id="y9"></td>
+                            </tr>
+                            <tr id="c10">
+                                <td>Target 10</td>
+                                <td><input class="coord" id="x10"></td>
+                                <td><input class="coord" id="y10"></td>
+                            </tr>
+                        </table>
+                    </p>
+                    <p>
+                        <div id="include-spawn">
+                            <button onclick="addSpawn()">Customize Player Spawn Location</button>
+                        </div>
+                        <div id="spawn-coordinates" style="display: none">
+                            <label><b>Player Spawn Coordinates:</b></label>
+                            <br>&nbsp;
+                            x:<input class="coord" id="xs">
+                            y:<input class="coord" id="ys">
+                            <br>
+                            <button onclick="cancelSpawn()" style="margin-top: 8px">Cancel</button>
+                        </div>
+                    </p>
+                    <p></p><button id="generate" onclick="generate()" class="button"><b>GENERATE</b></button></p>
+                </td>
+                <td>
+                    <p>
+                        <label for="result"><b>Gecko code:</b></label><br>
+                        <textarea id="result" class="codeArea"></textarea>
+                    </p>
+                    <p>
+                        <button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button>
+                    </p>
+                </td>
+            </tr>
+        </table>
+        
+        
         <!-- <p>
             <b>Known issues:</b><br>
         </p> -->
