@@ -46,6 +46,17 @@ var idBox = document.querySelector('#randomizer-id');
 
 var getRandom;
 
+var firebaseConfig = {
+	apiKey: "AIzaSyBzmvCfvumHNbr0aYxzTQLvnuWAEjXLwlQ",
+	authDomain: "bttrandomizer.firebaseapp.com",
+	databaseURL: "https://bttrandomizer.firebaseio.com",
+	projectId: "bttrandomizer",
+	storageBucket: "bttrandomizer.appspot.com",
+	messagingSenderId: "543190615441",
+	appId: "1:543190615441:web:bd9b80541ebe2bc6568630"
+};
+firebase.initializeApp(firebaseConfig);
+
 function randomize(seed) {
 	if (!seed) {
 		getRandom = new Math.seedrandom();
@@ -77,6 +88,9 @@ function randomize(seed) {
 		}
 
 		idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
+
+		var db = firebase.database().ref("bttrandomizer");
+		db.update({"randomize_counter": firebase.database.ServerValue.increment(1)});
 	}
 }
 
@@ -503,7 +517,7 @@ const base62 = {
 	},
 	decode: chars => chars.split('').reverse().reduce((prev, curr, i) =>
 	  prev + (base62.charset.indexOf(curr) * (62 ** i)), 0)
-  };  
+  };
 
 /*
  * includeJs by Svitlana Maksymchuk
