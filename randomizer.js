@@ -49,9 +49,11 @@ var getRandom;
 var db;
 
 function randomize(seed) {
+	var load = true;
 	if (!seed) {
 		getRandom = new Math.seedrandom();
 		seed = Math.floor(getRandom() * Number.MAX_SAFE_INTEGER);
+		load = false;
 	}
 	getRandom = new Math.seedrandom(seed);
 
@@ -86,7 +88,7 @@ function randomize(seed) {
 		updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
 		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
-		if (seed) updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
+		if (load) updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
 		db.update(updateObject);
 	}
 }
