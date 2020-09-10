@@ -79,7 +79,15 @@ function randomize(seed) {
 		}
 
 		idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
-		db.update({"randomize_counter": firebase.database.ServerValue.increment(1)});
+
+		var updateObject = {};
+		updateObject["randomize_counter"] = firebase.database.ServerValue.increment(1);
+		updateObject["stage_counter_" + stage] = firebase.database.ServerValue.increment(1);
+		updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
+		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
+		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
+		if (seed) updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
+		db.update(updateObject);
 	}
 }
 
