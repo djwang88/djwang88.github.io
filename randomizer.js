@@ -31,6 +31,7 @@
  */
 
 includeJs("seedrandom.js");
+initializeDatabase();
 
 var resultBox = document.querySelector('#result');
 var stageBox = document.querySelector('#stage');
@@ -45,17 +46,7 @@ var characterRandomizerNote = document.querySelector('#character-randomizer-note
 var idBox = document.querySelector('#randomizer-id');
 
 var getRandom;
-
-var firebaseConfig = {
-	apiKey: "AIzaSyBzmvCfvumHNbr0aYxzTQLvnuWAEjXLwlQ",
-	authDomain: "bttrandomizer.firebaseapp.com",
-	databaseURL: "https://bttrandomizer.firebaseio.com",
-	projectId: "bttrandomizer",
-	storageBucket: "bttrandomizer.appspot.com",
-	messagingSenderId: "543190615441",
-	appId: "1:543190615441:web:bd9b80541ebe2bc6568630"
-};
-firebase.initializeApp(firebaseConfig);
+var db;
 
 function randomize(seed) {
 	if (!seed) {
@@ -88,8 +79,6 @@ function randomize(seed) {
 		}
 
 		idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
-
-		var db = firebase.database().ref("bttrandomizer");
 		db.update({"randomize_counter": firebase.database.ServerValue.increment(1)});
 	}
 }
@@ -551,6 +540,25 @@ function loadCode() {
 	onChangeStage();
 
 	randomize(decoded.seed);
+}
+
+function initializeDatabase() {
+	var firebaseConfig = {
+		apiKey: "AIzaSyBzmvCfvumHNbr0aYxzTQLvnuWAEjXLwlQ",
+		authDomain: "bttrandomizer.firebaseapp.com",
+		databaseURL: "https://bttrandomizer.firebaseio.com",
+		projectId: "bttrandomizer",
+		storageBucket: "bttrandomizer.appspot.com",
+		messagingSenderId: "543190615441",
+		appId: "1:543190615441:web:bd9b80541ebe2bc6568630"
+	};
+	firebase.initializeApp(firebaseConfig);
+
+	db = firebase.database().ref();
+	db.on("value", function(snapshot) {
+		var data = snapshot.val();
+		document.querySelector('#counter').value = data.randomize_counter
+	});
 }
 
 /*
