@@ -1,6 +1,6 @@
 /*
  * Randomizer developed by djwang88
- * Current version: 0.2
+ * Current version: 0.6
  * ---------
  * CHANGELOG
  * ---------
@@ -27,7 +27,10 @@
  * [2020-09-09] Adjusted Falco bounds (increased y2) and fixed exclusion (Boundary 6)
  * [2020-09-09] Adjusted Captain Falcon bounds (increased y2)
  * [2020-09-09] Fixed Kirby spawn (5)
+ * [2020-09-09] Randomizer ID feature (version 0.6)
  */
+
+includeJs("seedrandom.js");
 
 var resultBox = document.querySelector('#result');
 var stageBox = document.querySelector('#stage');
@@ -39,34 +42,46 @@ var optionsDiv = document.querySelector('#options-div');
 var characterRandomizerCheckboxDiv = document.querySelector('#character-randomizer-checkbox-div');
 var characterRandomizerCheckbox = document.querySelector('#character-randomizer-checkbox');
 var characterRandomizerNote = document.querySelector('#character-randomizer-note');
+var idBox = document.querySelector('#randomizer-id');
 
-function randomize() {
-	var spawn = false;
-	if (optionsActive() && spawnBox.checked) {
-		spawn = true;
+var getRandom;
+
+function randomize(seed) {
+	if (!seed) {
+		getRandom = new Math.seedrandom();
+		seed = Math.floor(getRandom() * Number.MAX_SAFE_INTEGER);
 	}
+	getRandom = new Math.seedrandom(seed);
 
-	if (stageBox.value == "all") {
-		var code = getAllStagesCode(spawn);
-		if (optionsActive() && characterRandomizerCheckbox.checked) {
-			code += '\n';
-			code += getCharacterRandomizerCode();
-		}
-		resultBox.value = code;
-	} else if (stageBox.value == "random") {
-		var stage = Math.floor(Math.random() * stageHooks.length);
-		resultBox.value = getCode(stage, spawn);
-		stageBox.value = stage.toString();
+	var stage = getStage();
+	var numTargets = getNumTargets(stage);
+	var spawn = isSpawn();
+	var mismatch = isMismatch();
+
+	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
+		resultBox.value = "Number of targets must be a number between 1 and 255."
 	} else {
-		resultBox.value = getCode(parseInt(stageBox.value), spawn);
+		if (stage == ALL) {
+			var code = getAllStagesCode(spawn);
+			if (optionsActive() && characterRandomizerCheckbox.checked) {
+				code += '\n';
+				code += getCharacterRandomizerCode();
+			}
+			resultBox.value = code;
+		} else if (stage == RANDOM) {
+			stage = Math.floor(getRandom() * stageHooks.length);
+			resultBox.value = getCode(stage, spawn);
+			stageBox.value = stage.toString();
+		} else {
+			resultBox.value = getCode(stage, spawn);
+		}
+
+		idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
 	}
 }
 
 function getCode(stage, spawn) {
-	var numTargets = stage != SHEIK ? 10 : 3;
-	if (optionsActive()) {
-		numTargets = parseInt(numTargetsBox.value);
-	}
+	var numTargets = getNumTargets(stage);
 	if ((stage != SHEIK && numTargets != 10) ||
 		(stage == SHEIK && numTargets != 3)) {
 		return getModularCode([stage], spawn, numTargets);
@@ -95,7 +110,7 @@ function getRegularCode(stage, spawn) {
 	var result = stageHooks[stage] + start;
 
 	if (spawn) {
-		var index = Math.floor(Math.random() * spawns[stage].length);
+		var index = Math.floor(getRandom() * spawns[stage].length);
 		var x = spawns[stage][index][0];
 		var y = spawns[stage][index][1];
 
@@ -120,10 +135,6 @@ function getRegularCode(stage, spawn) {
 }
 
 function getModularCode(stages, spawn, numTargets) {
-	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
-		return "Number of targets must be a number between 1 and 255."
-	}
-
 	// build injection code
 	var instructions = [];
 	instructions = instructions.concat(modularInjectionStart);
@@ -167,7 +178,7 @@ function getModularCode(stages, spawn, numTargets) {
 }
 
 function getAllStagesCode(spawn) {
-	var numTargets = parseInt(numTargetsBox.value);
+	var numTargets = getNumTargets();
 	// TODO: warning if more than 20 targets
 	var stages = [];
 	for (let i = 0; i < 26; i++) {
@@ -183,7 +194,7 @@ function getCharacterRandomizerCode() {
 	// subtract one for sheik's stage
 	var numStages = stageIds.length - 1;
 	while (randomized.length < numStages) {
-		var index = Math.floor(Math.random() * numStages);
+		var index = Math.floor(getRandom() * numStages);
 		if (randomized.indexOf(stageIds[index]) == -1) {
 			randomized.push(stageIds[index]);
 		}
@@ -303,7 +314,7 @@ function getRandomDecimal(min, max) {
 	// two decimal places
 	min = min * 100;
 	max = max * 100;
-	return Math.floor((Math.floor(Math.random() * (max - min + 1)) + min)) / 100;
+	return Math.floor((Math.floor(getRandom() * (max - min + 1)) + min)) / 100;
 }
 
 function coordsToHex(x, y) {
@@ -359,7 +370,7 @@ function toHalfWord(floatNum) {
 }
 
 function getSpawnHalfWords(stage) {
-	var index = Math.floor(Math.random() * spawns[stage].length);
+	var index = Math.floor(getRandom() * spawns[stage].length);
 	return coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]);
 }
 
@@ -373,7 +384,8 @@ function copy() {
 }
 
 function onChangeStage() {
-	if (stageBox.value == "all") {
+	var stage = getStage();
+	if (stage == ALL) {
 		characterRandomizerCheckboxDiv.style.display = "block";
 	} else {
 		characterRandomizerCheckboxDiv.style.display = "none";
@@ -406,6 +418,127 @@ function convertToHex() {
 	}
 }
 
+function getStage() {
+	var stage;
+	if (stageBox.value == "all") {
+		stage = ALL;
+	} else if (stageBox.value == "random") {
+		stage = RANDOM;
+	} else {
+		stage = parseInt(stageBox.value);
+	}
+	return stage;
+}
+
+function getNumTargets(stage) {
+	var numTargets = stage != SHEIK ? 10 : 3;
+	if (optionsActive()) {
+		numTargets = parseInt(numTargetsBox.value);
+	}
+	return numTargets;
+}
+
+function isSpawn() {
+	if (optionsActive() && spawnBox.checked) {
+		return true;
+	}
+	return false;
+}
+
+function isMismatch() {
+	if (optionsActive() && characterRandomizerCheckbox.checked) {
+		return true;
+	}
+	return false;
+}
+
+function encodeRandomizerId(seed, stage, numTargets, spawn, mismatch) {
+	var version = 1;
+	var options = "1";
+	options += spawn ? "1" : "0";
+	options += mismatch ? "1" : "0";
+	options += numTargets.toString().padStart(3, '0');
+	options += stage.toString().padStart(2, '0');
+	return base62.encode(version) + base62.encode(parseInt(options)) + base62.encode(seed);
+}
+
+function decodeRandomizerId(id) {
+	var version = base62.decode(id.slice(0, 1));
+	if (version == 1) {
+		var options = base62.decode(id.slice(1, 5)).toString();
+		var seed = base62.decode(id.slice(5))
+
+		var spawn = parseInt(options.slice(1, 2));
+		var mismatch = parseInt(options.slice(2, 3));
+		var numTargets = parseInt(options.slice(3, 6));
+		var stage = parseInt(options.slice(6));
+	}
+
+	return {
+		seed: seed,
+		stage: stage,
+		numTargets: numTargets,
+		spawn: spawn,
+		mismatch: mismatch,
+	}
+}
+
+/*
+ * base62 by Bret Lowrey
+ * https://lowrey.me/encoding-decoding-base-62-in-es6-javascript/
+ */
+const base62 = {
+	charset: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	  .split(''),
+	encode: integer => {
+	  if (integer === 0) {
+		return 0;
+	  }
+	  let s = [];
+	  while (integer > 0) {
+		s = [base62.charset[integer % 62], ...s];
+		integer = Math.floor(integer / 62);
+	  }
+	  return s.join('');
+	},
+	decode: chars => chars.split('').reverse().reduce((prev, curr, i) =>
+	  prev + (base62.charset.indexOf(curr) * (62 ** i)), 0)
+  };  
+
+/*
+ * includeJs by Svitlana Maksymchuk
+ */
+function includeJs(jsFilePath) {
+    var js = document.createElement("script");
+    js.type = "text/javascript";
+    js.src = jsFilePath;
+    document.body.appendChild(js);
+}
+
+function loadCode() {
+	var id = idBox.value;
+	var decoded = decodeRandomizerId(id);
+
+	stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
+	var advanced =
+		decoded.spawn == 1 ||
+		decoded.mismatch == 1 ||
+		(decoded.stage == SHEIK && decoded.numTargets != 3) ||
+		(decoded.stage != SHEIK && decoded.numTargets != 10);
+	if (advanced) {
+		numTargetsBox.value = decoded.numTargets.toString();
+		spawnBox.checked = (decoded.spawn == 1);
+		characterRandomizerCheckbox.checked = (decoded.mismatch == 1);
+	} else {
+		numTargetsBox.value = (decoded.stage == SHEIK ? "3" : "10");
+		spawnBox.checked = false;
+		characterRandomizerCheckbox.checked = false;
+	}
+	onChangeStage();
+
+	randomize(decoded.seed);
+}
+
 /*
  * Constants
  */
@@ -435,6 +568,9 @@ const MRGAMEWATCH = 22;
 const MARTH = 23;
 const ROY = 24;
 const SHEIK = 25;
+
+const ALL = 99;
+const RANDOM = 98;
 
 /*
  * Stage hooks (mostly) found by djwang88

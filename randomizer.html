@@ -73,23 +73,24 @@
                         </div>
                     </div>
                     <div id="options-div" style="display: none">
-                        <div id="num-targets-div" style="margin-top: 5px">
-                            <div>
-                                <label for="num-targets">Number of targets: </label>
-                                <input id="num-targets" style="width: 50px" value="10">
-                            </div>
-                            <div style="margin-top: 3px">
-                                <input id="spawn" type="checkbox">Randomize spawn location
-                            </div>
-                            <div id="character-randomizer-checkbox-div">
-                                <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideCharacterRandomizer()">Randomize character/stage mappings
-                            </div>
+                        <div id="num-targets-div" style="margin-top: 10px">
+                            <label for="num-targets">Number of targets: </label>
+                            <input id="num-targets" style="width: 50px" value="10">
+                        </div>
+                        <div style="margin-top: 8px">
+                            <input id="spawn" type="checkbox">Randomize spawn location
+                        </div>
+                        <div id="character-randomizer-checkbox-div">
+                            <input id="character-randomizer-checkbox" type="checkbox">Randomize character/stage mappings
+                        </div>
+                        <div id="seed-div" style="margin-top: 8px">
+                            <label for="randomizer-id">ID:</label>
+                            <input id="randomizer-id" style="width: 110px">
+                            <button id="load" onclick="loadCode()">Load Code</button>
                         </div>
                         <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
                     </div>
-                    <br>
                 </td>
-
             </tr>
         </table>
         <p id="character-randomizer-note" style="color: red; display: none;">
