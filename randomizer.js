@@ -83,12 +83,15 @@ function randomize(seed) {
 		idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
 
 		var updateObject = {};
-		updateObject["randomize_counter"] = firebase.database.ServerValue.increment(1);
-		updateObject["stage_counter_" + stage] = firebase.database.ServerValue.increment(1);
-		updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
-		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
-		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
-		if (load) updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
+		if (load) {
+			updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
+		} else {
+			updateObject["randomize_counter"] = firebase.database.ServerValue.increment(1);
+			updateObject["stage_counter_" + stage] = firebase.database.ServerValue.increment(1);
+			updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
+			if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
+			if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
+		}
 		db.update(updateObject);
 	}
 }
@@ -151,7 +154,6 @@ function getModularCode(stages, spawn, numTargets) {
 	// build injection code
 	var instructions = [];
 	instructions = instructions.concat(modularInjectionStart);
-
 	var stageData = [];
 	for (let i = 0; i < stages.length; i++) {
 		var stage = stages[i];
@@ -159,6 +161,7 @@ function getModularCode(stages, spawn, numTargets) {
 		if (spawn) {
 			stageData.push(getSpawnHalfWords(stage));
 		}
+
 		for (let i = 0; i < numTargets; i++) {
 			var coords = getValidCoordinates(stage);
 			stageData.push(coordsToHalfWords(coords.x, coords.y));
@@ -773,7 +776,8 @@ const bounds = [
 	{x1: -110, y1: -100,  x2: 180, y2: 150  }, // 04 PEACH
 	{x1: -150, y1: -90,   x2: 130, y2: 170  }, // 05 YOSHI
 	{x1: -190, y1: 0,     x2: 190, y2: 200  }, // 06 DK
-	{x1: -160, y1: -130,  x2: 170, y2: 150  }, // 07 CFALCON
+//	{x1: -160, y1: -130,  x2: 170, y2: 150  }, // 07 CFALCON
+{x1: -160, y1: -130,  x2: 50, y2: 100  }, // 07 CFALCON
 	{x1: -90,  y1: -20,   x2: 90,  y2: 110  }, // 08 GANONDORF
 	{x1: -140, y1: -70,   x2: 110, y2: 130  }, // 09 FALCO
 	{x1: -150, y1: -150,  x2: 150, y2: 150  }, // 10 FOX
