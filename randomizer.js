@@ -490,6 +490,13 @@ function decodeRandomizerId(id) {
 		var stage = parseInt(options.slice(6));
 	}
 
+	if ((spawn != 0 || spawn != 1) ||
+		(mismatch != 0 || mismatch != 1) ||
+		(numTargets < 1 || numTargets > 255) ||
+		(stage < 0 || stage > 25 && stage != 99)) {
+		return false;
+	}
+
 	return {
 		seed: seed,
 		stage: stage,
@@ -568,10 +575,10 @@ function initializeDatabase() {
 	firebase.initializeApp(firebaseConfig);
 
 	db = firebase.database().ref();
-	db.on("value", function(snapshot) {
-		var data = snapshot.val();
-		document.querySelector('#counter').value = data.randomize_counter
-	});
+	// db.on("value", function(snapshot) {
+	// 	var data = snapshot.val();
+	// 	document.querySelector('#counter').value = data.randomize_counter
+	// });
 }
 
 /*
@@ -776,8 +783,7 @@ const bounds = [
 	{x1: -110, y1: -100,  x2: 180, y2: 150  }, // 04 PEACH
 	{x1: -150, y1: -90,   x2: 130, y2: 170  }, // 05 YOSHI
 	{x1: -190, y1: 0,     x2: 190, y2: 200  }, // 06 DK
-//	{x1: -160, y1: -130,  x2: 170, y2: 150  }, // 07 CFALCON
-{x1: -160, y1: -130,  x2: 50, y2: 100  }, // 07 CFALCON
+	{x1: -160, y1: -130,  x2: 170, y2: 150  }, // 07 CFALCON
 	{x1: -90,  y1: -20,   x2: 90,  y2: 110  }, // 08 GANONDORF
 	{x1: -140, y1: -70,   x2: 110, y2: 130  }, // 09 FALCO
 	{x1: -150, y1: -150,  x2: 150, y2: 150  }, // 10 FOX
