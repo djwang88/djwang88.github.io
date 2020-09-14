@@ -490,10 +490,10 @@ function decodeRandomizerId(id) {
 		var stage = parseInt(options.slice(6));
 	}
 
-	if ((spawn != 0 || spawn != 1) ||
-		(mismatch != 0 || mismatch != 1) ||
+	if ((spawn != 0 && spawn != 1) ||
+		(mismatch != 0 && mismatch != 1) ||
 		(numTargets < 1 || numTargets > 255) ||
-		(stage < 0 || stage > 25 && stage != 99)) {
+		((stage < DRMARIO || stage > SHEIK) && stage != ALL)) {
 		return false;
 	}
 
@@ -542,24 +542,28 @@ function loadCode() {
 	var id = idBox.value;
 	var decoded = decodeRandomizerId(id);
 
-	stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
-	var advanced =
-		decoded.spawn == 1 ||
-		decoded.mismatch == 1 ||
-		(decoded.stage == SHEIK && decoded.numTargets != 3) ||
-		(decoded.stage != SHEIK && decoded.numTargets != 10);
-	if (advanced) {
-		numTargetsBox.value = decoded.numTargets.toString();
-		spawnBox.checked = (decoded.spawn == 1);
-		characterRandomizerCheckbox.checked = (decoded.mismatch == 1);
-	} else {
-		numTargetsBox.value = (decoded.stage == SHEIK ? "3" : "10");
-		spawnBox.checked = false;
-		characterRandomizerCheckbox.checked = false;
-	}
-	onChangeStage();
+	if (decoded) {
+		stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
+		var advanced =
+			decoded.spawn == 1 ||
+			decoded.mismatch == 1 ||
+			(decoded.stage == SHEIK && decoded.numTargets != 3) ||
+			(decoded.stage != SHEIK && decoded.numTargets != 10);
+		if (advanced) {
+			numTargetsBox.value = decoded.numTargets.toString();
+			spawnBox.checked = (decoded.spawn == 1);
+			characterRandomizerCheckbox.checked = (decoded.mismatch == 1);
+		} else {
+			numTargetsBox.value = (decoded.stage == SHEIK ? "3" : "10");
+			spawnBox.checked = false;
+			characterRandomizerCheckbox.checked = false;
+		}
+		onChangeStage();
 
-	randomize(decoded.seed);
+		randomize(decoded.seed);
+	} else {
+		resultBox.value = "The randomizer ID entered is invalid."
+	}
 }
 
 function initializeDatabase() {
