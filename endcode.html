@@ -2,7 +2,7 @@
     <head>
         <style>
             .codeArea {
-                height: 200px;
+                height: 100px;
             }
 
             .button {
@@ -20,9 +20,9 @@
         </style>
     </head>
     <body>
-        <h1>SSBM Target Test Ends With X Targets Left</h1>
+        <h1>SSBM Target Counter Starts With X Targets</h1>
         <div style="margin-bottom: 20px">
-            * Generates a Gecko code to end Target Test when there are a specified number of targets left<br>
+            * Generates a Gecko code to start Target Test with a specified number of targets on the counter<br>
         </div>
         <div>
             <label for="num-targets">Number of targets: </label>
@@ -33,12 +33,12 @@
         </div>
         <div style="margin-top: 15px">
             <label for="result"><b>Gecko code:</b></label><br>
-            <textarea id="result" class="codeArea"></textarea>
+            <!-- <textarea id="result" class="codeArea"></textarea> -->
+            <input id="result" readonly="readonly">
             <div style="margin-top: 5px"><button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button></div>
         </div>
         
         <p>
-            * Game ends when there are X targets remaining. During normal behavior, the game ends when there are 0 targets remaining.<br>
             _______________________________________________________________________________<br>
             Designed and built by <b>djwang88</b><br>
         </p>
