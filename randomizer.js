@@ -1,6 +1,6 @@
 /*
  * Randomizer developed by djwang88
- * Current version: 0.6
+ * Current version: 1.0
  * ---------
  * CHANGELOG
  * ---------
@@ -29,6 +29,7 @@
  * [2020-09-09] Fixed Kirby spawn (5)
  * [2020-09-09] Randomizer ID feature (version 0.6)
  * [2020-09-14] Validation for randomizer ID
+ * [2020-09-15] First official release (version 1.0)
  */
 
 includeJs("seedrandom.js");
@@ -93,7 +94,7 @@ function randomize(seed) {
 			if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 			if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
 		}
-		db.update(updateObject);
+		//db.update(updateObject);
 	}
 }
 
@@ -413,11 +414,21 @@ function onChangeStage() {
 function showOptions() {
 	optionsDiv.style.display = "block";
 	optionsButton.style.display = "none";
+	showHideNote();
 }
 
 function hideOptions() {
 	optionsDiv.style.display = "none";
 	optionsButton.style.display = "block";
+	showHideNote();
+}
+
+function showHideNote() {
+	if (isMismatch()) {
+		characterRandomizerNote.style.display = "block";
+	} else {
+		characterRandomizerNote.style.display = "none";
+	}
 }
 
 function optionsActive() {

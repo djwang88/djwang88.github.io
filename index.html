@@ -87,7 +87,7 @@
                             <input id="spawn" type="checkbox">Randomize spawn location
                         </div>
                         <div id="character-randomizer-checkbox-div">
-                            <input id="character-randomizer-checkbox" type="checkbox">Randomize character mappings (mismatch)
+                            <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideNote()">Randomize stage mismatch
                         </div>
                         <div id="seed-div" style="margin-top: 8px">
                             <label for="randomizer-id">ID:</label>
@@ -95,15 +95,13 @@
                             <button id="load" onclick="loadCode()">Load Code</button>
                         </div>
                         <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
+                        <div id="character-randomizer-note" style="display: none; margin-top: 30px;">
+                            <b>NOTE: </b>Because target bounds and spawns are designed with each <br>stage's default character in mind, randomizing stage mismatch may <br>result in unwinnable character & stage combinations or other issues.
+                        </div>
                     </div>
                 </td>
             </tr>
         </table>
-        <p id="character-randomizer-note" style="color: red; display: none;">
-            <span>
-                Because target bounds are designed with the stage's default character in mind, it's possible <br>to generate unwinnable character & stage combinations.
-            </span>
-        </p>
         <br>
         <div>
             <b>Usage Notes:</b>
@@ -116,7 +114,7 @@
             <ul>
                 <li><b>Number of targets</b> places a specified number of targets on the stage (between 1 and 255)</li>
                 <li><b>Randomize spawn location</b> chooses from a set of fixed spawn points</li>
-                <li><b>Randomize character mappings</b> maps every character to a random stage (mismatch)</li>
+                <li><b>Randomize stage mismatch</b> maps every character to a random stage</li>
                 <li>Copy the randomizer <b>ID</b> and use <b>load code</b> to swap randomizer stages</li>
                 <li>For long-term archival, it is recommended to <b>copy and save the entire code</b></li>
             </ul>
