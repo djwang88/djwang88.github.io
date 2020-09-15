@@ -28,6 +28,7 @@
  * [2020-09-09] Adjusted Captain Falcon bounds (increased y2)
  * [2020-09-09] Fixed Kirby spawn (5)
  * [2020-09-09] Randomizer ID feature (version 0.6)
+ * [2020-09-14] Validation for randomizer ID
  */
 
 includeJs("seedrandom.js");
@@ -479,6 +480,10 @@ function encodeRandomizerId(seed, stage, numTargets, spawn, mismatch) {
 }
 
 function decodeRandomizerId(id) {
+	if (!isAlphaNumeric(id)) {
+		return false;
+	}
+
 	var version = base62.decode(id.slice(0, 1));
 	if (version == 1) {
 		var options = base62.decode(id.slice(1, 5)).toString();
@@ -504,6 +509,18 @@ function decodeRandomizerId(id) {
 		spawn: spawn,
 		mismatch: mismatch,
 	}
+}
+
+function isAlphaNumeric(id) {
+	for (let i = 0; i < id.length; i++) {
+		var char = id.charCodeAt(i);
+		if (!(char > 47 && char < 58) &&
+			!(char > 64 && char < 91) &&
+			!(char > 96 && char < 123)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /*
@@ -562,7 +579,7 @@ function loadCode() {
 
 		randomize(decoded.seed);
 	} else {
-		resultBox.value = "The randomizer ID entered is invalid."
+		resultBox.value = "Invalid randomizer ID."
 	}
 }
 
