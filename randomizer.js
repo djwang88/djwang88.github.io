@@ -29,6 +29,7 @@
  * [2020-09-09] Fixed Kirby spawn (5)
  * [2020-09-09] Randomizer ID feature (version 0.6)
  * [2020-09-14] Validation for randomizer ID
+ * [2020-09-15] Adjusted Peach spawn (5), Yoshi spawn (3)
  * [2020-09-15] First official release (version 1.0)
  */
 
@@ -1131,12 +1132,12 @@ spawns[PEACH] = [
 	[-35, -65], // 2
 	[75, 35], // 3
 	[90, 115], // 4
-	[82.5, -60], // 5
+	[128, -60], // 5
 ];
 spawns[YOSHI] = [
 	[-40, 35],
 	[-137.5, 35], // 2
-	[50, 35], // 3			// move right?
+	[55, 35], // 3
 	[-55, 150], // 4
 	[115, -5], // 5
 	[15, -15], // 6
@@ -1189,7 +1190,7 @@ spawns[NESS] = [
 spawns[ICECLIMBERS] = [
 	[0, 0],
 	[-50, 70], // 2
-	[-20, 370], // 3	// maybe -25?
+	[-20, 370], // 3
 	[62.5, 455], // 4
 ];
 spawns[KIRBY] = [
