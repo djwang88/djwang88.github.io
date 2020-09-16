@@ -95,7 +95,7 @@ function randomize(seed) {
 			if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 			if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
 		}
-		//db.update(updateObject);
+		db.update(updateObject);
 	}
 }
 
