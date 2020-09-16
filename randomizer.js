@@ -95,7 +95,7 @@ function randomize(seed) {
 			if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 			if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
 		}
-		db.update(updateObject);
+		//db.update(updateObject);
 	}
 }
 
@@ -1016,7 +1016,7 @@ exclusions[YLINK] = [
 	[ [-55, 120], [-5, 160] ], // Boundary 7
 	[ [10, 120], [40, 130] ], // Boundary 8
 	[ [70, 140], [70, 75], [80, 70], [80, 140] ], // Boundary 9
-	[ [80, 65], [70, 70], [70, 30], [95, 5], [120, 30], [120, 210], [100, 210], [100, 170], [70, 170], [70, 160], [100, 160],
+	[ [80, 65], [70, 70], [70, 30], [95, 5], [120, 30], [120, 210], [100, 210], [100, 170], [60, 170], [60, 160], [100, 160],
 		[100, 50], [80, 50] ], // Boundary 10
 ];
 exclusions[PICHU] = [
