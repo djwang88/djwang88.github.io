@@ -90,9 +90,9 @@
                             <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideNote()">Randomize character mismatch
                         </div>
                         <div id="seed-div" style="margin-top: 8px">
-                            <label for="randomizer-id">ID:</label>
+                            <label for="randomizer-id">Seed:</label>
                             <input id="randomizer-id" style="width: 125px">
-                            <button id="load" onclick="loadCode()">Load Code</button>
+                            <button id="load" onclick="loadCode()">Load</button>
                         </div>
                         <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
                         <div id="character-randomizer-note" style="display: none; margin-top: 30px;">
@@ -103,7 +103,7 @@
             </tr>
         </table>
         <div id="gecko-limitation-note" style="color: red; display: none; margin-top: 10px;">
-            <b>WARNING: </b>Because Gecko codes are limited to a certain length, depending on how many other codes are <br>enabled, generating an all-stages code with more than 20 targets may result in the code not working at all.
+            <b>WARNING: </b>Because Gecko codes are limited to a certain length, depending on how many other codes are <br>enabled, generating an all-stages code with too many targets may result in the code not working at all.
         </div>
         <br>
         <div>
@@ -118,8 +118,8 @@
                 <li><b>Number of targets</b> places a specified number of targets on the stage (between 1 and 255)</li>
                 <li><b>Randomize spawn location</b> chooses from a set of fixed spawn points</li>
                 <li><b>Randomize character mismatch</b> maps every character to a random stage</li>
-                <li>Copy the randomizer <b>ID</b> and use <b>load code</b> to swap randomizer stages</li>
-                <li>For long-term archival, it is recommended to <b>copy and save the entire code</b></li>
+                <li>Copy the randomizer <b>Seed</b> and use <b>Load</b> to share randomizer stages</li>
+                <li>For long-term archival, it is recommended to copy and save the entire code</li>
             </ul>
             <b>FAQ:</b>
             <ul>
