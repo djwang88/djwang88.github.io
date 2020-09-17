@@ -31,6 +31,8 @@
  * [2020-09-14] Validation for randomizer ID
  * [2020-09-15] Adjusted Peach spawn (5), Yoshi spawn (3)
  * [2020-09-15] First official release (version 1.0)
+ * [2020-09-16] Fixed Young Link exclusion (Boundary 10)
+ * [2020-09-16] Added warning for Gecko code limits
  */
 
 includeJs("seedrandom.js");
@@ -47,6 +49,7 @@ var characterRandomizerCheckboxDiv = document.querySelector('#character-randomiz
 var characterRandomizerCheckbox = document.querySelector('#character-randomizer-checkbox');
 var characterRandomizerNote = document.querySelector('#character-randomizer-note');
 var idBox = document.querySelector('#randomizer-id');
+var geckoNote = document.querySelector('#gecko-limitation-note');
 
 var getRandom;
 var db;
@@ -67,36 +70,39 @@ function randomize(seed) {
 
 	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
 		resultBox.value = "Number of targets must be a number between 1 and 255."
-	} else {
-		if (stage == ALL) {
-			var code = getAllStagesCode(spawn);
-			if (optionsActive() && characterRandomizerCheckbox.checked) {
-				code += '\n';
-				code += getCharacterRandomizerCode();
-			}
-			resultBox.value = code;
-		} else if (stage == RANDOM) {
-			stage = Math.floor(getRandom() * stageHooks.length);
-			resultBox.value = getCode(stage, spawn);
-			stageBox.value = stage.toString();
-		} else {
-			resultBox.value = getCode(stage, spawn);
-		}
-
-		idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
-
-		var updateObject = {};
-		if (load) {
-			updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
-		} else {
-			updateObject["randomize_counter"] = firebase.database.ServerValue.increment(1);
-			updateObject["stage_counter_" + stage] = firebase.database.ServerValue.increment(1);
-			updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
-			if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
-			if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
-		}
-		db.update(updateObject);
+		return;
 	}
+
+	showHideGeckoNote();
+
+	if (stage == ALL) {
+		var code = getAllStagesCode(spawn);
+		if (optionsActive() && characterRandomizerCheckbox.checked) {
+			code += '\n';
+			code += getCharacterRandomizerCode();
+		}
+		resultBox.value = code;
+	} else if (stage == RANDOM) {
+		stage = Math.floor(getRandom() * stageHooks.length);
+		resultBox.value = getCode(stage, spawn);
+		stageBox.value = stage.toString();
+	} else {
+		resultBox.value = getCode(stage, spawn);
+	}
+
+	idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
+
+	var updateObject = {};
+	if (load) {
+		updateObject["load_counter"] = firebase.database.ServerValue.increment(1);
+	} else {
+		updateObject["randomize_counter"] = firebase.database.ServerValue.increment(1);
+		updateObject["stage_counter_" + stage] = firebase.database.ServerValue.increment(1);
+		updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
+		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
+		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
+	}
+	db.update(updateObject);
 }
 
 function getCode(stage, spawn) {
@@ -198,12 +204,23 @@ function getModularCode(stages, spawn, numTargets) {
 
 function getAllStagesCode(spawn) {
 	var numTargets = getNumTargets();
-	// TODO: warning if more than 20 targets
 	var stages = [];
 	for (let i = 0; i < 26; i++) {
 		stages.push(i);
 	}
 	return getModularCode(stages, spawn, numTargets);
+}
+
+function showHideGeckoNote() {
+	geckoNote.style.display = "none";
+
+	var stage = getStage();
+	if (stage == ALL) {
+		var numTargets = getNumTargets();
+		if (numTargets > 20) {
+			geckoNote.style.display = "block";
+		}
+	}
 }
 
 function getCharacterRandomizerCode() {
