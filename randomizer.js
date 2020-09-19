@@ -46,9 +46,9 @@ var numTargetsBox = document.querySelector('#num-targets');
 var numTargetsDiv = document.querySelector('#num-targets-div');
 var optionsButton = document.querySelector('#show-options');
 var optionsDiv = document.querySelector('#options-div');
-var characterRandomizerCheckboxDiv = document.querySelector('#character-randomizer-checkbox-div');
-var characterRandomizerCheckbox = document.querySelector('#character-randomizer-checkbox');
-var characterRandomizerNote = document.querySelector('#character-randomizer-note');
+var mismatchCheckboxDiv = document.querySelector('#mismatch-checkbox-div');
+var mismatchCheckbox = document.querySelector('#mismatch-checkbox');
+var mismatchNote = document.querySelector('#mismatch-note');
 var idBox = document.querySelector('#randomizer-id');
 var geckoNote = document.querySelector('#gecko-limitation-note');
 
@@ -78,9 +78,9 @@ function randomize(seed) {
 
 	if (stage == ALL) {
 		var code = getAllStagesCode(spawn);
-		if (optionsActive() && characterRandomizerCheckbox.checked) {
+		if (optionsActive() && mismatchCheckbox.checked) {
 			code += '\n';
-			code += getCharacterRandomizerCode();
+			code += getMismatchCode();
 		}
 		resultBox.value = code;
 	} else if (stage == RANDOM) {
@@ -224,8 +224,8 @@ function showHideGeckoNote() {
 	}
 }
 
-function getCharacterRandomizerCode() {
-	var result = characterRandomizerStart;
+function getMismatchCode() {
+	var result = mismatchStart;
 	var randomized = [];
 
 	// subtract one for sheik's stage
@@ -259,7 +259,7 @@ function getCharacterRandomizerCode() {
 		}
 	}
 	result += "000000\n";
-	result += characterRandomizerEnd;
+	result += mismatchEnd;
 	return result;
 }
 
@@ -423,10 +423,10 @@ function copy() {
 function onChangeStage() {
 	var stage = getStage();
 	if (stage == ALL) {
-		characterRandomizerCheckboxDiv.style.display = "block";
+		mismatchCheckboxDiv.style.display = "block";
 	} else {
-		characterRandomizerCheckboxDiv.style.display = "none";
-		characterRandomizerCheckbox.checked = false;
+		mismatchCheckboxDiv.style.display = "none";
+		mismatchCheckbox.checked = false;
 	}
 }
 
@@ -444,9 +444,9 @@ function hideOptions() {
 
 function showHideNote() {
 	if (isMismatch()) {
-		characterRandomizerNote.style.display = "block";
+		mismatchNote.style.display = "block";
 	} else {
-		characterRandomizerNote.style.display = "none";
+		mismatchNote.style.display = "none";
 	}
 }
 
@@ -493,7 +493,7 @@ function isSpawn() {
 }
 
 function isMismatch() {
-	if (optionsActive() && characterRandomizerCheckbox.checked) {
+	if (optionsActive() && mismatchCheckbox.checked) {
 		return true;
 	}
 	return false;
@@ -599,11 +599,11 @@ function loadCode() {
 		if (advanced) {
 			numTargetsBox.value = decoded.numTargets.toString();
 			spawnBox.checked = (decoded.spawn == 1);
-			characterRandomizerCheckbox.checked = (decoded.mismatch == 1);
+			mismatchCheckbox.checked = (decoded.mismatch == 1);
 		} else {
 			numTargetsBox.value = (decoded.stage == SHEIK ? "3" : "10");
 			spawnBox.checked = false;
-			characterRandomizerCheckbox.checked = false;
+			mismatchCheckbox.checked = false;
 		}
 		onChangeStage();
 
@@ -819,8 +819,8 @@ const modularNop = "60000000";
 const modularZero = "00000000";
 const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
-const characterRandomizerStart = "C21B659C 00000008\n48000009 4800002C\n4E800021 ";
-const characterRandomizerEnd = "7CA802A6 7C6520AE\n60000000 00000000";
+const mismatchStart = "C21B659C 00000008\n48000009 4800002C\n4E800021 ";
+const mismatchEnd = "7CA802A6 7C6520AE\n60000000 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification

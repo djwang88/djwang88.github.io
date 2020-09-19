@@ -86,8 +86,8 @@
                         <div style="margin-top: 8px">
                             <input id="spawn" type="checkbox">Randomize spawn location
                         </div>
-                        <div id="character-randomizer-checkbox-div">
-                            <input id="character-randomizer-checkbox" type="checkbox" onclick="showHideNote()">Randomize character mismatch
+                        <div id="mismatch-checkbox-div">
+                            <input id="mismatch-checkbox" type="checkbox" onclick="showHideNote()">Randomize character mismatch
                         </div>
                         <div id="seed-div" style="margin-top: 8px">
                             <label for="randomizer-id">Seed:</label>
@@ -95,7 +95,7 @@
                             <button id="load" onclick="loadCode()">Load</button>
                         </div>
                         <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
-                        <div id="character-randomizer-note" style="display: none; margin-top: 30px;">
+                        <div id="mismatch-note" style="display: none; margin-top: 30px;">
                             <b>NOTE: </b>Because target bounds and spawns are designed with each <br>stage's default character in mind, randomizing character mismatch may <br>result in unwinnable character & stage combinations or other issues.
                         </div>
                     </div>
@@ -124,7 +124,8 @@
             <b>FAQ:</b>
             <ul>
                 <li>Target positions are <b>fixed</b> and will not change until a new code is generated and enabled</li>
-                <li>If the code is enabled but doesn't have any effect, it's possible that there are too many other Gecko <br>codes enabled. This is because Gecko codes can only take up a certain amount of space in memory.</li>
+                <li>If the code is enabled but doesn't have any effect, it's possible that there are too many other Gecko <br>codes enabled (due to codes having a limited amount of space in memory)</li>
+                <li>It is possible to use the randomizer with Faster Melee or Slippi, but a beta version of Dolphin is <br>highly recommended for its Gecko code adding support</li>
             </ul>
         </div>
         <p>
