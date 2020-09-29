@@ -34,6 +34,7 @@
  * [2020-09-16] Fixed Young Link exclusion (Boundary 10)
  * [2020-09-16] Added warning for Gecko code limits
  * [2020-09-18] New version of mismatch randomizer code to only affect target stages
+ * [2020-09-29] Target counter feature (version 1.1)
  */
 
 includeJs("seedrandom.js");
@@ -76,21 +77,28 @@ function randomize(seed) {
 
 	showHideGeckoNote();
 
+	var code = "";
 	if (stage == ALL) {
-		var code = getAllStagesCode(spawn);
+		code = getAllStagesCode(spawn);
 		if (optionsActive() && mismatchCheckbox.checked) {
 			code += '\n';
 			code += getMismatchCode();
 		}
-		resultBox.value = code;
+		
 	} else if (stage == RANDOM) {
 		stage = Math.floor(getRandom() * stageHooks.length);
-		resultBox.value = getCode(stage, spawn);
 		stageBox.value = stage.toString();
+		code = getCode(stage, spawn);
 	} else {
-		resultBox.value = getCode(stage, spawn);
+		code = getCode(stage, spawn);
 	}
 
+	if (numTargets > 15) {
+		code += '\n';
+		code += targetCounterCode;
+	}
+
+	resultBox.value = code;
 	idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
 
 	var updateObject = {};
@@ -218,7 +226,7 @@ function showHideGeckoNote() {
 	var stage = getStage();
 	if (stage == ALL) {
 		var numTargets = getNumTargets();
-		if (numTargets > 20) {
+		if (numTargets > 15) {
 			geckoNote.style.display = "block";
 		}
 	}
@@ -239,7 +247,7 @@ function getMismatchCode() {
 	var randomizedCounter = 0;
 	for (let i = 0; i <= 0x20; i++) {
 		if (i == 0x0E || // ice climbers
-			i == 0x13 || // jigglypuff
+			i == 0x13 || // sheik
 			i == 0x1A || // master hand
 			i == 0x1B || // wireframe male
 			i == 0x1C || // wireframe female
@@ -821,6 +829,8 @@ const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9
 
 const mismatchStart = "C21B659C 00000008\n48000009 4800002C\n4E800021 ";
 const mismatchEnd = "7CA802A6 7C6520AE\n60000000 00000000";
+
+const targetCounterCode = "C218252C 00000002\n2C000021 2C80000F\n4C003102 00000000\n042FA188 38c00002\nC22F91A8 0000000D\n80630000 2C030010\n39252EA0 80890000\n38000005 7D000026\n7C0903A6 55082EF6\n3C003F60 90040044\n90040058 80040014\n510006F6 80C40038\n90040014 3CC60017\n90C40050 84890004\n4200FFE4 3C00802F\n6000A2D0 7C0803A6\n4E800021 3C60804A\n60000000 00000000\nC22F91D4 00000003\n80010014 2C00000F\n40810008 38000001\n60000000 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
