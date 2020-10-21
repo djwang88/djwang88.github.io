@@ -54,13 +54,13 @@ var mismatchNote = document.querySelector('#mismatch-note');
 var idBox = document.querySelector('#randomizer-id');
 var geckoNote = document.querySelector('#gecko-limitation-note');
 
+var mismatchMappingBox = document.querySelector('#mismatch-mappings');
+
 var getRandom;
 var db;
 
 function randomize(seed, schema) {
 	if (!schema) schema = 2;
-	console.log(characterIds[NESS]);
-	console.log(characterIds[PIKACHU]);
 
 	var load = true;
 	if (!seed) {
@@ -98,6 +98,13 @@ function randomize(seed, schema) {
 				code = getAllStagesCode(spawn, schema, mismatchObject['map']);
 				code += '\n';
 				code += mismatchObject['code'];
+mismatchMappingBox.value =
+	"STAGE          CHARACTER\n" +
+	"Peach      <=> " + stageNames[mismatchObject['map'][PEACH]] + "\n" +
+	"Yoshi      <=> " + stageNames[mismatchObject['map'][YOSHI]] + "\n" +
+	"Fox        <=> " + stageNames[mismatchObject['map'][FOX]] + "\n" +
+	"Zelda      <=> " + stageNames[mismatchObject['map'][ZELDA]] + "\n" +
+	"Young Link <=> " + stageNames[mismatchObject['map'][YLINK]] + "\n";
 			} else {
 				code = getAllStagesCode(spawn);
 			}
@@ -128,7 +135,7 @@ function randomize(seed, schema) {
 		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
 	}
-	db.update(updateObject);
+	//db.update(updateObject);
 }
 
 function getCode(stage, spawn) {
@@ -801,6 +808,34 @@ const characterIds = [
 	0x09, // MARTH
 	0x17, // ROY
 ];
+
+const stageNames = [
+	"Dr. Mario",
+	"Mario",
+	"Luigi",
+	"Bowser",
+	"Peach",
+	"Yoshi",
+	"Donkey Kong",
+	"Captain Falcon",
+	"Ganondorf",
+	"Falco",
+	"Fox",
+	"Ness",
+	"Ice Climbers",
+	"Kirby",
+	"Samus",
+	"Zelda",
+	"Link",
+	"Young Link",
+	"Pichu",
+	"Pikachu",
+	"Jigglypuff",
+	"Mewtwo",
+	"Mr. Game & Watch",
+	"Marth",
+	"Roy",
+]
 
 /*
  * Stage hooks (mostly) found by djwang88
