@@ -104,7 +104,8 @@ mismatchMappingBox.value =
 	"Yoshi      <=> " + stageNames[mismatchObject['map'][YOSHI]] + "\n" +
 	"Fox        <=> " + stageNames[mismatchObject['map'][FOX]] + "\n" +
 	"Zelda      <=> " + stageNames[mismatchObject['map'][ZELDA]] + "\n" +
-	"Young Link <=> " + stageNames[mismatchObject['map'][YLINK]] + "\n";
+	"Young Link <=> " + stageNames[mismatchObject['map'][YLINK]] + "\n" + 
+	"Jigglypuff <=> " + stageNames[mismatchObject['map'][JIGGLYPUFF]];
 			} else {
 				code = getAllStagesCode(spawn);
 			}
