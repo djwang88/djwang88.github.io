@@ -234,6 +234,8 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 							stageData.push(coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]));
 						} else {
 							// force spawn to be on lip of pit
+							stageData.splice(-1, 1);
+							stageData.push(getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, numTargets, stage));
 							stageData.push(coordsToHalfWords(spawns[YLINK][1][0], spawns[YLINK][1][1]));
 						}
 						break;
@@ -840,7 +842,7 @@ const stageNames = [
 	"Mr. Game & Watch",
 	"Marth",
 	"Roy",
-]
+];
 
 /*
  * Stage hooks (mostly) found by djwang88
