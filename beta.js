@@ -216,7 +216,20 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 					case MRGAMEWATCH:
 					case MARTH:
 					case ROY:
-						stageData.push(coordsToHalfWords(spawns[YLINK][1][0], spawns[YLINK][1][1]));
+						if (spawn) {
+							// anything but pit spawn
+							var index = Math.floor((getRandom() * (spawns[stage].length - 1)) + 1);
+							stageData.push(coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]));
+						} else {
+							// force spawn to be on lip of pit
+							stageData.push(coordsToHalfWords(spawns[YLINK][1][0], spawns[YLINK][1][1]));
+						}
+						break;
+					default:
+						// normal behavior
+						if (spawn) {
+							stageData.push(getSpawnHalfWords(stage));
+						}
 						break;
 				}
 			} else if (spawn) {
