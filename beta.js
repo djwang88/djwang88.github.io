@@ -85,7 +85,6 @@ function randomize(seed, schema) {
 	var code = "";
 	if (stage == ALL) {
 		if (schema == 1) {
-			// legacy behavior
 			code = getAllStagesCode(spawn);
 			if (mismatch) {
 				var mismatchObject = getMismatchCode();
@@ -129,7 +128,7 @@ function randomize(seed, schema) {
 		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
 	}
-	//db.update(updateObject);
+	db.update(updateObject);
 }
 
 function getCode(stage, spawn) {
@@ -194,10 +193,36 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 	for (let i = 0; i < stages.length; i++) {
 		var stage = stages[i];
 		stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
-		if (spawn) {
-			stageData.push(getSpawnHalfWords(stage));
+		if (schema == 1) {
+			if (spawn) {
+				stageData.push(getSpawnHalfWords(stage));
+			}
+		} else {
+			if (mismatchMap && stage == YLINK) {
+				var character = mismatchMap[stage];
+				switch (character) {
+					case DRMARIO:
+					case LUIGI:
+					case BOWSER:
+					case YOSHI:
+					case DK:
+					case GANONDORF:
+					case FALCO:
+					case FOX:
+					case NESS:
+					case ICECLIMBERS:
+					case KIRBY:
+					case PIKACHU:
+					case MRGAMEWATCH:
+					case MARTH:
+					case ROY:
+						stageData.push(coordsToHalfWords(spawns[YLINK][1][0], spawns[YLINK][1][1]));
+						break;
+				}
+			} else if (spawn) {
+				stageData.push(getSpawnHalfWords(stage));
+			}
 		}
-		// TODO force spawn rules for mismatch
 
 		for (let i = 0; i < numTargets; i++) {
 			var coords = getValidCoordinates(stage, schema, mismatchMap);
@@ -346,6 +371,17 @@ function coordinatesValid(x, y, stage, schema, mismatchMap) {
 		}
 		return true;
 	} else {
+		if (mismatchMap) {
+			var character = mismatchMap[stage];
+			if (mismatchExclusions[stage] && mismatchExclusions[stage][character]) {
+				for (let i = 0; i < mismatchExclusions[stage][character].length; i++) {
+					var vs = mismatchExclusions[stage][character][i];
+					if (withinBounds(x, y, vs)) {
+						return false;
+					}
+				}
+			}
+		}
 		if (exceptions[stage] != null) {
 			for (let j = 0; j < exceptions[stage].length; j++) {
 				var ex = exceptions[stage][j];
@@ -359,17 +395,6 @@ function coordinatesValid(x, y, stage, schema, mismatchMap) {
 				var vs = exclusions[stage][i];
 				if (withinBounds(x, y, vs)) {
 					return false;
-				}
-			}
-		}
-		if (mismatchMap) {
-			var character = mismatchMap[stage];
-			if (mismatchExclusions[stage] && mismatchExclusions[stage][character]) {
-				for (let i = 0; i < mismatchExclusions[stage][character].length; i++) {
-					var vs = mismatchExclusions[stage][character][i];
-					if (withinBounds(x, y, vs)) {
-						return false;
-					}
 				}
 			}
 		}
