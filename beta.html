@@ -1,0 +1,145 @@
+<html>
+    <head>
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+        <title>SSBM Target Test Randomizer (beta)</title>
+        <style>
+            body {
+                margin-left: 10px;
+            }
+
+            .button {
+                font-size: 25px;
+            }
+            
+            .copyButton {
+                width: 160px;
+            }
+
+            .codeArea {
+                height: 300px;
+                width: 160px;
+            }
+
+            td {
+                vertical-align: top;
+            }
+
+            ul {
+                margin-top: 0px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style="margin-bottom: 12px">SSBM Target Test Randomizer</h1>
+        <table style="margin-bottom: 5px">
+            <tr>
+                <td style="min-width: 170px">
+                    <div id="gecko">
+                        <label for="result"><b>Gecko code:</b></label><br>
+                        <textarea readonly="readonly" id="result" class="codeArea"></textarea>
+                        <div style="margin-top: 5px"><button id="copy" onclick="copy()" class="copyButton">Copy code to clipboard</button></div>
+                    </div>
+                </td>
+                <td style="min-width: 210px">
+                    <div id="chooser">
+                        <label for="stage"><b>Stage: </b></label>
+                        <select id="stage" onchange="onChangeStage()">
+                            <option value="all">(All Stages)</option>
+                            <option value="random">(Random Stage)</option>
+                            <option value="0">Dr. Mario</option>
+                            <option value="1">Mario</option>
+                            <option value="2">Luigi</option>
+                            <option value="3">Bowser</option>
+                            <option value="4">Peach</option>
+                            <option value="5">Yoshi</option>
+                            <option value="6">Donkey Kong</option>
+                            <option value="7">Captain Falcon</option>
+                            <option value="8">Ganondorf</option>
+                            <option value="9">Falco</option>
+                            <option value="10">Fox</option>
+                            <option value="11">Ness</option>
+                            <option value="12">Ice Climbers</option>
+                            <option value="13">Kirby</option>
+                            <option value="14">Samus</option>
+                            <option value="15">Zelda</option>
+                            <option value="16">Link</option>
+                            <option value="17">Young Link</option>
+                            <option value="18">Pichu</option>
+                            <option value="19">Pikachu</option>
+                            <option value="20">Jigglypuff</option>
+                            <option value="21">Mewtwo</option>
+                            <option value="22">Mr. Game & Watch</option>
+                            <option value="23">Marth</option>
+                            <option value="24">Roy</option>
+                            <option value="25">Sheik (Seak)</option>
+                        </select>
+                        <p><button id="randomize" onclick="randomize()" class="button">RANDOMIZE</button></p>
+                        <div id="show-options">
+                            <button onclick="showOptions()">Advanced Options</button>
+                        </div>
+                    </div>
+                    <div id="options-div" style="display: none">
+                        <div id="num-targets-div" style="margin-top: 10px">
+                            <label for="num-targets">Number of targets: </label>
+                            <input id="num-targets" style="width: 50px" value="10">
+                        </div>
+                        <div style="margin-top: 8px">
+                            <input id="spawn" type="checkbox">Randomize spawn location
+                        </div>
+                        <div id="mismatch-checkbox-div">
+                            <input id="mismatch-checkbox" type="checkbox" onclick="showHideNote()">Randomize character mismatch
+                        </div>
+                        <div id="seed-div" style="margin-top: 8px">
+                            <label for="randomizer-id">Seed:</label>
+                            <input id="randomizer-id" style="width: 125px">
+                            <button id="load" onclick="loadCode()">Load</button>
+                        </div>
+                        <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
+                        <div id="mismatch-note" style="display: none; margin-top: 30px;">
+                            <b>NOTE: </b>Because target bounds and spawns are designed with each <br>stage's default character in mind, randomizing character mismatch may <br>result in unwinnable character & stage combinations or other issues.
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div id="gecko-limitation-note" style="color: red; display: none; margin-top: 10px;">
+            <b>WARNING: </b>Because Gecko codes are limited to a certain length, depending on how many other codes are <br>enabled, generating an all-stages code with too many targets may result in the code not working at all.
+        </div>
+        <br>
+        <div>
+            <b>Usage Notes:</b>
+            <ul>
+                <li>Generates <b>random, fixed target positions</b>, with stage-specific exclusion rules to prevent collisions</li>
+                <li>Dynamically builds a Gecko code, which can be used in <a href="https://dolphin-emu.org/"><b>Dolphin Emulator</b></a> or Wii Homebrew</li>
+                <li>For help getting set up, check out the <a href="setupguide.html"><b>Visual Setup Guide</b></a></li>
+            </ul>
+            <b>Advanced Options:</b>
+            <ul>
+                <li><b>Number of targets</b> places a specified number of targets on the stage (between 1 and 255)</li>
+                <li><b>Randomize spawn location</b> chooses from a set of fixed spawn points</li>
+                <li><b>Randomize character mismatch</b> maps every character to a random stage</li>
+                <li>Copy the randomizer <b>Seed</b> and use <b>Load</b> to share randomizer stages</li>
+                <li>For long-term archival, it is recommended to copy and save the entire code</li>
+            </ul>
+            <b>FAQ/Troubleshooting:</b>
+            <ul>
+                <li>Target positions are <b>fixed</b> and will not change until a new code is generated and enabled</li>
+                <li>If the code is enabled but doesn't have any effect, it's possible that there are too many other Gecko <br>codes enabled (due to codes having a limited amount of space in memory)</li>
+                <li>It is possible to use the randomizer with Faster Melee or Slippi, but a beta version of Dolphin is <br>highly recommended for its Gecko code adding support</li>
+            </ul>
+        </div>
+        <p>
+            _______________________________________________________________________________<br>
+            Randomizer designed and built by <b>djwang88</b><br>
+            Stage & spawn mappings determined by <b>megaqwertification</b><br>
+            Gecko code developed by <b>Punkline</b><br>
+            Inspired by <b>megaqwertification</b>, <b>hotdogturtle</b>, and <b>LinksDarkArrows</b><br>
+            Playtesting and feature suggestions by the <b><a href="https://discord.gg/AfEaYaE">Smash Stadium Discord</a></b>
+        </p>
+        <!-- <input id="counter" type="hidden" value=""> -->
+    </body>
+</html>
+<script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-database.js"></script>
+<script src="beta.js"></script>
