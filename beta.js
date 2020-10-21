@@ -915,7 +915,8 @@ const bounds = [
 	{x1: -120, y1: 0,     x2: 120, y2: 500  }, // 12 ICECLIMBERS
 	{x1: -150, y1: -70,   x2: 130, y2: 180  }, // 13 KIRBY
 	{x1: -130, y1: -110,  x2: 130, y2: 130  }, // 14 SAMUS
-	{x1: -130, y1: -100,  x2: 115, y2: 115  }, // 15 ZELDA
+//	{x1: -130, y1: -100,  x2: 115, y2: 115  }, // 15 ZELDA
+{x1: -130, y1: 65,  x2: 115, y2: 115  }, // 15 ZELDA
 	{x1: -150, y1: -100,  x2: 120, y2: 100  }, // 16 LINK
 	{x1: -190, y1: -40,   x2: 120, y2: 210  }, // 17 YLINK
 	{x1: -160, y1: -80,   x2: 145, y2: 110  }, // 18 PICHU
@@ -1375,14 +1376,14 @@ spawns[SHEIK] = [
 ];
 
 /*
- * Mismatch exceptions by djwang88, consultation by chaos6
- * Map is stage to character
+ * Mismatch exceptions by djwang88 (with consultation by chaos6)
+ * Map is stage => character
  */
 
 mismatchExclusions = [];
 
 mismatchExclusions[PEACH] = [];
-mismatchExclusions[PEACH][DRMARIO] = [ // DIFFICULT
+mismatchExclusions[PEACH][DRMARIO] = [ // MEDIUM
 	[ [-110, 130], [30, 150] ],
 	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
 ];
@@ -1390,7 +1391,7 @@ mismatchExclusions[PEACH][BOWSER] = [
 	[ [-110, 130], [30, 150] ],
 	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
 ];
-mismatchExclusions[PEACH][DK] = [ // DIFFICULT
+mismatchExclusions[PEACH][DK] = [ // MEDIUM
 	[ [-110, 130], [30, 150] ],
 	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
 ];
@@ -1400,4 +1401,53 @@ mismatchExclusions[PEACH][GANONDORF] = [
 mismatchExclusions[PEACH][ICECLIMBERS] = [
 	[ [-110, 130], [30, 150] ],
 	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
+];
+
+mismatchExclusions[YOSHI] = [];
+mismatchExclusions[YOSHI][DRMARIO] = [ // MEDIUM
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+mismatchExclusions[YOSHI][BOWSER] = [
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+mismatchExclusions[YOSHI][DK] = [
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+mismatchExclusions[YOSHI][ICECLIMBERS] = [
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+
+mismatchExclusions[FOX] = [];
+mismatchExclusions[FOX][DRMARIO] = [
+	[ [-150, 117], [150, 150] ],
+];
+mismatchExclusions[FOX][BOWSER] = [
+	[ [-150, 117], [150, 150] ],
+];
+mismatchExclusions[FOX][DK] = [
+	[ [-150, 117], [150, 150] ],
+];
+mismatchExclusions[FOX][ICECLIMBERS] = [ // hard to get top
+	[ [-150, 117], [150, 150] ],
+];
+
+mismatchExclusions[ZELDA] = [];
+mismatchExclusions[ZELDA][BOWSER] = [ // DIFFICULT
+	[ [-130, 90], [115, 115] ],
+	[ [-20, 70], [20, 95] ],
+];
+mismatchExclusions[ZELDA][DK] = [
+	[ [-130, 90], [115, 115] ],
+	[ [-20, 85], [20, 90] ],
+];
+mismatchExclusions[ZELDA][GANONDORF] = [ // hard to get top-right
+	[ [-130, 75], [-110, 115] ],
+];
+mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
+	[ [-130, 90], [115, 115] ],
+	[ [-40, 70], [40, 95] ],
 ];
