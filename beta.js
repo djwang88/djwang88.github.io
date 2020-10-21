@@ -211,6 +211,7 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 					case DRMARIO:
 					case LUIGI:
 					case BOWSER:
+					case PEACH: // DIFFICULT
 					case YOSHI:
 					case DK:
 					case GANONDORF:
@@ -219,7 +220,10 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 					case NESS:
 					case ICECLIMBERS:
 					case KIRBY:
+					case LINK: // DIFFICULT
 					case PIKACHU:
+					case JIGGLYPUFF: // DIFFICULT
+					case MEWTWO: // DIFFICULT
 					case MRGAMEWATCH:
 					case MARTH:
 					case ROY:
@@ -312,14 +316,14 @@ function getMismatchCode() {
 	}
 	var randomizedCounter = 0;
 	for (let i = 0; i <= 0x20; i++) {
-		if (i == 0x0E || // ice climbers
-			i == 0x13 || // sheik
-			i == 0x1A || // master hand
-			i == 0x1B || // wireframe male
-			i == 0x1C || // wireframe female
-			i == 0x1D || // giga bowser
-			i == 0x1E || // crazy hand
-			i == 0x1F    // sandbag
+		if (i == 0x0E || // Ice Climbers
+			i == 0x13 || // Sheik
+			i == 0x1A || // Master Hand
+			i == 0x1B || // Wireframe Male
+			i == 0x1C || // Wireframe Female
+			i == 0x1D || // Giga Bowser
+			i == 0x1E || // Crazy Hand
+			i == 0x1F    // Sandbag
 			) {
 			code += "01";
 		} else {
@@ -993,7 +997,8 @@ const bounds = [
 	{x1: -190, y1: -40,   x2: 120, y2: 210  }, // 17 YLINK
 	{x1: -160, y1: -80,   x2: 145, y2: 110  }, // 18 PICHU
 	{x1: -130, y1: -90,   x2: 175, y2: 115  }, // 19 PIKACHU
-	{x1: -150, y1: -75,   x2: 130, y2: 90   }, // 20 JIGGLYPUFF
+//	{x1: -150, y1: -75,   x2: 130, y2: 90   }, // 20 JIGGLYPUFF
+{x1: -150, y1: -75,   x2: 130, y2: -30   }, // 20 JIGGLYPUFF
 	{x1: -120, y1: -120,  x2: 130, y2: 100  }, // 21 MEWTWO
 	{x1: -79,  y1: -29.5, x2: 76,  y2: 57.44}, // 22 MRGAMEWATCH
 	{x1: -150, y1: -80,   x2: 120, y2: 140  }, // 23 MARTH
@@ -1211,6 +1216,17 @@ exclusions[JIGGLYPUFF] = [
 		[120, -60], [100, -60], [100, -70], [130, -70], [130, 70] ], // Boundary 1
 	[ [-150, -75], [-140, -30] ], // Boundary 2
 	[ [70, -40], [90, -30] ], // Boundary 3
+
+
+
+
+
+
+
+
+
+
+	[ [-150, -75], [-50, -40] ],
 ];	
 exclusions[MEWTWO] = [
 	[ [-92.5, 42.5], [-77.5, 57.5], [-82.5, 62.5], [-97.5, 47.5] ], // Boundary 1
@@ -1522,4 +1538,42 @@ mismatchExclusions[ZELDA][GANONDORF] = [ // hard to get top-right
 mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
 	[ [-130, 90], [115, 115] ],
 	[ [-40, 70], [40, 95] ],
+];
+
+mismatchExclusions[JIGGLYPUFF] = [];
+mismatchExclusions[JIGGLYPUFF][DRMARIO] = [ // 55%
+	[ [-150, -75], [5, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][MARIO] = [ // 50%
+	[ [-150, -75], [-10, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][LUIGI] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][BOWSER] = [ // 55%
+	[ [-150, -75], [5, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][YOSHI] = [ // 50%
+	[ [-150, -75], [-10, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][DK] = [ // 45%
+	[ [-150, -75], [-25, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][CFALCON] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][GANONDORF] = [ // 50%
+	[ [-150, -75], [-10, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][ICECLIMBERS] = [ // 45%
+	[ [-150, -75], [-25, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][MRGAMEWATCH] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][MARTH] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
+	[ [-150, -75], [-25, -40] ],
 ];
