@@ -619,7 +619,6 @@ function isMismatch() {
 
 /*
  * Schema
- * 2 - 
  */
 function encodeRandomizerId(seed, stage, numTargets, spawn, mismatch, schema) {
 	if (!schema) schema = 2;
@@ -1455,8 +1454,8 @@ spawns[SHEIK] = [
 ];
 
 /*
- * Mismatch exceptions by djwang88 (with consultation by chaos6)
- * Map is stage => character
+ * Mismatch exclusions by djwang88 (with consultation by chaos6)
+ * Map is stage to character
  */
 
 mismatchExclusions = [];
@@ -1531,6 +1530,101 @@ mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
 	[ [-40, 70], [40, 95] ],
 ];
 
+mismatchExclusions[YLINK] = [];
+mismatchExclusions[YLINK][DRMARIO] = [
+	[ [-35, 133], [-25, 147] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][MARIO] = [
+	[ [-35, 133], [-25, 147] ], // box
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][LUIGI] = [
+	[ [-37, 133], [-23, 147] ], // box
+	[ [-93, -40], [-87, 95] ], // pit
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [50, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][BOWSER] = [
+	[ [-35, 133], [-25, 147] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [40, -40], [120, 0] ], // bottom-right
+	[ [60, 0], [120, 30] ], // bottom-right
+	[ [-70, -40], [120, -25] ], // bottom-right
+];
+mismatchExclusions[YLINK][PEACH] = [
+	[ [-41, 133], [-19, 148] ], // box
+];
+mismatchExclusions[YLINK][YOSHI] = [
+	[ [-37, 133], [-23, 147] ], // box
+	[ [-93, -40], [-87, 70] ], // pit
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][DK] = [
+	[ [-31, 137], [-29, 143] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [-70, -40], [120, -15] ], // bottom-right
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][CFALCON] = [
+	[ [-40, 135], [-20, 145] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [25, -40], [120, -15] ], // bottom-right
+	[ [85, -40], [120, 30] ], // bottom-right
+	[ [-70, -40], [120, -25] ], // bottom-right
+];
+mismatchExclusions[YLINK][GANONDORF] = [
+	[ [-40, 135], [-20, 145] ], // box
+	[ [-95, -40], [-85, 85] ], // pit
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [-190, 190], [-120, 210] ], // top-left
+	[ [75, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][FALCO] = [
+	[ [-41, 133], [-19, 148] ], // box
+	[ [60, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][FOX] = [
+	[ [-41, 133], [-19, 148] ], // box
+	[ [60, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][NESS] = [
+	[ [-35, 133], [-25, 147] ], // box
+];
+mismatchExclusions[YLINK][ICECLIMBERS] = [
+	[ [-40, 135], [-20, 145] ], // box
+	[ [-95, -40], [-85, 65] ], // pit
+	[ [-70, -40], [-60, -15] ], // bottom-right
+	[ [-50, -20], [-40, -5] ], // bottom-right
+	[ [-40, -40], [-40, 0], [-20, 0], [20, -40] ], // bottom-right
+	[ [0, 5], [50, 5], [95, -40], [40, -40] ], // bottom-right
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][KIRBY] = [
+	[ [-35, 133], [-25, 147] ], // box
+];
+mismatchExclusions[YLINK][SAMUS] = [
+	[ [-37, 133], [-23, 147] ], // box
+];
+mismatchExclusions[YLINK][JIGGLYPUFF] = [
+	[ [-41, 133], [-19, 148] ], // box
+];
+mismatchExclusions[YLINK][MRGAMEWATCH] = [
+	[ [-31, 137], [-29, 143] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][MARTH] = [
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [75, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][ROY] = [
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [75, -40], [120, 30] ], // bottom-right
+];
+
 mismatchExclusions[JIGGLYPUFF] = [];
 mismatchExclusions[JIGGLYPUFF][DRMARIO] = [ // 55%
 	[ [-150, -75], [5, -40] ],
@@ -1568,3 +1662,15 @@ mismatchExclusions[JIGGLYPUFF][MARTH] = [ // 40%
 mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
+
+/* bowser
+ * top-right
+ *   ganondorf (?)
+ */
+
+/* mewtwo
+ * bottom left/right
+ */
+
+ /* falco
+  */
