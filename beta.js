@@ -978,7 +978,7 @@ const targetCounterCode = "C218252C 00000002\n2C000021 2C80000F\n4C003102 000000
  * Stage boundaries and exclusions by megaqwertification
  * https://docs.google.com/document/d/1Dke2FDt5gVqJZyGCLipJYVynHd7EIbuxknme12z_gf4/edit#
  */
-const bounds = [
+bounds = [
 	{x1: -130, y1: -130,  x2: 130, y2: 130  }, // 00 DRMARIO
 	{x1: -150, y1: -100,  x2: 130, y2: 150  }, // 01 MARIO
 	{x1: -70,  y1: -70,   x2: 70,  y2: 70   }, // 02 LUIGI
@@ -1010,7 +1010,7 @@ const bounds = [
 /*
  * Two-coordinate pairs are assumed to be bottom-left and top-right corners of a rectangle
  */
-var exclusions = [];
+exclusions = [];
 exclusions[DRMARIO] = [
 	[ [-95, -25], [-80, 90] ], // Boundary 1
 	[ [30, 10], [70, -35], [80, -25], [40, 20] ], // Boundary 2
@@ -1460,6 +1460,11 @@ spawns[SHEIK] = [
 
 mismatchExclusions = [];
 
+mismatchExclusions[BOWSER] = [];
+mismatchExclusions[BOWSER][GANONDORF] = [
+	[ [225, 0], [250, 100] ],
+];
+
 mismatchExclusions[PEACH] = [];
 mismatchExclusions[PEACH][DRMARIO] = [ // MEDIUM
 	[ [-110, 130], [30, 150] ],
@@ -1499,6 +1504,21 @@ mismatchExclusions[YOSHI][ICECLIMBERS] = [
 	[ [-85, 135], [-30, 165] ],
 ];
 
+mismatchExclusions[FALCO] = [];
+mismatchExclusions[FALCO][BOWSER] = [
+	[ [-40, -70], [10, -55] ],
+];
+mismatchExclusions[FALCO][DK] = [
+	[ [-40, -70], [10, -50] ],
+	[ [10, -70], [60, -55] ],
+];
+mismatchExclusions[FALCO][YOSHI] = [
+	[ [-40, -70], [10, -55] ],
+];
+mismatchExclusions[FALCO][CFALCON] = [
+	[ [-40, -70], [10, -55] ],
+];
+
 mismatchExclusions[FOX] = [];
 mismatchExclusions[FOX][DRMARIO] = [
 	[ [-150, 117], [150, 150] ],
@@ -1529,6 +1549,10 @@ mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
 	[ [-130, 90], [115, 115] ],
 	[ [-40, 70], [40, 95] ],
 ];
+
+/*
+ * check flipper cage
+ */
 
 mismatchExclusions[YLINK] = [];
 mismatchExclusions[YLINK][DRMARIO] = [
@@ -1663,14 +1687,29 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
 
-/* bowser
- * top-right
- *   ganondorf (?)
+/* mario (check ganon), (check bottom-right, cage)
  */
 
-/* mewtwo
- * bottom left/right
+/* ness (bottom-right, bottom-left, bottom-middle)
  */
 
- /* falco
-  */
+/* link (check bottom-left)
+ */
+
+/* pichu (check bottom-left)
+ */
+
+/* pikachu (check bottom-left/right)
+
+/* mewtwo (bottom-left is SD pit)
+ */
+
+/* roy
+ganon square 
+bowser (tiny square up top, platform size)
+ */
+
+/************
+ * DK STAGE: add targets higher, at moving platform
+ * NESS STAGE: is the curly-q in-bounds?
+ */
