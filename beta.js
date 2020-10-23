@@ -998,7 +998,8 @@ bounds = [
 	{x1: -150, y1: -100,  x2: 120, y2: 100  }, // 16 LINK
 	{x1: -190, y1: -40,   x2: 120, y2: 210  }, // 17 YLINK
 	{x1: -160, y1: -80,   x2: 145, y2: 110  }, // 18 PICHU
-	{x1: -130, y1: -90,   x2: 175, y2: 115  }, // 19 PIKACHU
+//	{x1: -130, y1: -90,   x2: 175, y2: 115  }, // 19 PIKACHU
+{x1: -130, y1: -90,   x2: 0, y2: -40  }, // 19 PIKACHU
 	{x1: -150, y1: -75,   x2: 130, y2: 90   }, // 20 JIGGLYPUFF
 	{x1: -120, y1: -120,  x2: 130, y2: 100  }, // 21 MEWTWO
 	{x1: -79,  y1: -29.5, x2: 76,  y2: 57.44}, // 22 MRGAMEWATCH
@@ -1209,6 +1210,21 @@ exclusions[PIKACHU] = [
 	[ [100, 115], [100, 65], [110, 65], [110, 105], [140, 105], [140, 85], [150, 85], [150, 115], ], // Boundary 5
 	[ [35, 100], [35, 65], [45, 65], [45, 110], [15, 110], [15, 100], ], // Boundary 6
 	[ [-50, 110], [-50, 80], [-40, 80], [-40, 100], [-15, 100], [-15, 110], ], // Boundary 7
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/////////////////////
+	[ [-70, -90], [-60, -80] ],
 ];
 exclusions[JIGGLYPUFF] = [
 	[ [-150, 70], [-150, 0], [-110, 0], [-110, 10], [-125, 45], [-140, 45], [-140, 60], [-55, 60], [-55, 40], [-45, 40],
@@ -1649,6 +1665,89 @@ mismatchExclusions[YLINK][ROY] = [
 	[ [75, -40], [120, 30] ], // bottom-right
 ];
 
+/* pikachu (check bottom-left/right)
+ * left
+ *   *ganondorf
+ * right
+ *   *drmario
+ *   *mario
+ *   *luigi (right side raise)
+ *   *bowser (right side raise)
+ *   *yoshi
+ *   *dk (right side raise)
+ *   *cfalcon (right side raise)
+ *   *ganondorf
+ *   *falco
+ *   *fox
+ *   *popo (right side raise)
+ *   *kirby (shorten to middle of u-platform)
+ *   *samus (raise height halfway)
+ *   *zelda
+ *   *mrgamewatch
+ *   *marth
+ *   *roy
+ */
+////////////////////
+//	{x1: -130, y1: -90,   x2: 175, y2: 115  }, // 19 PIKACHU
+mismatchExclusions[PIKACHU] = [];
+mismatchExclusions[PIKACHU][DRMARIO] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][MARIO] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][LUIGI] = [
+	[ [60, -90], [140, -60] ],
+	[ [60, -90], [175, -75] ],
+];
+mismatchExclusions[PIKACHU][BOWSER] = [
+	[ [60, -90], [150, -60] ],
+	[ [60, -90], [175, -75] ],
+];
+mismatchExclusions[PIKACHU][YOSHI] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][DK] = [
+	[ [60, -90], [150, -60] ],
+	[ [60, -90], [175, -55] ],
+];
+mismatchExclusions[PIKACHU][CFALCON] = [
+	[ [60, -90], [145, -60] ],
+	[ [60, -90], [175, -70] ],
+];
+mismatchExclusions[PIKACHU][GANONDORF] = [
+	[ [60, -90], [135, -60] ],
+	[ [-75, -90], [-60, -80] ],
+];
+mismatchExclusions[PIKACHU][FALCO] = [
+	[ [60, -90], [145, -60] ],
+];
+mismatchExclusions[PIKACHU][FOX] = [
+	[ [60, -90], [145, -60] ],
+];
+mismatchExclusions[PIKACHU][ICECLIMBERS] = [
+	[ [60, -90], [160, -60] ],
+	[ [60, -90], [175, -65] ],
+];
+mismatchExclusions[PIKACHU][KIRBY] = [
+	[ [60, -90], [95, -60] ],
+];
+mismatchExclusions[PIKACHU][SAMUS] = [
+	[ [60, -90], [140, -70] ],
+];
+mismatchExclusions[PIKACHU][ZELDA] = [
+	[ [60, -90], [130, -60] ],
+];
+mismatchExclusions[PIKACHU][MRGAMEWATCH] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][MARTH] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][ROY] = [
+	[ [60, -90], [125, -60] ],
+];
+
 mismatchExclusions[JIGGLYPUFF] = [];
 mismatchExclusions[JIGGLYPUFF][DRMARIO] = [ // 55%
 	[ [-150, -75], [5, -40] ],
@@ -1690,18 +1789,16 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 /* mario (check ganon), (check bottom-right, cage)
  */
 
+/* fox (bottom)
+ */
+
 /* ness (bottom-right, bottom-left, bottom-middle)
  */
 
 /* link (check bottom-left)
  */
 
-/* pichu (check bottom-left)
- */
-
-/* pikachu (check bottom-left/right)
-
-/* mewtwo (bottom-left is SD pit)
+/* mewtwo (bottom-left is SD pit, top-right)
  */
 
 /* roy
