@@ -1460,6 +1460,21 @@ spawns[SHEIK] = [
 
 mismatchExclusions = [];
 
+mismatchExclusions[MARIO] = [];
+mismatchExclusions[MARIO][LUIGI] = [
+	[ [75, -100], [130, -80] ],
+];
+mismatchExclusions[MARIO][DK] = [
+	[ [75, -100], [130, -70] ],
+	[ [-150, 37.5], [-120, -57.5] ],
+];
+mismatchExclusions[MARIO][GANONDORF] = [
+	[ [75, -100], [130, -90] ],
+];
+mismatchExclusions[MARIO][ICECLIMBERS] = [
+	[ [75, -100], [85, -40], [130, -100] ],
+];
+
 mismatchExclusions[BOWSER] = [];
 mismatchExclusions[BOWSER][GANONDORF] = [
 	[ [225, 0], [250, 100] ],
@@ -1549,10 +1564,6 @@ mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
 	[ [-130, 90], [115, 115] ],
 	[ [-40, 70], [40, 95] ],
 ];
-
-/*
- * check flipper cage
- */
 
 mismatchExclusions[YLINK] = [];
 mismatchExclusions[YLINK][DRMARIO] = [
@@ -1746,9 +1757,6 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
 
-/* mario (check ganon), (check bottom-right, cage)
- */
-
 /* fox (bottom)
  */
 
@@ -1759,6 +1767,11 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
  */
 
 /* young link (behind flipper)
+ * I finished testing YL
+ * didn't test Link since he has boomerang. Also mewtwo can backair through so whatever
+ * Couldn't get DK, Ganon, and randomly Kirby , Game and watch to work
+ * Falcon Fox Falco ness marth Roy jigglypuff are possible but imo too hard for fun
+ * The rest is consistent enough if you know how to do
  */
 
 /* mewtwo (bottom-left is SD pit, top-right)
@@ -1772,4 +1785,10 @@ bowser (tiny square up top, platform size)
 /************
  * DK STAGE: add targets higher, at moving platform
  * NESS STAGE: is the curly-q in-bounds?
+ * ZELDA STAGE: bottom
+ * JIGGLYPUFF (zelda): din's fire range
+ * JIGGLYPUFF (pichu)
+ * 
+ * 
+ * 
  */
