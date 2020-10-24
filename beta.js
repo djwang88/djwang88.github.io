@@ -1567,21 +1567,25 @@ mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
 
 mismatchExclusions[YLINK] = [];
 mismatchExclusions[YLINK][DRMARIO] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
 	[ [-35, 133], [-25, 147] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [95, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][MARIO] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
 	[ [-35, 133], [-25, 147] ], // box
 	[ [95, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][LUIGI] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
 	[ [-37, 133], [-23, 147] ], // box
 	[ [-93, -40], [-87, 95] ], // pit
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [50, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][BOWSER] = [
+	[ [80, 50], [100, 100] ], // cage (easy)
 	[ [-35, 133], [-25, 147] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [40, -40], [120, 0] ], // bottom-right
@@ -1592,18 +1596,21 @@ mismatchExclusions[YLINK][PEACH] = [
 	[ [-41, 133], [-19, 148] ], // box
 ];
 mismatchExclusions[YLINK][YOSHI] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
 	[ [-37, 133], [-23, 147] ], // box
 	[ [-93, -40], [-87, 70] ], // pit
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [95, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][DK] = [
+	[ [87, 50], [100, 100] ], // cage
 	[ [-31, 137], [-29, 143] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [-70, -40], [120, -15] ], // bottom-right
 	[ [95, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][CFALCON] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-40, 135], [-20, 145] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [25, -40], [120, -15] ], // bottom-right
@@ -1611,6 +1618,7 @@ mismatchExclusions[YLINK][CFALCON] = [
 	[ [-70, -40], [120, -25] ], // bottom-right
 ];
 mismatchExclusions[YLINK][GANONDORF] = [
+	[ [80, 50], [100, 100] ], // cage
 	[ [-40, 135], [-20, 145] ], // box
 	[ [-95, -40], [-85, 85] ], // pit
 	[ [-190, -40], [-155, 140] ], // bottom-left
@@ -1618,14 +1626,17 @@ mismatchExclusions[YLINK][GANONDORF] = [
 	[ [75, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][FALCO] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-41, 133], [-19, 148] ], // box
 	[ [60, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][FOX] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-41, 133], [-19, 148] ], // box
 	[ [60, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][NESS] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-35, 133], [-25, 147] ], // box
 ];
 mismatchExclusions[YLINK][ICECLIMBERS] = [
@@ -1638,24 +1649,29 @@ mismatchExclusions[YLINK][ICECLIMBERS] = [
 	[ [95, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][KIRBY] = [
+	[ [85, 50], [100, 100] ], // cage
 	[ [-35, 133], [-25, 147] ], // box
 ];
 mismatchExclusions[YLINK][SAMUS] = [
 	[ [-37, 133], [-23, 147] ], // box
 ];
 mismatchExclusions[YLINK][JIGGLYPUFF] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-41, 133], [-19, 148] ], // box
 ];
 mismatchExclusions[YLINK][MRGAMEWATCH] = [
+	[ [90, 50], [100, 100] ], // cage
 	[ [-31, 137], [-29, 143] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [95, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][MARTH] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [75, -40], [120, 30] ], // bottom-right
 ];
 mismatchExclusions[YLINK][ROY] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [75, -40], [120, 30] ], // bottom-right
 ];
@@ -1747,6 +1763,12 @@ mismatchExclusions[JIGGLYPUFF][GANONDORF] = [ // 50%
 mismatchExclusions[JIGGLYPUFF][ICECLIMBERS] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
+mismatchExclusions[JIGGLYPUFF][ZELDA] = [ // 35%
+	[ [-150, -75], [-50, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][PICHU] = [ // 40% (but allow low targets)
+	[ [-150, -72], [-35, -40] ],
+];
 mismatchExclusions[JIGGLYPUFF][MRGAMEWATCH] = [ // 40%
 	[ [-150, -75], [-35, -40] ],
 ];
@@ -1755,6 +1777,14 @@ mismatchExclusions[JIGGLYPUFF][MARTH] = [ // 40%
 ];
 mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
+];
+
+mismatchExclusions[ROY] = [];
+mismatchExclusions[ROY][BOWSER] = [
+	[ [-155, 95], [-130, 140] ],
+];
+mismatchExclusions[ROY][GANONDORF] = [
+	[ [-155, 100], [-110, 140] ],
 ];
 
 /* fox (bottom)
@@ -1766,29 +1796,14 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 /* link (check bottom-left)
  */
 
-/* young link (behind flipper)
- * I finished testing YL
- * didn't test Link since he has boomerang. Also mewtwo can backair through so whatever
- * Couldn't get DK, Ganon, and randomly Kirby , Game and watch to work
- * Falcon Fox Falco ness marth Roy jigglypuff are possible but imo too hard for fun
- * The rest is consistent enough if you know how to do
- */
-
 /* mewtwo (bottom-left is SD pit, top-right)
  */
 
-/* roy
-ganon square 
-bowser (tiny square up top, platform size)
- */
-
 /************
- * DK STAGE: add targets higher, at moving platform
+ * DK STAGE: add targets higher, at moving platform?
  * NESS STAGE: is the curly-q in-bounds?
  * ZELDA STAGE: bottom
- * JIGGLYPUFF (zelda): din's fire range
- * JIGGLYPUFF (pichu)
- * 
+ * ROY: bottom-right
  * 
  * 
  */
