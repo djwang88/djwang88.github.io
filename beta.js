@@ -1548,6 +1548,76 @@ mismatchExclusions[FOX][ICECLIMBERS] = [ // hard to get top
 	[ [-150, 117], [150, 150] ],
 ];
 
+/*
+ * drmario - raise bottom slightly (10), ban alcove
+ * luigi - raise bottom (20), ban alcove
+ * bowser - raise bottom-left (30), ban right part of bottom-left, raise middle (10)?, ban alcove, ban left part of bottom-right
+ * yoshi - ban alcove
+ * dk - raise bottom (40), ban alcove
+ * cfalcon - raise bottom (20), ban alcove
+ * ganondorf - raise bottom slightly (15), ban alcove
+ * falco - ban alcove
+ * iceclimbers - ban alcove, ban right part of bottom-left (test icicles)
+ * marth - ban alcove
+ * roy - ban alcove
+ */
+mismatchExclusions[NESS] = [];
+//////////////////// //	{x1: -150, y1: -140,  x2: 150, y2: 100  }, // 11 NESS
+mismatchExclusions[NESS][DRMARIO] = [
+	[ [-40, -120], [-30, -103] ], // alcove
+	[ [-35, -140], [-25, -120] ],
+	[ [-150, -140], [-60, -130] ], // bottom-left
+];
+mismatchExclusions[NESS][LUIGI] = [
+	[ [-50, -120], [-28, -103] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -120] ], // bottom-left
+];
+mismatchExclusions[NESS][BOWSER] = [
+	[ [-50, -120], [-28, -103] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -115] ], // bottom-left
+	[ [-150, -140], [-90, -110] ],
+	[ [-110, -140], [-90, -90] ],
+	[ [50, -140], [70, -90] ], // bottom-right
+];
+mismatchExclusions[NESS][YOSHI] = [
+	[ [-44, -140], [-28, -103] ], // alcove
+	[ [-28, -140], [-20, -127] ],
+];
+mismatchExclusions[NESS][DK] = [
+	[ [-50, -127], [-28, -103] ], // alcove
+	[ [-35, -140], [-10, -127] ],
+	[ [-150, -140], [-60, -100] ], // bottom-left
+];
+mismatchExclusions[NESS][CFALCON] = [
+	[ [-50, -120], [-27, -105] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -120] ], // bottom-left
+];
+mismatchExclusions[NESS][GANONDORF] = [
+	[ [-44, -120], [-26, -106] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -125] ], // bottom-left
+];
+mismatchExclusions[NESS][FALCO] = [
+	[ [-50, -120], [-25, -102] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+];
+mismatchExclusions[NESS][ICECLIMBERS] = [
+	[ [-50, -120], [-29, -104] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-140, -140], [-130, -115] ], // bottom-left
+	[ [-110, -90], [-90, -90], [-90, -115] ],
+];
+mismatchExclusions[NESS][MARTH] = [
+	[ [-35, -140], [-25, -122] ], // alcove
+];
+mismatchExclusions[NESS][ROY] = [
+	[ [-38, -123], [-32, -103] ], // alcove
+	[ [-35, -140], [-21, -123] ],
+];
+
 mismatchExclusions[ZELDA] = [];
 mismatchExclusions[ZELDA][BOWSER] = [ // DIFFICULT
 	[ [-130, 90], [115, 115] ],
@@ -1589,8 +1659,8 @@ mismatchExclusions[YLINK][BOWSER] = [
 	[ [-35, 133], [-25, 147] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [40, -40], [120, 0] ], // bottom-right
-	[ [60, 0], [120, 30] ], // bottom-right
-	[ [-70, -40], [120, -25] ], // bottom-right
+	[ [60, 0], [120, 30] ],
+	[ [-70, -40], [120, -25] ],
 ];
 mismatchExclusions[YLINK][PEACH] = [
 	[ [-41, 133], [-19, 148] ], // box
@@ -1607,15 +1677,15 @@ mismatchExclusions[YLINK][DK] = [
 	[ [-31, 137], [-29, 143] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [-70, -40], [120, -15] ], // bottom-right
-	[ [95, -40], [120, 30] ], // bottom-right
+	[ [95, -40], [120, 30] ],
 ];
 mismatchExclusions[YLINK][CFALCON] = [
 	[ [80, 50], [100, 100] ], // cage (difficult)
 	[ [-40, 135], [-20, 145] ], // box
 	[ [-190, -40], [-155, 140] ], // bottom-left
 	[ [25, -40], [120, -15] ], // bottom-right
-	[ [85, -40], [120, 30] ], // bottom-right
-	[ [-70, -40], [120, -25] ], // bottom-right
+	[ [85, -40], [120, 30] ],
+	[ [-70, -40], [120, -25] ],
 ];
 mismatchExclusions[YLINK][GANONDORF] = [
 	[ [80, 50], [100, 100] ], // cage
@@ -1643,10 +1713,10 @@ mismatchExclusions[YLINK][ICECLIMBERS] = [
 	[ [-40, 135], [-20, 145] ], // box
 	[ [-95, -40], [-85, 65] ], // pit
 	[ [-70, -40], [-60, -15] ], // bottom-right
-	[ [-50, -20], [-40, -5] ], // bottom-right
-	[ [-40, -40], [-40, 0], [-20, 0], [20, -40] ], // bottom-right
-	[ [0, 5], [50, 5], [95, -40], [40, -40] ], // bottom-right
-	[ [95, -40], [120, 30] ], // bottom-right
+	[ [-50, -20], [-40, -5] ],
+	[ [-40, -40], [-40, 0], [-20, 0], [20, -40] ],
+	[ [0, 5], [50, 5], [95, -40], [40, -40] ],
+	[ [95, -40], [120, 30] ],
 ];
 mismatchExclusions[YLINK][KIRBY] = [
 	[ [85, 50], [100, 100] ], // cage
@@ -1760,6 +1830,9 @@ mismatchExclusions[JIGGLYPUFF][CFALCON] = [ // 40%
 mismatchExclusions[JIGGLYPUFF][GANONDORF] = [ // 50%
 	[ [-150, -75], [-10, -40] ],
 ];
+mismatchExclusions[JIGGLYPUFF][NESS] = [ // 35%
+	[ [-150, -75], [-50, -40] ],
+];
 mismatchExclusions[JIGGLYPUFF][ICECLIMBERS] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
@@ -1793,15 +1866,11 @@ mismatchExclusions[ROY][GANONDORF] = [
 /* ness (bottom-right, bottom-left, bottom-middle)
  */
 
-/* link (check bottom-left)
- */
-
 /* mewtwo (bottom-left is SD pit, top-right)
  */
 
 /************
  * DK STAGE: add targets higher, at moving platform?
- * NESS STAGE: is the curly-q in-bounds?
  * ZELDA STAGE: bottom
  * ROY: bottom-right
  * 
