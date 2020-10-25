@@ -103,9 +103,12 @@ mismatchMappingBox.value =
 	"Peach      <=> " + stageNames[mismatchObject['map'][PEACH]] + "\n" +
 	"Yoshi      <=> " + stageNames[mismatchObject['map'][YOSHI]] + "\n" +
 	"Fox        <=> " + stageNames[mismatchObject['map'][FOX]] + "\n" +
+	"Ness       <=> " + stageNames[mismatchObject['map'][NESS]] + "\n" +
 	"Zelda      <=> " + stageNames[mismatchObject['map'][ZELDA]] + "\n" +
 	"Young Link <=> " + stageNames[mismatchObject['map'][YLINK]] + "\n" + 
-	"Jigglypuff <=> " + stageNames[mismatchObject['map'][JIGGLYPUFF]];
+	"Pikachu    <=> " + stageNames[mismatchObject['map'][PIKACHU]] + "\n" +
+	"Jigglypuff <=> " + stageNames[mismatchObject['map'][JIGGLYPUFF]] + "\n" +
+	"Mewtwo     <=> " + stageNames[mismatchObject['map'][MEWTWO]];
 			} else {
 				code = getAllStagesCode(spawn);
 			}
@@ -1534,14 +1537,6 @@ mismatchExclusions[FALCO][CFALCON] = [
 	[ [-40, -70], [10, -55] ],
 ];
 
-/* fox (bottom)
- * luigi (raise 10 bottom-left?) (raise 10 bottom-right?)
- * bowser (raise 10 bottom-left & bottom-right?)
- * dk (raise 10 bottom-left- & bottom-right?)
- * cfalcon (raise 10 bottom-left- & bottom-right?)
- * iceclimbers (raise ??? right of the last burner, left of the last burner)
- */
-/////////////////////////{x1: -150, y1: -150,  x2: 150, y2: -100  }, // 10 FOX
 mismatchExclusions[FOX] = [];
 mismatchExclusions[FOX][DRMARIO] = [
 	[ [-150, 117], [150, 150] ],
@@ -1570,19 +1565,6 @@ mismatchExclusions[FOX][ICECLIMBERS] = [ // hard to get top
 	[ [70, -150], [125, -132] ],
 ];
 
-/*
- * drmario - raise bottom slightly (10), ban alcove
- * luigi - raise bottom (20), ban alcove
- * bowser - raise bottom-left (30), ban right part of bottom-left, raise middle (10)?, ban alcove, ban left part of bottom-right
- * yoshi - ban alcove
- * dk - raise bottom (40), ban alcove
- * cfalcon - raise bottom (20), ban alcove
- * ganondorf - raise bottom slightly (15), ban alcove
- * falco - ban alcove
- * iceclimbers - ban alcove, ban right part of bottom-left (test icicles)
- * marth - ban alcove
- * roy - ban alcove
- */
 mismatchExclusions[NESS] = [];
 mismatchExclusions[NESS][DRMARIO] = [
 	[ [-40, -120], [-30, -103] ], // alcove
@@ -1639,21 +1621,41 @@ mismatchExclusions[NESS][ROY] = [
 	[ [-35, -140], [-21, -123] ],
 ];
 
+/////////////////////////{x1: -130, y1: -100,  x2: 115, y2: -80  }, // 15 ZELDA
 mismatchExclusions[ZELDA] = [];
+mismatchExclusions[ZELDA][LUIGI] = [
+	[ [68, -100], [85, -90] ],
+];
 mismatchExclusions[ZELDA][BOWSER] = [ // DIFFICULT
 	[ [-130, 90], [115, 115] ],
 	[ [-20, 70], [20, 95] ],
+	[ [58, -100], [92, -90] ],
+];
+mismatchExclusions[ZELDA][YOSHI] = [
+	[ [68, -100], [85, -90] ],
 ];
 mismatchExclusions[ZELDA][DK] = [
 	[ [-130, 90], [115, 115] ],
 	[ [-20, 85], [20, 90] ],
+	[ [68, -100], [85, -90] ],
+];
+mismatchExclusions[ZELDA][CFALCON] = [
+	[ [62, -100], [89, -90] ],
 ];
 mismatchExclusions[ZELDA][GANONDORF] = [ // hard to get top-right
 	[ [-130, 75], [-110, 115] ],
+	[ [68, -100], [85, -90] ],
 ];
+mismatchExclusions[ZELDA][FALCO] = [
+	[ [58, -100], [92, -90] ],
+];
+mismatchExclusions[ZELDA][FOX] = [
+	[ [63, -100], [87, -90] ],
+]
 mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
 	[ [-130, 90], [115, 115] ],
 	[ [-40, 70], [40, 95] ],
+	[ [-130, -100], [115, -95] ],
 ];
 
 mismatchExclusions[YLINK] = [];
@@ -1873,6 +1875,23 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
 
+/*
+	luigi 40
+	bowser 30
+	yoshi 47
+	dk 20
+	ganon 45
+	cfalcon 40
+*/
+//{x1: -120, y1: -120,  x2: 130, y2: 100  }, // 21 MEWTWO
+mismatchExclusions[MEWTWO] = [];
+mismatchExclusions[MEWTWO][BOWSER] = [
+	[ [0, -120], [130, -110] ],
+];
+mismatchExclusions[MEWTWO][DK] = [
+	[ [0, -120], [130, -100] ],
+];
+
 mismatchExclusions[ROY] = [];
 mismatchExclusions[ROY][BOWSER] = [
 	[ [-155, 95], [-130, 140] ],
@@ -1881,20 +1900,7 @@ mismatchExclusions[ROY][GANONDORF] = [
 	[ [-155, 100], [-110, 140] ],
 ];
 
-/* mewtwo (bottom-left is SD pit, top-right)
- */
-
 /************
  * DK STAGE: add targets higher, at moving platform?
- * ZELDA STAGE: bottom
  * 
  */
-
-/*
-	luigi 40
-	bowser 35
-	yoshi 47
-	dk 20
-	ganon 45
-	cfalcon 40
-*/
