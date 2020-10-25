@@ -1534,18 +1534,40 @@ mismatchExclusions[FALCO][CFALCON] = [
 	[ [-40, -70], [10, -55] ],
 ];
 
+/* fox (bottom)
+ * luigi (raise 10 bottom-left?) (raise 10 bottom-right?)
+ * bowser (raise 10 bottom-left & bottom-right?)
+ * dk (raise 10 bottom-left- & bottom-right?)
+ * cfalcon (raise 10 bottom-left- & bottom-right?)
+ * iceclimbers (raise ??? right of the last burner, left of the last burner)
+ */
+/////////////////////////{x1: -150, y1: -150,  x2: 150, y2: -100  }, // 10 FOX
 mismatchExclusions[FOX] = [];
 mismatchExclusions[FOX][DRMARIO] = [
 	[ [-150, 117], [150, 150] ],
 ];
+mismatchExclusions[FOX][LUIGI] = [
+	[ [-150, -150], [-20, -140] ],
+	[ [70, -150], [150, -140] ],
+];
 mismatchExclusions[FOX][BOWSER] = [
 	[ [-150, 117], [150, 150] ],
+	[ [-150, -150], [-20, -140] ],
+	[ [70, -150], [150, -140] ],
 ];
 mismatchExclusions[FOX][DK] = [
 	[ [-150, 117], [150, 150] ],
+	[ [-150, -150], [-20, -135] ],
+	[ [70, -150], [150, -135] ],
+];
+mismatchExclusions[FOX][CFALCON] = [
+	[ [-150, -150], [-20, -140] ],
+	[ [70, -150], [150, -140] ],
 ];
 mismatchExclusions[FOX][ICECLIMBERS] = [ // hard to get top
 	[ [-150, 117], [150, 150] ],
+	[ [-150, -150], [-20, -135] ],
+	[ [70, -150], [125, -132] ],
 ];
 
 /*
@@ -1562,7 +1584,6 @@ mismatchExclusions[FOX][ICECLIMBERS] = [ // hard to get top
  * roy - ban alcove
  */
 mismatchExclusions[NESS] = [];
-//////////////////// //	{x1: -150, y1: -140,  x2: 150, y2: 100  }, // 11 NESS
 mismatchExclusions[NESS][DRMARIO] = [
 	[ [-40, -120], [-30, -103] ], // alcove
 	[ [-35, -140], [-25, -120] ],
@@ -1860,19 +1881,20 @@ mismatchExclusions[ROY][GANONDORF] = [
 	[ [-155, 100], [-110, 140] ],
 ];
 
-/* fox (bottom)
- */
-
-/* ness (bottom-right, bottom-left, bottom-middle)
- */
-
 /* mewtwo (bottom-left is SD pit, top-right)
  */
 
 /************
  * DK STAGE: add targets higher, at moving platform?
  * ZELDA STAGE: bottom
- * ROY: bottom-right
- * 
  * 
  */
+
+/*
+	luigi 40
+	bowser 35
+	yoshi 47
+	dk 20
+	ganon 45
+	cfalcon 40
+*/
