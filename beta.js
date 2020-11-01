@@ -250,7 +250,22 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 						break;
 				}
 			} else if (spawn) {
-				stageData.push(getSpawnHalfWords(stage));
+				var spawnCoordinates = getSpawnHalfWords(stage);
+				if (mismatchMap && stage == ICECLIMBERS) {
+					var character = mismatchMap[stage];
+					switch (character) {
+						case DK:
+						case KIRBY:
+						case JIGGLYPUFF:
+							// prevent instadeath by moving spawn up
+							var badSpawn = coordsToHalfWords(spawns[ICECLIMBERS][2][0], spawns[ICECLIMBERS][2][1]);
+							if (spawnCoordinates == badSpawn) {
+								spawnCoordinates = coordsToHalfWords(spawns[ICECLIMBERS][3][0], spawns[ICECLIMBERS][3][1]);
+							}
+							break;
+					}
+				}
+				stageData.push(spawnCoordinates);
 			}
 		}
 
@@ -1875,15 +1890,6 @@ mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
 	[ [-150, -75], [-25, -40] ],
 ];
 
-/*
-	luigi 40
-	bowser 30
-	yoshi 47
-	dk 20
-	ganon 45
-	cfalcon 40
-*/
-//{x1: -120, y1: -120,  x2: 130, y2: 100  }, // 21 MEWTWO
 mismatchExclusions[MEWTWO] = [];
 mismatchExclusions[MEWTWO][BOWSER] = [
 	[ [0, -120], [130, -110] ],
@@ -1902,5 +1908,4 @@ mismatchExclusions[ROY][GANONDORF] = [
 
 /************
  * DK STAGE: add targets higher, at moving platform?
- * 
  */
