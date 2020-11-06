@@ -1,7 +1,7 @@
 <html>
     <head>
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-        <title>SSBM Target Test Randomizer</title>
+        <title>Break the Targets Randomizer</title>
         <style>
             body {
                 margin-left: 10px;
@@ -30,7 +30,7 @@
         </style>
     </head>
     <body>
-        <h1 style="margin-bottom: 12px">SSBM Target Test Randomizer (beta)</h1>
+        <h1 style="margin-bottom: 12px">Break the Targets Randomizer (beta)</h1>
         <table style="margin-bottom: 5px">
             <tr>
                 <td style="min-width: 170px">
@@ -79,26 +79,39 @@
                         </div>
                     </div>
                     <div id="options-div" style="display: none">
-                        <div id="num-targets-div" style="margin-top: 10px">
-                            <label for="num-targets">Number of targets: </label>
-                            <input id="num-targets" style="width: 50px" value="10">
-                        </div>
-                        <div style="margin-top: 8px">
-                            <input id="spawn" type="checkbox">Randomize spawn location
-                        </div>
-                        <div id="mismatch-checkbox-div">
-                            <input id="mismatch-checkbox" type="checkbox" onclick="showHideNote()">Randomize character mismatch
-                        </div>
                         <div id="seed-div" style="margin-top: 8px">
                             <label for="randomizer-id">Seed:</label>
                             <input id="randomizer-id" style="width: 125px">
                             <button id="load" onclick="loadCode()">Load</button>
                         </div>
+                        <div id="num-targets-div" style="margin-top: 10px">
+                            <label for="num-targets">Number of targets: </label>
+                            <input id="num-targets" style="width: 40px" value="10">
+                        </div>
+                        <div style="margin-top: 8px">
+                            <input id="spawn" type="checkbox">Randomize spawn location
+                        </div>
+                        <div id="mismatch-checkbox-div">
+                            <input id="mismatch-checkbox" type="checkbox" onclick="showHideMismatch()">Randomize character mismatch
+                            <div id="impossible-checkbox-div" style="margin-left: 20px; display: none;">
+                                <input id="impossible-checkbox" type="checkbox">Reduce impossible seeds (recommended)
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px">
+                            <input id="speedrun-codes" type="checkbox">Enable speedrun codes
+                        </div>
+                        <div>
+                            <input id="win-condition" type="checkbox" onclick="showHideWinCondition()">Custom win condition
+                            <div id="win-condition-div" style="margin-left: 30px; display: none;">
+                                Game ends when
+                                <input id="win-condition-box" style="width: 40px">
+                                targets are broken
+                            </div>
+                        </div>
                         <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
                         <div id="mismatch-note" style="display: none; margin-top: 30px;">
                             <b>NOTE: </b>Because target bounds and spawns are designed with each <br>stage's default character in mind, randomizing character mismatch may <br>result in unwinnable character & stage combinations or other issues.
                         </div>
-<br><textarea id="mismatch-mappings" readonly="readonly" style="height: 160px; width: 275px"></textarea>
                     </div>
                 </td>
             </tr>
@@ -120,7 +133,7 @@
                 <li><b>Randomize spawn location</b> chooses from a set of fixed spawn points</li>
                 <li><b>Randomize character mismatch</b> maps every character to a random stage</li>
                 <li>Copy the randomizer <b>Seed</b> and use <b>Load</b> to share randomizer stages</li>
-                <li>For long-term archival, it is recommended to copy and save the entire code</li>
+                <li>For long-term archiving, it is recommended to copy and save the entire code</li>
             </ul>
             <b>FAQ/Troubleshooting:</b>
             <ul>

@@ -1,6 +1,6 @@
 /*
  * Randomizer developed by djwang88
- * Current version: 1.1
+ * Current version: 2.0
  * ---------
  * CHANGELOG
  * ---------
@@ -36,6 +36,9 @@
  * [2020-09-18] New version of mismatch randomizer code to only affect target stages
  * [2020-09-29] Target counter feature (version 1.1)
  * [2020-10-06] Fixed issue with Mario/Luigi/Bowser spawn differentials
+ * [2020-10-26] Reduce impossible seeds feature
+ * [2020-11-01] Fixed issue with Ice Climbers mismatch instadeath
+ * [2020-11-06] Options added for speedrun codes, win condition, and reduce impossible
  */
 
 includeJs("seedrandom.js");
@@ -51,10 +54,14 @@ var optionsDiv = document.querySelector('#options-div');
 var mismatchCheckboxDiv = document.querySelector('#mismatch-checkbox-div');
 var mismatchCheckbox = document.querySelector('#mismatch-checkbox');
 var mismatchNote = document.querySelector('#mismatch-note');
+var impossibleCheckboxDiv = document.querySelector('#impossible-checkbox-div');
+var impossibleCheckbox = document.querySelector('#impossible-checkbox');
 var idBox = document.querySelector('#randomizer-id');
 var geckoNote = document.querySelector('#gecko-limitation-note');
-
-var mismatchMappingBox = document.querySelector('#mismatch-mappings');
+var winConditionCheckbox = document.querySelector('#win-condition');
+var winConditionDiv = document.querySelector('#win-condition-div');
+var winConditionBox = document.querySelector('#win-condition-box');
+var speedrunCodesCheckbox = document.querySelector('#speedrun-codes');
 
 var getRandom;
 var db;
@@ -74,9 +81,18 @@ function randomize(seed, schema) {
 	var numTargets = getNumTargets(stage);
 	var spawn = isSpawn();
 	var mismatch = isMismatch();
+	var reduceImpossible = isReduceImpossible();
+	var enableSpeedrunCodes = isSpeedrunCodes();
+	var enableWinCondition = isWinCondition();
+	var winCondition = getWinCondition();
 
 	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
 		resultBox.value = "Number of targets must be a number between 1 and 255."
+		return;
+	}
+
+	if (enableWinCondition && (isNaN(winCondition) || winCondition < 1 || winCondition > numTargets)) {
+		resultBox.value = "Win condition must be a number between 1 and the number of targets."
 		return;
 	}
 
@@ -85,32 +101,22 @@ function randomize(seed, schema) {
 	var code = "";
 	if (stage == ALL) {
 		if (schema == 1) {
-			code = getAllStagesCode(spawn);
+			code = getAllStagesCode(spawn, schema);
 			if (mismatch) {
 				var mismatchObject = getMismatchCode();
-				code += '\n';
-				code += mismatchObject['code'];
+				code += '\n' + mismatchObject['code'];
 			}
 		} else {
 			if (mismatch) {
 				mismatchObject = getMismatchCode();
-				// TODO don't send map with option
-				code = getAllStagesCode(spawn, schema, mismatchObject['map']);
-				code += '\n';
-				code += mismatchObject['code'];
-mismatchMappingBox.value =
-	"STAGE          CHARACTER\n" +
-	"Peach      <=> " + stageNames[mismatchObject['map'][PEACH]] + "\n" +
-	"Yoshi      <=> " + stageNames[mismatchObject['map'][YOSHI]] + "\n" +
-	"Fox        <=> " + stageNames[mismatchObject['map'][FOX]] + "\n" +
-	"Ness       <=> " + stageNames[mismatchObject['map'][NESS]] + "\n" +
-	"Zelda      <=> " + stageNames[mismatchObject['map'][ZELDA]] + "\n" +
-	"Young Link <=> " + stageNames[mismatchObject['map'][YLINK]] + "\n" + 
-	"Pikachu    <=> " + stageNames[mismatchObject['map'][PIKACHU]] + "\n" +
-	"Jigglypuff <=> " + stageNames[mismatchObject['map'][JIGGLYPUFF]] + "\n" +
-	"Mewtwo     <=> " + stageNames[mismatchObject['map'][MEWTWO]];
+				if (reduceImpossible) {
+					code = getAllStagesCode(spawn, schema, mismatchObject['map']);
+				} else {
+					code = getAllStagesCode(spawn, schema);
+				}
+				code += '\n' + mismatchObject['code'];
 			} else {
-				code = getAllStagesCode(spawn);
+				code = getAllStagesCode(spawn, schema);
 			}
 		}
 	} else if (stage == RANDOM) {
@@ -121,13 +127,21 @@ mismatchMappingBox.value =
 		code = getCode(stage, spawn);
 	}
 
-	if (numTargets > 15) {
-		code += '\n';
-		code += targetCounterCode;
+	if (enableSpeedrunCodes) {
+		code += '\n' + speedrunCodes;
+	}
+
+	if (numTargets > 15 && !enableSpeedrunCodes) {
+		code += '\n' + targetCounterCode;
+	}
+
+	if (enableWinCondition && winCondition != numTargets) {
+		code += '\n' + winConditionCode + winCondition.toString(16).padStart(2, '0').toUpperCase();
 	}
 
 	resultBox.value = code;
-	idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch, schema);
+	idBox.value = encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
+		reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition);
 
 	var updateObject = {};
 	if (load) {
@@ -337,14 +351,14 @@ function getMismatchCode() {
 	}
 	var randomizedCounter = 0;
 	for (let i = 0; i <= 0x20; i++) {
-		if (i == 0x0E || // Ice Climbers
-			i == 0x13 || // Sheik
-			i == 0x1A || // Master Hand
-			i == 0x1B || // Wireframe Male
-			i == 0x1C || // Wireframe Female
-			i == 0x1D || // Giga Bowser
-			i == 0x1E || // Crazy Hand
-			i == 0x1F    // Sandbag
+		if (i == 0x0E || // ice climbers
+			i == 0x13 || // sheik
+			i == 0x1A || // master hand
+			i == 0x1B || // wireframe male
+			i == 0x1C || // wireframe female
+			i == 0x1D || // giga bowser
+			i == 0x1E || // crazy hand
+			i == 0x1F    // sandbag
 			) {
 			code += "01";
 		} else {
@@ -547,6 +561,17 @@ function getSpawnHalfWords(stage) {
 	return coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]);
 }
 
+function convertToHex() {
+	var xcoord = document.querySelector('#xcoord').value;
+	var ycoord = document.querySelector('#ycoord').value;
+	var hexresult = document.querySelector('#hexresult');
+	if (xcoord && ycoord) {
+		xcoord = parseFloat(xcoord);
+		ycoord = parseFloat(ycoord);
+		hexresult.value = toHalfWord(xcoord) + " " + toHalfWord(ycoord);
+	}
+}
+
 function isEven(num) {
 	return (num % 2 == 0);
 }
@@ -562,43 +587,46 @@ function onChangeStage() {
 		mismatchCheckboxDiv.style.display = "block";
 	} else {
 		mismatchCheckboxDiv.style.display = "none";
+		impossibleCheckboxDiv.style.display = "none";
 		mismatchCheckbox.checked = false;
+		impossibleCheckbox.checked = false;
 	}
 }
 
 function showOptions() {
 	optionsDiv.style.display = "block";
 	optionsButton.style.display = "none";
-	showHideNote();
+	showHideMismatch();
 }
 
 function hideOptions() {
 	optionsDiv.style.display = "none";
 	optionsButton.style.display = "block";
-	showHideNote();
+	showHideMismatch();
 }
 
-function showHideNote() {
+function showHideMismatch() {
 	if (isMismatch()) {
 		mismatchNote.style.display = "block";
+		impossibleCheckboxDiv.style.display = "block";
+		impossibleCheckbox.checked = true;
 	} else {
 		mismatchNote.style.display = "none";
+		impossibleCheckboxDiv.style.display = "none";
+	}
+}
+
+function showHideWinCondition() {
+	if (isWinCondition()) {
+		winConditionDiv.style.display = "block";
+		winConditionBox.value = numTargetsBox.value;
+	} else {
+		winConditionDiv.style.display = "none";
 	}
 }
 
 function optionsActive() {
 	return optionsDiv.style.display != "none";
-}
-
-function convertToHex() {
-	var xcoord = document.querySelector('#xcoord').value;
-	var ycoord = document.querySelector('#ycoord').value;
-	var hexresult = document.querySelector('#hexresult');
-	if (xcoord && ycoord) {
-		xcoord = parseFloat(xcoord);
-		ycoord = parseFloat(ycoord);
-		hexresult.value = toHalfWord(xcoord) + " " + toHalfWord(ycoord);
-	}
 }
 
 function getStage() {
@@ -635,15 +663,47 @@ function isMismatch() {
 	return false;
 }
 
-/*
- * Schema
- */
-function encodeRandomizerId(seed, stage, numTargets, spawn, mismatch, schema) {
+function isReduceImpossible() {
+	// default to true unless checkbox is explicitly unchecked
+	if (optionsActive() && !impossibleCheckbox.checked) {
+		return false;
+	}
+	return true;
+}
+
+function isWinCondition() {
+	if (optionsActive() && winConditionCheckbox.checked) {
+		return true;
+	}
+	return false;
+}
+
+function getWinCondition() {
+	return parseInt(winConditionBox.value);
+}
+
+function isSpeedrunCodes() {
+	if (optionsActive() && speedrunCodesCheckbox.checked) {
+		return true;
+	}
+	return false;
+}
+
+function encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
+	reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition) {
 	if (!schema) schema = 2;
 	var options = "1";
-	options += spawn ? "1" : "0";
-	options += mismatch ? "1" : "0";
+
+	var mask = 0;
+	if (spawn) mask |= OPTION_SPAWN;
+	if (mismatch) mask |= OPTION_MISMATCH;
+	if (mismatch && reduceImpossible) mask |= OPTION_IMPOSSIBLE;
+	if (enableSpeedrunCodes) mask |= OPTION_SPEEDRUN;
+	if (enableWinCondition) mask |= OPTION_WIN;
+	options += mask.toString().padStart(2, '0');
+
 	options += numTargets.toString().padStart(3, '0');
+	options += enableWinCondition ? winCondition.toString().padStart(3, '0') : '000';
 	options += stage.toString().padStart(2, '0');
 	return base62.encode(schema) + base62.encode(parseInt(options)) + base62.encode(seed);
 }
@@ -654,20 +714,41 @@ function decodeRandomizerId(id) {
 	}
 
 	var schema = base62.decode(id.slice(0, 1));
-	if (schema <= 2) {
+	if (schema == 1) {
 		var options = base62.decode(id.slice(1, 5)).toString();
-		var seed = base62.decode(id.slice(5))
+		var seed = base62.decode(id.slice(5));
 
-		var spawn = parseInt(options.slice(1, 2));
-		var mismatch = parseInt(options.slice(2, 3));
+		var spawn = parseInt(options.slice(1, 2)) == 1;
+		var mismatch = parseInt(options.slice(2, 3)) == 1;
 		var numTargets = parseInt(options.slice(3, 6));
 		var stage = parseInt(options.slice(6));
+
+		var reduceImpossible = false;
+		var enableSpeedrunCodes = false;
+		var enableWinCondition = false;
+		var winCondition = 0;
+
+	} else if (schema == 2) {
+		var options = base62.decode(id.slice(1, 7)).toString();
+		var seed = base62.decode(id.slice(7));
+
+		var mask = parseInt(options.slice(1, 3));
+		var spawn = (mask & OPTION_SPAWN) != 0;
+		var mismatch = (mask & OPTION_MISMATCH) != 0;
+		var reduceImpossible = (mask & OPTION_IMPOSSIBLE) != 0;
+		var enableSpeedrunCodes = (mask & OPTION_SPEEDRUN) != 0;
+		var enableWinCondition = (mask & OPTION_WIN) != 0;
+
+		var numTargets = parseInt(options.slice(3, 6));
+		var winCondition = parseInt(options.slice(6, 9));
+		var stage = parseInt(options.slice(9));
+	} else {
+		return false;
 	}
 
-	if ((spawn != 0 && spawn != 1) ||
-		(mismatch != 0 && mismatch != 1) ||
-		(numTargets < 1 || numTargets > 255) ||
-		((stage < DRMARIO || stage > SHEIK) && stage != ALL)) {
+	if (isNaN(numTargets) || (numTargets < 1 || numTargets > 255) ||
+		isNaN(stage) || ((stage < DRMARIO || stage > SHEIK) && stage != ALL) ||
+		isNaN(winCondition) || (enableWinCondition && (winCondition < 1 || winCondition > numTargets))) {
 		return false;
 	}
 
@@ -678,6 +759,10 @@ function decodeRandomizerId(id) {
 		numTargets: numTargets,
 		spawn: spawn,
 		mismatch: mismatch,
+		reduceImpossible: reduceImpossible,
+		enableSpeedrunCodes: enableSpeedrunCodes,
+		enableWinCondition: enableWinCondition,
+		winCondition: winCondition,
 	}
 }
 
@@ -731,25 +816,20 @@ function loadCode() {
 
 	if (decoded) {
 		stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
-		var advanced =
-			decoded.spawn == 1 ||
-			decoded.mismatch == 1 ||
-			(decoded.stage == SHEIK && decoded.numTargets != 3) ||
-			(decoded.stage != SHEIK && decoded.numTargets != 10);
-		if (advanced) {
-			numTargetsBox.value = decoded.numTargets.toString();
-			spawnBox.checked = (decoded.spawn == 1);
-			mismatchCheckbox.checked = (decoded.mismatch == 1);
-		} else {
-			numTargetsBox.value = (decoded.stage == SHEIK ? "3" : "10");
-			spawnBox.checked = false;
-			mismatchCheckbox.checked = false;
-		}
+		numTargetsBox.value = decoded.numTargets.toString();
+		spawnBox.checked = decoded.spawn;
+		mismatchCheckbox.checked = decoded.mismatch;
+		speedrunCodesCheckbox.checked = decoded.enableSpeedrunCodes;
+		winConditionCheckbox.checked = decoded.enableWinCondition;
 		onChangeStage();
+		showHideMismatch();
+		showHideWinCondition();
+		impossibleCheckbox.checked = decoded.reduceImpossible;
+		winConditionBox.value = decoded.winCondition.toString();
 
 		randomize(decoded.seed, decoded.schema);
 	} else {
-		resultBox.value = "Invalid randomizer ID."
+		resultBox.value = "Invalid seed."
 	}
 }
 
@@ -927,6 +1007,12 @@ const stageIds = [
 	"35", // 25 SHEIK
 ];
 
+const OPTION_SPAWN = 1;
+const OPTION_MISMATCH = 2;
+const OPTION_IMPOSSIBLE = 4;
+const OPTION_SPEEDRUN = 8;
+const OPTION_WIN = 16;
+
 /*
  * Assembly code by Punkline
  * Gecko code templates by djwang88
@@ -987,10 +1073,40 @@ const modularNop = "60000000";
 const modularZero = "00000000";
 const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
+/*
+ * Mismatch code by djwang88 & Punkline
+ */
+
 const mismatchStart = "C21B659C 00000008\n48000009 4800002C\n4E800021 ";
 const mismatchEnd = "7CA802A6 7C6520AE\n60000000 00000000";
 
+/*
+ * Target counter code by djwang88 & Punkline
+ */
+
 const targetCounterCode = "C218252C 00000002\n2C000021 2C80000F\n4C003102 00000000\n042FA188 38c00002\nC22F91A8 0000000D\n80630000 2C030010\n39252EA0 80890000\n38000005 7D000026\n7C0903A6 55082EF6\n3C003F60 90040044\n90040058 80040014\n510006F6 80C40038\n90040014 3CC60017\n90C40050 84890004\n4200FFE4 3C00802F\n6000A2D0 7C0803A6\n4E800021 3C60804A\n60000000 00000000\nC22F91D4 00000003\n80010014 2C00000F\n40810008 38000001\n60000000 00000000";
+
+/*
+ * Speedrun codes
+ * - Unlock All Characters and Stages [Datel]
+ * - Boot to Target Test [djwang88]
+ * - Disable Special Messages [Most]
+ * - Disable Trophy Messages [Achilles]
+ * - Pause During Game Start [UnclePunch]
+ * - C-Stick in Single Player [Zauron]
+ * - Disable Player HUD [Achilles]
+ * - Remove Pause Textures [djwang88]
+ * - Disable "Go!" Text Graphic On Match Start [gadzook]
+ * - Fixed Cam (D-Pad) [djwang88]
+ * - Target Counter Code (Always) [djwang88, Punkline]
+ */
+
+const speedrunCodes = "0445BF28 FFFFFFFF\n0445BF2C FFFFFFFF\n041BFA20 3860000F\n0415D94C 4E800020\n0415D984 4E800020\n0416CC1C 60000000\n0416CA9C 60000000\n0416B480 60000000\n042F6508 4E800020\n041A0FEC 4E800020\nC22F6EA8 00000002\n7C6E1B78 2C030008\n60000000 00000000\nC22F6FAC 00000005\n2C0E0004 41820020\n3D808039 618C069C\n7D8903A6 4E800421\n60000000 39C00000\n60000000 00000000\n2046B109 00010000\n04452C6C 00000000\n2046B109 00020000\n04452C6C 00000004\nE0000000 80008000\nC218252C 00000002\n2C000021 2C80000F\n4C003102 00000000\n042FA188 38C00002\nC22F91A8 0000000A\n80630000 39252EA0\n80890000 38000005\n7C0903A6 55082EF6\n3C003F60 90040044\n90040058 80C40038\n3CC60017 90C40050\n84890004 4200FFF0\n3C00802F 6000A2D0\n7C0803A6 4E800021\n3C60804A 00000000\n042F91D4 38000001";
+
+/*
+ * Win condition code by djwang88
+ */
+const winConditionCode = "041C427C 380000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
