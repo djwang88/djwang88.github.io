@@ -1,6 +1,6 @@
 /*
  * Randomizer developed by djwang88
- * Current version: 1.0
+ * Current version: 2.0
  * ---------
  * CHANGELOG
  * ---------
@@ -35,6 +35,12 @@
  * [2020-09-16] Added warning for Gecko code limits
  * [2020-09-18] New version of mismatch randomizer code to only affect target stages
  * [2020-09-29] Target counter feature (version 1.1)
+ * [2020-10-06] Fixed issue with Mario/Luigi/Bowser spawn differentials
+ * [2020-10-26] Reduce impossible seeds feature
+ * [2020-11-01] Fixed issue with Ice Climbers mismatch instadeath
+ * [2020-11-06] Options added for speedrun codes, win condition, and reduce impossible
+ * [2020-12-09] Adjusted Luigi center spawn and Mewtwo skinny spawns -0.1 for Popo
+ * [2020-12-10] Second official release (version 2.0)
  */
 
 includeJs("seedrandom.js");
@@ -50,13 +56,22 @@ var optionsDiv = document.querySelector('#options-div');
 var mismatchCheckboxDiv = document.querySelector('#mismatch-checkbox-div');
 var mismatchCheckbox = document.querySelector('#mismatch-checkbox');
 var mismatchNote = document.querySelector('#mismatch-note');
+var impossibleCheckboxDiv = document.querySelector('#impossible-checkbox-div');
+var impossibleCheckbox = document.querySelector('#impossible-checkbox');
 var idBox = document.querySelector('#randomizer-id');
 var geckoNote = document.querySelector('#gecko-limitation-note');
+var winConditionCheckbox = document.querySelector('#win-condition');
+var winConditionDiv = document.querySelector('#win-condition-div');
+var winConditionBox = document.querySelector('#win-condition-box');
+var speedrunCodesCheckbox = document.querySelector('#speedrun-codes');
+var codeDetailsDiv = document.querySelector('#code-details');
 
 var getRandom;
 var db;
 
-function randomize(seed) {
+function randomize(seed, schema) {
+	if (!schema) schema = 2;
+
 	var load = true;
 	if (!seed) {
 		getRandom = new Math.seedrandom();
@@ -69,9 +84,18 @@ function randomize(seed) {
 	var numTargets = getNumTargets(stage);
 	var spawn = isSpawn();
 	var mismatch = isMismatch();
+	var reduceImpossible = isReduceImpossible();
+	var enableSpeedrunCodes = isSpeedrunCodes();
+	var enableWinCondition = isWinCondition();
+	var winCondition = getWinCondition();
 
 	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
 		resultBox.value = "Number of targets must be a number between 1 and 255."
+		return;
+	}
+
+	if (enableWinCondition && (isNaN(winCondition) || winCondition < 1 || winCondition > numTargets)) {
+		resultBox.value = "Win condition must be a number between 1 and the number of targets."
 		return;
 	}
 
@@ -79,12 +103,25 @@ function randomize(seed) {
 
 	var code = "";
 	if (stage == ALL) {
-		code = getAllStagesCode(spawn);
-		if (optionsActive() && mismatchCheckbox.checked) {
-			code += '\n';
-			code += getMismatchCode();
+		if (schema == 1) {
+			code = getAllStagesCode(spawn, schema);
+			if (mismatch) {
+				var mismatchObject = getMismatchCode();
+				code += '\n' + mismatchObject['code'];
+			}
+		} else {
+			if (mismatch) {
+				mismatchObject = getMismatchCode();
+				if (reduceImpossible) {
+					code = getAllStagesCode(spawn, schema, mismatchObject['map']);
+				} else {
+					code = getAllStagesCode(spawn, schema);
+				}
+				code += '\n' + mismatchObject['code'];
+			} else {
+				code = getAllStagesCode(spawn, schema);
+			}
 		}
-		
 	} else if (stage == RANDOM) {
 		stage = Math.floor(getRandom() * stageHooks.length);
 		stageBox.value = stage.toString();
@@ -93,13 +130,21 @@ function randomize(seed) {
 		code = getCode(stage, spawn);
 	}
 
-	if (numTargets > 15) {
-		code += '\n';
-		code += targetCounterCode;
+	if (enableSpeedrunCodes) {
+		code += '\n' + speedrunCodes;
+	}
+
+	if (numTargets > 15 && !enableSpeedrunCodes) {
+		code += '\n' + targetCounterCode;
+	}
+
+	if (enableWinCondition && winCondition != numTargets) {
+		code += '\n' + winConditionCode + winCondition.toString(16).padStart(2, '0').toUpperCase();
 	}
 
 	resultBox.value = code;
-	idBox.value = encodeRandomizerId(seed, stage, numTargets, spawn, mismatch);
+	idBox.value = encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
+		reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition);
 
 	var updateObject = {};
 	if (load) {
@@ -110,6 +155,9 @@ function randomize(seed) {
 		updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
 		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
+		if (reduceImpossible) updateObject["reduce_counter"] = firebase.database.ServerValue.increment(1);
+		if (enableSpeedrunCodes) updateObject["codes_counter"] = firebase.database.ServerValue.increment(1);
+		if (enableWinCondition) updateObject["win_counter_" + winCondition] = firebase.database.ServerValue.increment(1);
 	}
 	db.update(updateObject);
 }
@@ -157,7 +205,7 @@ function getRegularCode(stage, spawn) {
 			x += 50;
 			y -= 77;
 		}
-		result += coordsToHex(spawns[stage][index][0], spawns[stage][index][1]);
+		result += coordsToHex(x, y);
 	}
 
 	for (let i = 0; i < numTargets; i++) {
@@ -168,7 +216,7 @@ function getRegularCode(stage, spawn) {
 	return result;
 }
 
-function getModularCode(stages, spawn, numTargets) {
+function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 	// build injection code
 	var instructions = [];
 	instructions = instructions.concat(modularInjectionStart);
@@ -176,12 +224,73 @@ function getModularCode(stages, spawn, numTargets) {
 	for (let i = 0; i < stages.length; i++) {
 		var stage = stages[i];
 		stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
-		if (spawn) {
-			stageData.push(getSpawnHalfWords(stage));
+		if (schema == 1) {
+			if (spawn) {
+				stageData.push(getSpawnHalfWords(stage));
+			}
+		} else {
+			if (mismatchMap && stage == YLINK) {
+				var character = mismatchMap[stage];
+				switch (character) {
+					case DRMARIO:
+					case LUIGI:
+					case BOWSER:
+					case PEACH: // DIFFICULT
+					case YOSHI:
+					case DK:
+					case GANONDORF:
+					case FALCO:
+					case FOX:
+					case NESS:
+					case ICECLIMBERS:
+					case KIRBY:
+					case LINK: // DIFFICULT
+					case PIKACHU:
+					case JIGGLYPUFF: // DIFFICULT
+					case MEWTWO: // DIFFICULT
+					case MRGAMEWATCH:
+					case MARTH:
+					case ROY:
+						if (spawn) {
+							// anything but pit spawn
+							var index = Math.floor(getRandom() * (spawns[stage].length - 1)) + 1;
+							stageData.push(coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]));
+						} else {
+							// force spawn to be on lip of pit
+							stageData.splice(-1, 1);
+							stageData.push(getStageHeader(DEFAULT_SCALE, true, COMPRESSION_HWORD, numTargets, stage));
+							stageData.push(coordsToHalfWords(spawns[YLINK][1][0], spawns[YLINK][1][1]));
+						}
+						break;
+					default:
+						// normal behavior
+						if (spawn) {
+							stageData.push(getSpawnHalfWords(stage));
+						}
+						break;
+				}
+			} else if (spawn) {
+				var spawnCoordinates = getSpawnHalfWords(stage);
+				if (mismatchMap && stage == ICECLIMBERS) {
+					var character = mismatchMap[stage];
+					switch (character) {
+						case DK:
+						case KIRBY:
+						case JIGGLYPUFF:
+							// prevent instadeath by moving spawn up
+							var badSpawn = coordsToHalfWords(spawns[ICECLIMBERS][2][0], spawns[ICECLIMBERS][2][1]);
+							if (spawnCoordinates == badSpawn) {
+								spawnCoordinates = coordsToHalfWords(spawns[ICECLIMBERS][3][0], spawns[ICECLIMBERS][3][1]);
+							}
+							break;
+					}
+				}
+				stageData.push(spawnCoordinates);
+			}
 		}
 
 		for (let i = 0; i < numTargets; i++) {
-			var coords = getValidCoordinates(stage);
+			var coords = getValidCoordinates(stage, schema, mismatchMap);
 			stageData.push(coordsToHalfWords(coords.x, coords.y));
 		}
 	}
@@ -211,13 +320,13 @@ function getModularCode(stages, spawn, numTargets) {
 	return result;
 }
 
-function getAllStagesCode(spawn) {
+function getAllStagesCode(spawn, schema, mismatchMap) {
 	var numTargets = getNumTargets();
 	var stages = [];
 	for (let i = 0; i < 26; i++) {
 		stages.push(i);
 	}
-	return getModularCode(stages, spawn, numTargets);
+	return getModularCode(stages, spawn, numTargets, schema, mismatchMap);
 }
 
 function showHideGeckoNote() {
@@ -233,15 +342,17 @@ function showHideGeckoNote() {
 }
 
 function getMismatchCode() {
-	var result = mismatchStart;
+	var mismatchObject = [];
+	var code = mismatchStart;
 	var randomized = [];
+	var mismatchMap = [];	// index on stage
 
 	// subtract one for sheik's stage
 	var numStages = stageIds.length - 1;
 	while (randomized.length < numStages) {
 		var index = Math.floor(getRandom() * numStages);
-		if (randomized.indexOf(stageIds[index]) == -1) {
-			randomized.push(stageIds[index]);
+		if (randomized.indexOf(index) == -1) {
+			randomized.push(index);
 		}
 	}
 	var randomizedCounter = 0;
@@ -255,20 +366,25 @@ function getMismatchCode() {
 			i == 0x1E || // crazy hand
 			i == 0x1F    // sandbag
 			) {
-			result += "01";
+			code += "01";
 		} else {
-			result += randomized[randomizedCounter];
+			var index = randomized[randomizedCounter];
+			code += stageIds[index];
+			mismatchMap[index] = characterIds.indexOf(i);
 			randomizedCounter++;
 		}
 		if ((i + 1) % 8 == 0) {
-			result += ' ';
+			code += ' ';
 		} else if ((i + 1) % 4 == 0) {
-			result += '\n';
+			code += '\n';
 		}
 	}
-	result += "000000\n";
-	result += mismatchEnd;
-	return result;
+	code += "000000\n";
+	code += mismatchEnd;
+
+	mismatchObject['code'] = code;
+	mismatchObject['map'] = mismatchMap;
+	return mismatchObject;
 }
 
 /*
@@ -280,43 +396,75 @@ function getMismatchCode() {
  * 0x000000FF = stage (stage ID) (unsigned)
  */
 function getStageHeader(scale, spawn, compression, numTargets, stage) {
-	return scale.toString(16).padStart(2, '0') +
+	var header = scale.toString(16).padStart(2, '0') +
 		(spawn ? '1' : '0') + 
 		compression.toString(16) +
 		numTargets.toString(16).padStart(2, '0') +
 		stageIds[stage];
+	return header.toUpperCase();
 }
 
-function getValidCoordinates(stage) {
+function getValidCoordinates(stage, schema, mismatchMap) {
 	var invalid = true;
 	while (invalid) {
 		var x = getRandomDecimal(bounds[stage].x1, bounds[stage].x2);
 		var y = getRandomDecimal(bounds[stage].y1, bounds[stage].y2);
-		if (coordinatesValid(x, y, stage)) {
+		if (coordinatesValid(x, y, stage, schema, mismatchMap)) {
 			invalid = false;
 		}
 	}
 	return {x: x, y: y};
 }
 
-function coordinatesValid(x, y, stage) {
-	if (exclusions[stage] != null) {
-		for (let i = 0; i < exclusions[stage].length; i++) {
-			var vs = exclusions[stage][i];
-			if (withinBounds(x, y, vs)) {
-				if (exceptions[stage] != null) {
-					for (let j = 0; j < exceptions[stage].length; j++) {
-						var ex = exceptions[stage][j];
-						if (withinBounds(x, y, ex)) {
-							return true;
+function coordinatesValid(x, y, stage, schema, mismatchMap) {
+	if (schema == 1) {
+		if (exclusions[stage] != null) {
+			for (let i = 0; i < exclusions[stage].length; i++) {
+				var vs = exclusions[stage][i];
+				if (withinBounds(x, y, vs)) {
+					if (exceptions[stage] != null) {
+						for (let j = 0; j < exceptions[stage].length; j++) {
+							var ex = exceptions[stage][j];
+							if (withinBounds(x, y, ex)) {
+								return true;
+							}
 						}
 					}
+					return false;
 				}
-				return false;
 			}
 		}
+		return true;
+	} else {
+		if (mismatchMap) {
+			var character = mismatchMap[stage];
+			if (mismatchExclusions[stage] && mismatchExclusions[stage][character]) {
+				for (let i = 0; i < mismatchExclusions[stage][character].length; i++) {
+					var vs = mismatchExclusions[stage][character][i];
+					if (withinBounds(x, y, vs)) {
+						return false;
+					}
+				}
+			}
+		}
+		if (exceptions[stage] != null) {
+			for (let j = 0; j < exceptions[stage].length; j++) {
+				var ex = exceptions[stage][j];
+				if (withinBounds(x, y, ex)) {
+					return true;
+				}
+			}
+		}
+		if (exclusions[stage] != null) {
+			for (let i = 0; i < exclusions[stage].length; i++) {
+				var vs = exclusions[stage][i];
+				if (withinBounds(x, y, vs)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
-	return true;
 }
 
 function withinBounds(x, y, vs) {
@@ -419,6 +567,17 @@ function getSpawnHalfWords(stage) {
 	return coordsToHalfWords(spawns[stage][index][0], spawns[stage][index][1]);
 }
 
+function convertToHex() {
+	var xcoord = document.querySelector('#xcoord').value;
+	var ycoord = document.querySelector('#ycoord').value;
+	var hexresult = document.querySelector('#hexresult');
+	if (xcoord && ycoord) {
+		xcoord = parseFloat(xcoord);
+		ycoord = parseFloat(ycoord);
+		hexresult.value = toHalfWord(xcoord) + " " + toHalfWord(ycoord);
+	}
+}
+
 function isEven(num) {
 	return (num % 2 == 0);
 }
@@ -434,43 +593,50 @@ function onChangeStage() {
 		mismatchCheckboxDiv.style.display = "block";
 	} else {
 		mismatchCheckboxDiv.style.display = "none";
+		impossibleCheckboxDiv.style.display = "none";
 		mismatchCheckbox.checked = false;
+		impossibleCheckbox.checked = false;
 	}
 }
 
 function showOptions() {
 	optionsDiv.style.display = "block";
 	optionsButton.style.display = "none";
-	showHideNote();
+	showHideMismatch();
 }
 
 function hideOptions() {
 	optionsDiv.style.display = "none";
 	optionsButton.style.display = "block";
-	showHideNote();
+	showHideMismatch();
 }
 
-function showHideNote() {
+function showHideMismatch() {
 	if (isMismatch()) {
 		mismatchNote.style.display = "block";
+		impossibleCheckboxDiv.style.display = "block";
+		impossibleCheckbox.checked = true;
 	} else {
 		mismatchNote.style.display = "none";
+		impossibleCheckboxDiv.style.display = "none";
 	}
+}
+
+function showHideWinCondition() {
+	if (isWinCondition()) {
+		winConditionDiv.style.display = "block";
+		winConditionBox.value = numTargetsBox.value;
+	} else {
+		winConditionDiv.style.display = "none";
+	}
+}
+
+function showCodeDetails() {
+	codeDetailsDiv.style.display = "block";
 }
 
 function optionsActive() {
 	return optionsDiv.style.display != "none";
-}
-
-function convertToHex() {
-	var xcoord = document.querySelector('#xcoord').value;
-	var ycoord = document.querySelector('#ycoord').value;
-	var hexresult = document.querySelector('#hexresult');
-	if (xcoord && ycoord) {
-		xcoord = parseFloat(xcoord);
-		ycoord = parseFloat(ycoord);
-		hexresult.value = toHalfWord(xcoord) + " " + toHalfWord(ycoord);
-	}
 }
 
 function getStage() {
@@ -507,14 +673,49 @@ function isMismatch() {
 	return false;
 }
 
-function encodeRandomizerId(seed, stage, numTargets, spawn, mismatch) {
-	var version = 1;
+function isReduceImpossible() {
+	// default to true unless checkbox is explicitly unchecked
+	if (optionsActive() && !impossibleCheckbox.checked) {
+		return false;
+	}
+	return true;
+}
+
+function isWinCondition() {
+	if (optionsActive() && winConditionCheckbox.checked) {
+		return true;
+	}
+	return false;
+}
+
+function getWinCondition() {
+	return parseInt(winConditionBox.value);
+}
+
+function isSpeedrunCodes() {
+	if (optionsActive() && speedrunCodesCheckbox.checked) {
+		return true;
+	}
+	return false;
+}
+
+function encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
+	reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition) {
+	if (!schema) schema = 2;
 	var options = "1";
-	options += spawn ? "1" : "0";
-	options += mismatch ? "1" : "0";
+
+	var mask = 0;
+	if (spawn) mask |= OPTION_SPAWN;
+	if (mismatch) mask |= OPTION_MISMATCH;
+	if (mismatch && reduceImpossible) mask |= OPTION_IMPOSSIBLE;
+	if (enableSpeedrunCodes) mask |= OPTION_SPEEDRUN;
+	if (enableWinCondition) mask |= OPTION_WIN;
+	options += mask.toString().padStart(2, '0');
+
 	options += numTargets.toString().padStart(3, '0');
+	options += enableWinCondition ? winCondition.toString().padStart(3, '0') : '000';
 	options += stage.toString().padStart(2, '0');
-	return base62.encode(version) + base62.encode(parseInt(options)) + base62.encode(seed);
+	return base62.encode(schema) + base62.encode(parseInt(options)) + base62.encode(seed);
 }
 
 function decodeRandomizerId(id) {
@@ -522,30 +723,79 @@ function decodeRandomizerId(id) {
 		return false;
 	}
 
-	var version = base62.decode(id.slice(0, 1));
-	if (version == 1) {
+	var schema = base62.decode(id.slice(0, 1));
+	if (schema == 1) {
 		var options = base62.decode(id.slice(1, 5)).toString();
-		var seed = base62.decode(id.slice(5))
+		var seed = base62.decode(id.slice(5));
 
-		var spawn = parseInt(options.slice(1, 2));
-		var mismatch = parseInt(options.slice(2, 3));
+		var spawn = parseInt(options.slice(1, 2)) == 1;
+		var mismatch = parseInt(options.slice(2, 3)) == 1;
 		var numTargets = parseInt(options.slice(3, 6));
 		var stage = parseInt(options.slice(6));
+
+		var reduceImpossible = false;
+		var enableSpeedrunCodes = false;
+		var enableWinCondition = false;
+		var winCondition = 0;
+
+	} else if (schema == 2) {
+		var options = base62.decode(id.slice(1, 7)).toString();
+		var seed = base62.decode(id.slice(7));
+
+		var mask = parseInt(options.slice(1, 3));
+		var spawn = (mask & OPTION_SPAWN) != 0;
+		var mismatch = (mask & OPTION_MISMATCH) != 0;
+		var reduceImpossible = (mask & OPTION_IMPOSSIBLE) != 0;
+		var enableSpeedrunCodes = (mask & OPTION_SPEEDRUN) != 0;
+		var enableWinCondition = (mask & OPTION_WIN) != 0;
+
+		var numTargets = parseInt(options.slice(3, 6));
+		var winCondition = parseInt(options.slice(6, 9));
+		var stage = parseInt(options.slice(9));
+	} else {
+		return false;
 	}
 
-	if ((spawn != 0 && spawn != 1) ||
-		(mismatch != 0 && mismatch != 1) ||
-		(numTargets < 1 || numTargets > 255) ||
-		((stage < DRMARIO || stage > SHEIK) && stage != ALL)) {
+	if (isNaN(numTargets) || (numTargets < 1 || numTargets > 255) ||
+		isNaN(stage) || ((stage < DRMARIO || stage > SHEIK) && stage != ALL) ||
+		isNaN(winCondition) || (enableWinCondition && (winCondition < 1 || winCondition > numTargets))) {
 		return false;
 	}
 
 	return {
+		schema: schema,
 		seed: seed,
 		stage: stage,
 		numTargets: numTargets,
 		spawn: spawn,
 		mismatch: mismatch,
+		reduceImpossible: reduceImpossible,
+		enableSpeedrunCodes: enableSpeedrunCodes,
+		enableWinCondition: enableWinCondition,
+		winCondition: winCondition,
+	}
+}
+
+function loadCode() {
+	var id = idBox.value;
+	var decoded = decodeRandomizerId(id);
+
+	if (decoded) {
+		stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
+		numTargetsBox.value = decoded.numTargets.toString();
+		spawnBox.checked = decoded.spawn;
+		mismatchCheckbox.checked = decoded.mismatch;
+		speedrunCodesCheckbox.checked = decoded.enableSpeedrunCodes;
+		winConditionCheckbox.checked = decoded.enableWinCondition;
+		onChangeStage();
+		showHideMismatch();
+		showHideWinCondition();
+		impossibleCheckbox.checked = decoded.reduceImpossible;
+		winConditionBox.value = decoded.winCondition.toString();
+
+		randomize(decoded.seed, decoded.schema);
+	} else {
+		resultBox.value = "Invalid seed."
 	}
 }
 
@@ -591,34 +841,6 @@ function includeJs(jsFilePath) {
     js.type = "text/javascript";
     js.src = jsFilePath;
     document.body.appendChild(js);
-}
-
-function loadCode() {
-	var id = idBox.value;
-	var decoded = decodeRandomizerId(id);
-
-	if (decoded) {
-		stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
-		var advanced =
-			decoded.spawn == 1 ||
-			decoded.mismatch == 1 ||
-			(decoded.stage == SHEIK && decoded.numTargets != 3) ||
-			(decoded.stage != SHEIK && decoded.numTargets != 10);
-		if (advanced) {
-			numTargetsBox.value = decoded.numTargets.toString();
-			spawnBox.checked = (decoded.spawn == 1);
-			mismatchCheckbox.checked = (decoded.mismatch == 1);
-		} else {
-			numTargetsBox.value = (decoded.stage == SHEIK ? "3" : "10");
-			spawnBox.checked = false;
-			mismatchCheckbox.checked = false;
-		}
-		onChangeStage();
-
-		randomize(decoded.seed);
-	} else {
-		resultBox.value = "Invalid randomizer ID."
-	}
 }
 
 function initializeDatabase() {
@@ -672,6 +894,62 @@ const SHEIK = 25;
 
 const ALL = 99;
 const RANDOM = 98;
+
+const characterIds = [
+	0x16, // DRMARIO
+	0x08, // MARIO
+	0x07, // LUIGI
+	0x05, // BOWSER
+	0x0C, // PEACH
+	0x11, // YOSHI
+	0x01, // DK
+	0x00, // CFALCON
+	0x19, // GANONDORF
+	0x14, // FALCO
+	0x02, // FOX
+	0x0B, // NESS
+	0x20, // POPO
+	0x04, // KIRBY
+	0x10, // SAMUS
+	0x12, // ZELDA/SHEIK
+	0x06, // LINK
+	0x15, // YLINK
+	0x18, // PICHU
+	0x0D, // PIKACHU
+	0x0F, // JIGGLYPUFF
+	0x0A, // MEWTWO
+	0x03, // MRGAMEWATCH
+	0x09, // MARTH
+	0x17, // ROY
+];
+
+const stageNames = [
+	"Dr. Mario",
+	"Mario",
+	"Luigi",
+	"Bowser",
+	"Peach",
+	"Yoshi",
+	"Donkey Kong",
+	"Captain Falcon",
+	"Ganondorf",
+	"Falco",
+	"Fox",
+	"Ness",
+	"Ice Climbers",
+	"Kirby",
+	"Samus",
+	"Zelda",
+	"Link",
+	"Young Link",
+	"Pichu",
+	"Pikachu",
+	"Jigglypuff",
+	"Mewtwo",
+	"Mr. Game & Watch",
+	"Marth",
+	"Roy",
+];
 
 /*
  * Stage hooks (mostly) found by djwang88
@@ -739,33 +1017,11 @@ const stageIds = [
 	"35", // 25 SHEIK
 ];
 
-const characterIds = [
-	"00", // CFALCON
-	"01", // DK
-	"02", // FOX
-	"03", // MRGAMEWATCH
-	"04", // KIRBY
-	"05", // BOWSER
-	"06", // LINK
-	"07", // LUIGI
-	"08", // MARIO
-	"09", // MARTH
-	"0A", // MEWTWO
-	"0B", // NESS
-	"0C", // PEACH
-	"0D", // PIKACHU
-	"0F", // JIGGLYPUFF
-	"10", // SAMUS
-	"11", // YOSHI
-	"12", // ZELDA/SHEIK
-	"14", // FALCO
-	"15", // YLINK
-	"16", // DRMARIO
-	"17", // ROY
-	"18", // PICHU
-	"19", // GANONDORF
-	"20", // POPO
-]
+const OPTION_SPAWN = 1;
+const OPTION_MISMATCH = 2;
+const OPTION_IMPOSSIBLE = 4;
+const OPTION_SPEEDRUN = 8;
+const OPTION_WIN = 16;
 
 /*
  * Assembly code by Punkline
@@ -827,16 +1083,46 @@ const modularNop = "60000000";
 const modularZero = "00000000";
 const modularEnd = "C21C4244 00000018\n80C10008 70C000FF\n418200AC 54C9C63E\n7C9D4800 4184000C\n38A00000 48000098\n80E1000C 7CAA2B79\n811F0280 2C1D0000\n40A20010 74C00010\n41A20008 7D054378\n2C050000 41A00028\n41A5006C 3B9CFFFF\n3BDEFFFC 80680084\n3C008037 60000E44\n7C0803A6 4E800021\n7C651B78 80C10008\n80E1000C 54C4063E\n74C03F07 7C17E3A6\n100723CC F0050038\n102004A0 D0050050\nD0250060 80050014\n64000080 90050014\n90E1000C 7C082800\n40A2000C 7D455378\n4BFFFF90 2C050000\n60000000 00000000";
 
+/*
+ * Mismatch code by djwang88 & Punkline
+ */
+
 const mismatchStart = "C21B659C 00000008\n48000009 4800002C\n4E800021 ";
 const mismatchEnd = "7CA802A6 7C6520AE\n60000000 00000000";
 
+/*
+ * Target counter code by djwang88 & Punkline
+ */
+
 const targetCounterCode = "C218252C 00000002\n2C000021 2C80000F\n4C003102 00000000\n042FA188 38c00002\nC22F91A8 0000000D\n80630000 2C030010\n39252EA0 80890000\n38000005 7D000026\n7C0903A6 55082EF6\n3C003F60 90040044\n90040058 80040014\n510006F6 80C40038\n90040014 3CC60017\n90C40050 84890004\n4200FFE4 3C00802F\n6000A2D0 7C0803A6\n4E800021 3C60804A\n60000000 00000000\nC22F91D4 00000003\n80010014 2C00000F\n40810008 38000001\n60000000 00000000";
+
+/*
+ * Speedrun codes
+ * - Unlock All Characters and Stages [Datel]
+ * - Boot to Target Test [djwang88]
+ * - Disable Special Messages [Most]
+ * - Disable Trophy Messages [Achilles]
+ * - Pause During Game Start [UnclePunch]
+ * - C-Stick in Single Player [Zauron]
+ * - Disable Player HUD [Achilles]
+ * - Remove Pause Textures [djwang88]
+ * - Disable "Go!" Text Graphic On Match Start [gadzook]
+ * - Fixed Cam (D-Pad) [djwang88]
+ * - Target Counter Code (Always) [djwang88, Punkline]
+ */
+
+const speedrunCodes = "0445BF28 FFFFFFFF\n0445BF2C FFFFFFFF\n041BFA20 3860000F\n0415D94C 4E800020\n0415D984 4E800020\n0416CC1C 60000000\n0416CA9C 60000000\n0416B480 60000000\n042F6508 4E800020\n041A0FEC 4E800020\nC22F6EA8 00000002\n7C6E1B78 2C030008\n60000000 00000000\nC22F6FAC 00000005\n2C0E0004 41820020\n3D808039 618C069C\n7D8903A6 4E800421\n60000000 39C00000\n60000000 00000000\n2046B109 00010000\n04452C6C 00000000\n2046B109 00020000\n04452C6C 00000004\nE0000000 80008000\nC218252C 00000002\n2C000021 2C80000F\n4C003102 00000000\n042FA188 38C00002\nC22F91A8 0000000A\n80630000 39252EA0\n80890000 38000005\n7C0903A6 55082EF6\n3C003F60 90040044\n90040058 80C40038\n3CC60017 90C40050\n84890004 4200FFF0\n3C00802F 6000A2D0\n7C0803A6 4E800021\n3C60804A 00000000\n042F91D4 38000001";
+
+/*
+ * Win condition code by djwang88
+ */
+const winConditionCode = "041C427C 380000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
  * https://docs.google.com/document/d/1Dke2FDt5gVqJZyGCLipJYVynHd7EIbuxknme12z_gf4/edit#
  */
-const bounds = [
+bounds = [
 	{x1: -130, y1: -130,  x2: 130, y2: 130  }, // 00 DRMARIO
 	{x1: -150, y1: -100,  x2: 130, y2: 150  }, // 01 MARIO
 	{x1: -70,  y1: -70,   x2: 70,  y2: 70   }, // 02 LUIGI
@@ -868,7 +1154,7 @@ const bounds = [
 /*
  * Two-coordinate pairs are assumed to be bottom-left and top-right corners of a rectangle
  */
-var exclusions = [];
+exclusions = [];
 exclusions[DRMARIO] = [
 	[ [-95, -25], [-80, 90] ], // Boundary 1
 	[ [30, 10], [70, -35], [80, -25], [40, 20] ], // Boundary 2
@@ -907,7 +1193,7 @@ exclusions[PEACH] = [
 	[ [45, 83], [45, 75], [40, 65], [40, 50], [55, 50], [55, -10], [50, -20], [50, -55], [110, -55], [110, -45],
 		[60, -45], [60, 50], [55, 65], [55, 78] ], // Boundary 2
 	[ [17, 20], [22, 20], [22, 65], [30, 80], [30, 120], [40, 120], [130, 86.24], [130, 65], [135, 65], [135, 84.38],
-		[145, 80.62], [145, 65], [150, 65], [150, 85], [30, 130], [17, 130] ], // Boundary 3	
+		[145, 80.62], [145, 65], [150, 65], [150, 85], [30, 130], [17, 130] ], // Boundary 3
 ];
 exclusions[YOSHI] = [
 	[ [-85, 150], [-85, 130], [-75, 120], [-40, 120], [-30, 130], [-30, 165], [-40, 165], [-40, 135], [-75, 135],
@@ -1144,7 +1430,7 @@ spawns[MARIO] = [
 	[-78, 58], // 5 [-78, 30]
 ];
 spawns[LUIGI] = [
-	[0, 10], // original [1, -10] (y-20)
+	[-0.1, 10], // original [1, -10] (y-20)
 	[-55, -60], // 2 [-55, -80]
 	[35, -60], // 3 [35, -80]
 ];
@@ -1283,8 +1569,8 @@ spawns[JIGGLYPUFF] = [
 spawns[MEWTWO] = [
 	[5, -30],
 	[-35, 70], // 2
-	[-115, 10], // 3
-	[125, 10], // 4
+	[-115.1, 10], // 3
+	[124.9, 10], // 4
 	[85, -70], // 5
 ];
 spawns[MRGAMEWATCH] = [
@@ -1310,3 +1596,441 @@ spawns[SHEIK] = [
 	[-90, 0], // 2
 	[80, 0], // 3
 ];
+
+/*
+ * Mismatch exclusions by djwang88 (with consultation by chaos6)
+ * Map is stage to character
+ */
+
+mismatchExclusions = [];
+
+mismatchExclusions[MARIO] = [];
+mismatchExclusions[MARIO][LUIGI] = [
+	[ [75, -100], [130, -80] ],
+];
+mismatchExclusions[MARIO][DK] = [
+	[ [75, -100], [130, -70] ],
+	[ [-150, 37.5], [-120, -57.5] ],
+];
+mismatchExclusions[MARIO][GANONDORF] = [
+	[ [75, -100], [130, -90] ],
+];
+mismatchExclusions[MARIO][ICECLIMBERS] = [
+	[ [75, -100], [85, -40], [130, -100] ],
+];
+
+mismatchExclusions[BOWSER] = [];
+mismatchExclusions[BOWSER][GANONDORF] = [
+	[ [225, 0], [250, 100] ],
+];
+
+mismatchExclusions[PEACH] = [];
+mismatchExclusions[PEACH][DRMARIO] = [ // MEDIUM
+	[ [-110, 130], [30, 150] ],
+	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
+];
+mismatchExclusions[PEACH][BOWSER] = [
+	[ [-110, 130], [30, 150] ],
+	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
+];
+mismatchExclusions[PEACH][DK] = [ // MEDIUM
+	[ [-110, 130], [30, 150] ],
+	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
+];
+mismatchExclusions[PEACH][GANONDORF] = [
+	[ [35, 83], [50, 112] ],
+];
+mismatchExclusions[PEACH][ICECLIMBERS] = [
+	[ [-110, 130], [30, 150] ],
+	[ [30, 130], [30, 150], [180, 150], [180, 75] ],
+];
+
+mismatchExclusions[YOSHI] = [];
+mismatchExclusions[YOSHI][DRMARIO] = [ // MEDIUM
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+mismatchExclusions[YOSHI][BOWSER] = [
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+mismatchExclusions[YOSHI][DK] = [
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+mismatchExclusions[YOSHI][ICECLIMBERS] = [
+	[ [-150, 150], [130, 170] ],
+	[ [-85, 135], [-30, 165] ],
+];
+
+mismatchExclusions[FALCO] = [];
+mismatchExclusions[FALCO][BOWSER] = [
+	[ [-40, -70], [10, -55] ],
+];
+mismatchExclusions[FALCO][DK] = [
+	[ [-40, -70], [10, -50] ],
+	[ [10, -70], [60, -55] ],
+];
+mismatchExclusions[FALCO][YOSHI] = [
+	[ [-40, -70], [10, -55] ],
+];
+mismatchExclusions[FALCO][CFALCON] = [
+	[ [-40, -70], [10, -55] ],
+];
+
+mismatchExclusions[FOX] = [];
+mismatchExclusions[FOX][DRMARIO] = [
+	[ [-150, 117], [150, 150] ],
+];
+mismatchExclusions[FOX][LUIGI] = [
+	[ [-150, -150], [-20, -140] ],
+	[ [70, -150], [150, -140] ],
+];
+mismatchExclusions[FOX][BOWSER] = [
+	[ [-150, 117], [150, 150] ],
+	[ [-150, -150], [-20, -140] ],
+	[ [70, -150], [150, -140] ],
+];
+mismatchExclusions[FOX][DK] = [
+	[ [-150, 117], [150, 150] ],
+	[ [-150, -150], [-20, -135] ],
+	[ [70, -150], [150, -135] ],
+];
+mismatchExclusions[FOX][CFALCON] = [
+	[ [-150, -150], [-20, -140] ],
+	[ [70, -150], [150, -140] ],
+];
+mismatchExclusions[FOX][ICECLIMBERS] = [ // hard to get top
+	[ [-150, 117], [150, 150] ],
+	[ [-150, -150], [-20, -135] ],
+	[ [70, -150], [125, -132] ],
+];
+
+mismatchExclusions[NESS] = [];
+mismatchExclusions[NESS][DRMARIO] = [
+	[ [-40, -120], [-30, -103] ], // alcove
+	[ [-35, -140], [-25, -120] ],
+	[ [-150, -140], [-60, -130] ], // bottom-left
+];
+mismatchExclusions[NESS][LUIGI] = [
+	[ [-50, -120], [-28, -103] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -120] ], // bottom-left
+];
+mismatchExclusions[NESS][BOWSER] = [
+	[ [-50, -120], [-28, -103] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -115] ], // bottom-left
+	[ [-150, -140], [-90, -110] ],
+	[ [-110, -140], [-90, -90] ],
+	[ [50, -140], [70, -90] ], // bottom-right
+];
+mismatchExclusions[NESS][YOSHI] = [
+	[ [-44, -140], [-28, -103] ], // alcove
+	[ [-28, -140], [-20, -127] ],
+];
+mismatchExclusions[NESS][DK] = [
+	[ [-50, -127], [-28, -103] ], // alcove
+	[ [-35, -140], [-10, -127] ],
+	[ [-150, -140], [-60, -100] ], // bottom-left
+];
+mismatchExclusions[NESS][CFALCON] = [
+	[ [-50, -120], [-27, -105] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -120] ], // bottom-left
+];
+mismatchExclusions[NESS][GANONDORF] = [
+	[ [-44, -120], [-26, -106] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-150, -140], [-60, -125] ], // bottom-left
+];
+mismatchExclusions[NESS][FALCO] = [
+	[ [-50, -120], [-25, -102] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+];
+mismatchExclusions[NESS][ICECLIMBERS] = [
+	[ [-50, -120], [-29, -104] ], // alcove
+	[ [-35, -140], [-10, -120] ],
+	[ [-140, -140], [-130, -115] ], // bottom-left
+	[ [-110, -90], [-90, -90], [-90, -115] ],
+];
+mismatchExclusions[NESS][MARTH] = [
+	[ [-35, -140], [-25, -122] ], // alcove
+];
+mismatchExclusions[NESS][ROY] = [
+	[ [-38, -123], [-32, -103] ], // alcove
+	[ [-35, -140], [-21, -123] ],
+];
+
+mismatchExclusions[ZELDA] = [];
+mismatchExclusions[ZELDA][LUIGI] = [
+	[ [68, -100], [85, -90] ],
+];
+mismatchExclusions[ZELDA][BOWSER] = [ // DIFFICULT
+	[ [-130, 90], [115, 115] ],
+	[ [-20, 70], [20, 95] ],
+	[ [58, -100], [92, -90] ],
+];
+mismatchExclusions[ZELDA][YOSHI] = [
+	[ [68, -100], [85, -90] ],
+];
+mismatchExclusions[ZELDA][DK] = [
+	[ [-130, 90], [115, 115] ],
+	[ [-20, 85], [20, 90] ],
+	[ [68, -100], [85, -90] ],
+];
+mismatchExclusions[ZELDA][CFALCON] = [
+	[ [62, -100], [89, -90] ],
+];
+mismatchExclusions[ZELDA][GANONDORF] = [ // hard to get top-right
+	[ [-130, 75], [-110, 115] ],
+	[ [68, -100], [85, -90] ],
+];
+mismatchExclusions[ZELDA][FALCO] = [
+	[ [58, -100], [92, -90] ],
+];
+mismatchExclusions[ZELDA][FOX] = [
+	[ [63, -100], [87, -90] ],
+]
+mismatchExclusions[ZELDA][ICECLIMBERS] = [ // DIFFICULT
+	[ [-130, 90], [115, 115] ],
+	[ [-40, 70], [40, 95] ],
+	[ [-130, -100], [115, -95] ],
+];
+
+mismatchExclusions[YLINK] = [];
+mismatchExclusions[YLINK][DRMARIO] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
+	[ [-35, 133], [-25, 147] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][MARIO] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
+	[ [-35, 133], [-25, 147] ], // box
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][LUIGI] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
+	[ [-37, 133], [-23, 147] ], // box
+	[ [-93, -40], [-87, 95] ], // pit
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [50, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][BOWSER] = [
+	[ [80, 50], [100, 100] ], // cage (easy)
+	[ [-35, 133], [-25, 147] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [40, -40], [120, 0] ], // bottom-right
+	[ [60, 0], [120, 30] ],
+	[ [-70, -40], [120, -25] ],
+];
+mismatchExclusions[YLINK][PEACH] = [
+	[ [-41, 133], [-19, 148] ], // box
+];
+mismatchExclusions[YLINK][YOSHI] = [
+	[ [80, 50], [100, 100] ], // cage (medium)
+	[ [-37, 133], [-23, 147] ], // box
+	[ [-93, -40], [-87, 70] ], // pit
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][DK] = [
+	[ [87, 50], [100, 100] ], // cage
+	[ [-31, 137], [-29, 143] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [-70, -40], [120, -15] ], // bottom-right
+	[ [95, -40], [120, 30] ],
+];
+mismatchExclusions[YLINK][CFALCON] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-40, 135], [-20, 145] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [25, -40], [120, -15] ], // bottom-right
+	[ [85, -40], [120, 30] ],
+	[ [-70, -40], [120, -25] ],
+];
+mismatchExclusions[YLINK][GANONDORF] = [
+	[ [80, 50], [100, 100] ], // cage
+	[ [-40, 135], [-20, 145] ], // box
+	[ [-95, -40], [-85, 85] ], // pit
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [-190, 190], [-120, 210] ], // top-left
+	[ [75, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][FALCO] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-41, 133], [-19, 148] ], // box
+	[ [60, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][FOX] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-41, 133], [-19, 148] ], // box
+	[ [60, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][NESS] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-35, 133], [-25, 147] ], // box
+];
+mismatchExclusions[YLINK][ICECLIMBERS] = [
+	[ [-40, 135], [-20, 145] ], // box
+	[ [-95, -40], [-85, 65] ], // pit
+	[ [-70, -40], [-60, -15] ], // bottom-right
+	[ [-50, -20], [-40, -5] ],
+	[ [-40, -40], [-40, 0], [-20, 0], [20, -40] ],
+	[ [0, 5], [50, 5], [95, -40], [40, -40] ],
+	[ [95, -40], [120, 30] ],
+];
+mismatchExclusions[YLINK][KIRBY] = [
+	[ [85, 50], [100, 100] ], // cage
+	[ [-35, 133], [-25, 147] ], // box
+];
+mismatchExclusions[YLINK][SAMUS] = [
+	[ [-37, 133], [-23, 147] ], // box
+];
+mismatchExclusions[YLINK][JIGGLYPUFF] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-41, 133], [-19, 148] ], // box
+];
+mismatchExclusions[YLINK][MRGAMEWATCH] = [
+	[ [90, 50], [100, 100] ], // cage
+	[ [-31, 137], [-29, 143] ], // box
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [95, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][MARTH] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [75, -40], [120, 30] ], // bottom-right
+];
+mismatchExclusions[YLINK][ROY] = [
+	[ [80, 50], [100, 100] ], // cage (difficult)
+	[ [-190, -40], [-155, 140] ], // bottom-left
+	[ [75, -40], [120, 30] ], // bottom-right
+];
+
+mismatchExclusions[PIKACHU] = [];
+mismatchExclusions[PIKACHU][DRMARIO] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][MARIO] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][LUIGI] = [
+	[ [60, -90], [140, -60] ],
+	[ [60, -90], [175, -75] ],
+];
+mismatchExclusions[PIKACHU][BOWSER] = [
+	[ [60, -90], [150, -60] ],
+	[ [60, -90], [175, -75] ],
+];
+mismatchExclusions[PIKACHU][YOSHI] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][DK] = [
+	[ [60, -90], [150, -60] ],
+	[ [60, -90], [175, -55] ],
+];
+mismatchExclusions[PIKACHU][CFALCON] = [
+	[ [60, -90], [145, -60] ],
+	[ [60, -90], [175, -70] ],
+];
+mismatchExclusions[PIKACHU][GANONDORF] = [
+	[ [60, -90], [135, -60] ],
+	[ [-75, -90], [-60, -80] ],
+];
+mismatchExclusions[PIKACHU][FALCO] = [
+	[ [60, -90], [145, -60] ],
+];
+mismatchExclusions[PIKACHU][FOX] = [
+	[ [60, -90], [145, -60] ],
+];
+mismatchExclusions[PIKACHU][ICECLIMBERS] = [
+	[ [60, -90], [160, -60] ],
+	[ [60, -90], [175, -65] ],
+];
+mismatchExclusions[PIKACHU][KIRBY] = [
+	[ [60, -90], [95, -60] ],
+];
+mismatchExclusions[PIKACHU][SAMUS] = [
+	[ [60, -90], [140, -70] ],
+];
+mismatchExclusions[PIKACHU][ZELDA] = [
+	[ [60, -90], [130, -60] ],
+];
+mismatchExclusions[PIKACHU][MRGAMEWATCH] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][MARTH] = [
+	[ [60, -90], [125, -60] ],
+];
+mismatchExclusions[PIKACHU][ROY] = [
+	[ [60, -90], [125, -60] ],
+];
+
+mismatchExclusions[JIGGLYPUFF] = [];
+mismatchExclusions[JIGGLYPUFF][DRMARIO] = [ // 55%
+	[ [-150, -75], [5, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][MARIO] = [ // 50%
+	[ [-150, -75], [-10, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][LUIGI] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][BOWSER] = [ // 55%
+	[ [-150, -75], [5, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][YOSHI] = [ // 50%
+	[ [-150, -75], [-10, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][DK] = [ // 45%
+	[ [-150, -75], [-25, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][CFALCON] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][GANONDORF] = [ // 50%
+	[ [-150, -75], [-10, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][NESS] = [ // 35%
+	[ [-150, -75], [-50, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][ICECLIMBERS] = [ // 45%
+	[ [-150, -75], [-25, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][ZELDA] = [ // 35%
+	[ [-150, -75], [-50, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][PICHU] = [ // 40% (but allow low targets)
+	[ [-150, -72], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][MRGAMEWATCH] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][MARTH] = [ // 40%
+	[ [-150, -75], [-35, -40] ],
+];
+mismatchExclusions[JIGGLYPUFF][ROY] = [ // 45%
+	[ [-150, -75], [-25, -40] ],
+];
+
+mismatchExclusions[MEWTWO] = [];
+mismatchExclusions[MEWTWO][BOWSER] = [
+	[ [0, -120], [130, -110] ],
+];
+mismatchExclusions[MEWTWO][DK] = [
+	[ [0, -120], [130, -100] ],
+];
+
+mismatchExclusions[ROY] = [];
+mismatchExclusions[ROY][BOWSER] = [
+	[ [-155, 95], [-130, 140] ],
+];
+mismatchExclusions[ROY][GANONDORF] = [
+	[ [-155, 100], [-110, 140] ],
+];
+
+/*
+ * DK STAGE: add targets higher, at moving platform?
+ */
