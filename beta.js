@@ -39,6 +39,7 @@
  * [2020-10-26] Reduce impossible seeds feature
  * [2020-11-01] Fixed issue with Ice Climbers mismatch instadeath
  * [2020-11-06] Options added for speedrun codes, win condition, and reduce impossible
+ * [2020-12-09] Adjusted Luigi center spawn and Mewtwo skinny spawns -0.1 for Popo
  */
 
 includeJs("seedrandom.js");
@@ -62,6 +63,7 @@ var winConditionCheckbox = document.querySelector('#win-condition');
 var winConditionDiv = document.querySelector('#win-condition-div');
 var winConditionBox = document.querySelector('#win-condition-box');
 var speedrunCodesCheckbox = document.querySelector('#speedrun-codes');
+var codeDetailsDiv = document.querySelector('#code-details');
 
 var getRandom;
 var db;
@@ -152,6 +154,9 @@ function randomize(seed, schema) {
 		updateObject["targets_counter_" + numTargets] = firebase.database.ServerValue.increment(1);
 		if (spawn) updateObject["spawn_counter"] = firebase.database.ServerValue.increment(1);
 		if (mismatch) updateObject["mismatch_counter"] = firebase.database.ServerValue.increment(1);
+		if (reduceImpossible) updateObject["reduce_counter"] = firebase.database.ServerValue.increment(1);
+		if (enableSpeedrunCodes) updateObject["codes_counter"] = firebase.database.ServerValue.increment(1);
+		if (enableWinCondition) updateObject["win_counter_" + winCondition] = firebase.database.ServerValue.increment(1);
 	}
 	//db.update(updateObject);
 }
@@ -625,6 +630,10 @@ function showHideWinCondition() {
 	}
 }
 
+function showCodeDetails() {
+	codeDetailsDiv.style.display = "block";
+}
+
 function optionsActive() {
 	return optionsDiv.style.display != "none";
 }
@@ -766,6 +775,29 @@ function decodeRandomizerId(id) {
 	}
 }
 
+function loadCode() {
+	var id = idBox.value;
+	var decoded = decodeRandomizerId(id);
+
+	if (decoded) {
+		stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
+		numTargetsBox.value = decoded.numTargets.toString();
+		spawnBox.checked = decoded.spawn;
+		mismatchCheckbox.checked = decoded.mismatch;
+		speedrunCodesCheckbox.checked = decoded.enableSpeedrunCodes;
+		winConditionCheckbox.checked = decoded.enableWinCondition;
+		onChangeStage();
+		showHideMismatch();
+		showHideWinCondition();
+		impossibleCheckbox.checked = decoded.reduceImpossible;
+		winConditionBox.value = decoded.winCondition.toString();
+
+		randomize(decoded.seed, decoded.schema);
+	} else {
+		resultBox.value = "Invalid seed."
+	}
+}
+
 function isAlphaNumeric(id) {
 	for (let i = 0; i < id.length; i++) {
 		var char = id.charCodeAt(i);
@@ -808,29 +840,6 @@ function includeJs(jsFilePath) {
     js.type = "text/javascript";
     js.src = jsFilePath;
     document.body.appendChild(js);
-}
-
-function loadCode() {
-	var id = idBox.value;
-	var decoded = decodeRandomizerId(id);
-
-	if (decoded) {
-		stageBox.value = (decoded.stage == 99 ? "all" : decoded.stage.toString());
-		numTargetsBox.value = decoded.numTargets.toString();
-		spawnBox.checked = decoded.spawn;
-		mismatchCheckbox.checked = decoded.mismatch;
-		speedrunCodesCheckbox.checked = decoded.enableSpeedrunCodes;
-		winConditionCheckbox.checked = decoded.enableWinCondition;
-		onChangeStage();
-		showHideMismatch();
-		showHideWinCondition();
-		impossibleCheckbox.checked = decoded.reduceImpossible;
-		winConditionBox.value = decoded.winCondition.toString();
-
-		randomize(decoded.seed, decoded.schema);
-	} else {
-		resultBox.value = "Invalid seed."
-	}
 }
 
 function initializeDatabase() {
@@ -1420,7 +1429,7 @@ spawns[MARIO] = [
 	[-78, 58], // 5 [-78, 30]
 ];
 spawns[LUIGI] = [
-	[0, 10], // original [1, -10] (y-20)
+	[-0.1, 10], // original [1, -10] (y-20)
 	[-55, -60], // 2 [-55, -80]
 	[35, -60], // 3 [35, -80]
 ];
@@ -1559,8 +1568,8 @@ spawns[JIGGLYPUFF] = [
 spawns[MEWTWO] = [
 	[5, -30],
 	[-35, 70], // 2
-	[-115, 10], // 3
-	[125, 10], // 4
+	[-115.1, 10], // 3
+	[124.9, 10], // 4
 	[85, -70], // 5
 ];
 spawns[MRGAMEWATCH] = [
@@ -1752,7 +1761,6 @@ mismatchExclusions[NESS][ROY] = [
 	[ [-35, -140], [-21, -123] ],
 ];
 
-/////////////////////////{x1: -130, y1: -100,  x2: 115, y2: -80  }, // 15 ZELDA
 mismatchExclusions[ZELDA] = [];
 mismatchExclusions[ZELDA][LUIGI] = [
 	[ [68, -100], [85, -90] ],
@@ -2022,6 +2030,6 @@ mismatchExclusions[ROY][GANONDORF] = [
 	[ [-155, 100], [-110, 140] ],
 ];
 
-/************
+/*
  * DK STAGE: add targets higher, at moving platform?
  */
