@@ -42,6 +42,7 @@
  * [2020-12-09] Adjusted Luigi center spawn and Mewtwo skinny spawns -0.1 for Popo
  * [2020-12-10] Second official release (version 2.0)
  * [2020-12-17] Moved several codes to default codes
+ * [2020-08-16] Fixed issue with win condition code resulting in no score
  */
 
 includeJs("seedrandom.js");
@@ -143,6 +144,7 @@ function randomize(seed, schema) {
 
 	if (enableWinCondition && winCondition != numTargets) {
 		code += '\n' + winConditionCode + winCondition.toString(16).padStart(2, '0').toUpperCase();
+		code += '\n' + noScoreFix;
 	}
 
 	resultBox.value = code;
@@ -1125,6 +1127,11 @@ const speedrunCodes = "0416CC1C 60000000\n0416CA9C 60000000\n042F6508 4E800020\n
  * Win condition code by djwang88
  */
 const winConditionCode = "041C427C 380000";
+
+/*
+ * No score bug fix by djwang88
+ */
+const noScoreFix = "C21C4344 00000003\n2C030000 40820008\n38600001 3803FFFF\n60000000 00000000";
 
 /*
  * Stage boundaries and exclusions by megaqwertification
