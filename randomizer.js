@@ -36,7 +36,7 @@
  * [2020-09-18] New version of mismatch randomizer code to only affect target stages
  * [2020-09-29] Target counter feature (version 1.1)
  * [2020-10-06] Fixed issue with Mario/Luigi/Bowser spawn differentials
- * [2020-10-26] Reduce impossible seeds feature
+ * [2020-10-26] Reduce impossible seeds feature (version 1.2)
  * [2020-11-01] Fixed issue with Ice Climbers mismatch instadeath
  * [2020-11-06] Options added for speedrun codes, win condition, and reduce impossible
  * [2020-12-09] Adjusted Luigi center spawn and Mewtwo skinny spawns -0.1 for Popo
@@ -783,6 +783,10 @@ function decodeRandomizerId(id) {
 
 function loadCode() {
 	var id = idBox.value;
+	loadCode(id);
+}
+
+function loadCode(id) {
 	var decoded = decodeRandomizerId(id);
 
 	if (decoded) {
@@ -814,6 +818,14 @@ function isAlphaNumeric(id) {
 		}
 	}
 	return true;
+}
+
+function loadSeedFromURL() {
+	var params = new URLSearchParams(window.location.search);
+	var seed = params.get('seed');
+	if (seed != null) {
+		loadCode(seed);
+	}
 }
 
 /*
