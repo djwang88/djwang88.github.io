@@ -783,10 +783,10 @@ function decodeRandomizerId(id) {
 
 function loadCode() {
 	var id = idBox.value;
-	loadCode(id);
+	loadCodeFromSeed(id);
 }
 
-function loadCode(id) {
+function loadCodeFromSeed(id) {
 	var decoded = decodeRandomizerId(id);
 
 	if (decoded) {
@@ -824,7 +824,7 @@ function loadSeedFromURL() {
 	var params = new URLSearchParams(window.location.search);
 	var seed = params.get('seed');
 	if (seed != null) {
-		loadCode(seed);
+		loadCodeFromSeed(seed);
 	}
 }
 
