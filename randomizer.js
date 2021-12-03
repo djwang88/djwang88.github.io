@@ -824,6 +824,7 @@ function loadSeedFromURL() {
 	var params = new URLSearchParams(window.location.search);
 	var seed = params.get('seed');
 	if (seed != null) {
+		showOptions();
 		loadCodeFromSeed(seed);
 	}
 }
@@ -875,7 +876,7 @@ function initializeDatabase() {
 	db = firebase.database().ref();
 	// db.on("value", function(snapshot) {
 	// 	var data = snapshot.val();
-	// 	document.querySelector('#counter').value = data.randomize_counter
+	// 	document.querySelector('#counter').value = data.randomize_counter;
 	// });
 }
 
