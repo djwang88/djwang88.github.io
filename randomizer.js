@@ -607,20 +607,22 @@ function onChangeStage() {
 function showOptions() {
 	optionsDiv.style.display = "block";
 	optionsButton.style.display = "none";
-	showHideMismatch();
+	showHideMismatch(true);
 }
 
 function hideOptions() {
 	optionsDiv.style.display = "none";
 	optionsButton.style.display = "block";
-	showHideMismatch();
+	showHideMismatch(true);
 }
 
-function showHideMismatch() {
+function showHideMismatch(noCheck) {
 	if (isMismatch()) {
 		mismatchNote.style.display = "block";
 		impossibleCheckboxDiv.style.display = "block";
-		impossibleCheckbox.checked = true;
+		if (!noCheck) {
+			impossibleCheckbox.checked = true;
+		}
 	} else {
 		mismatchNote.style.display = "none";
 		impossibleCheckboxDiv.style.display = "none";
@@ -665,17 +667,17 @@ function getNumTargets(stage) {
 }
 
 function isSpawn() {
-	if (optionsActive() && spawnBox.checked) {
-		return true;
+	if (optionsActive() && !spawnBox.checked) {
+		return false;
 	}
-	return false;
+	return true;
 }
 
 function isMismatch() {
-	if (optionsActive() && mismatchCheckbox.checked) {
-		return true;
+	if (optionsActive() && !mismatchCheckbox.checked) {
+		return false;
 	}
-	return false;
+	return true;
 }
 
 function isReduceImpossible() {
@@ -698,10 +700,10 @@ function getWinCondition() {
 }
 
 function isSpeedrunCodes() {
-	if (optionsActive() && speedrunCodesCheckbox.checked) {
-		return true;
+	if (optionsActive() && !speedrunCodesCheckbox.checked) {
+		return false;
 	}
-	return false;
+	return true;
 }
 
 function encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
@@ -797,7 +799,7 @@ function loadCodeFromSeed(id) {
 		speedrunCodesCheckbox.checked = decoded.enableSpeedrunCodes;
 		winConditionCheckbox.checked = decoded.enableWinCondition;
 		onChangeStage();
-		showHideMismatch();
+		showHideMismatch(true);
 		showHideWinCondition();
 		impossibleCheckbox.checked = decoded.reduceImpossible;
 		winConditionBox.value = decoded.winCondition.toString();
