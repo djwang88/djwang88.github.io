@@ -129,9 +129,9 @@ function randomize(seed, schema) {
 	} else if (stage == RANDOM) {
 		stage = Math.floor(getRandom() * stageHooks.length);
 		stageBox.value = stage.toString();
-		code = getCode(stage, spawn);
+		code = getCode(stage, spawn, schema);
 	} else {
-		code = getCode(stage, spawn);
+		code = getCode(stage, spawn, schema);
 	}
 
 	code += '\n' + defaultCodes;
@@ -169,17 +169,17 @@ function randomize(seed, schema) {
 	db.update(updateObject);
 }
 
-function getCode(stage, spawn) {
+function getCode(stage, spawn, schema) {
 	var numTargets = getNumTargets(stage);
 	if ((stage != SHEIK && numTargets != 10) ||
 		(stage == SHEIK && numTargets != 3)) {
-		return getModularCode([stage], spawn, numTargets);
+		return getModularCode([stage], spawn, numTargets, schema);
 	} else {
-		return getRegularCode(stage, spawn);
+		return getRegularCode(stage, spawn, schema);
 	}
 }
 
-function getRegularCode(stage, spawn) {
+function getRegularCode(stage, spawn, schema) {
 	var numTargets = 10;
 	var start = codeStart;
 	var end = codeEnd;
@@ -215,8 +215,13 @@ function getRegularCode(stage, spawn) {
 		result += coordsToHex(x, y);
 	}
 
+	var checkRandomExclusions = false;
+	if (schema == 3) {
+		checkRandomExclusions = isCheckRandomExclusions(stage);
+	}
+
 	for (let i = 0; i < numTargets; i++) {
-		var coords = getValidCoordinates(stage);
+		var coords = getValidCoordinates(stage, schema, null, checkRandomExclusions);
 		result += coordsToHex(coords.x, coords.y);
 	}
 	result += end;
@@ -296,8 +301,13 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 			}
 		}
 
+		var checkRandomExclusions = false;
+		if (schema == 3) {
+			checkRandomExclusions = isCheckRandomExclusions(stage);
+		}
+
 		for (let i = 0; i < numTargets; i++) {
-			var coords = getValidCoordinates(stage, schema, mismatchMap);
+			var coords = getValidCoordinates(stage, schema, mismatchMap, checkRandomExclusions);
 			stageData.push(coordsToHalfWords(coords.x, coords.y));
 		}
 	}
@@ -325,6 +335,17 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 	result += modularEnd;
 
 	return result;
+}
+
+function isCheckRandomExclusions(stage) {
+	if (randomExclusions[stage] != null) {
+		var rand = getRandomDecimal(0, 1);
+		var weight = randomExclusions[stage].slice(0, 1)[0];
+		if (rand > weight) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function getAllStagesCode(spawn, schema, mismatchMap) {
@@ -411,7 +432,7 @@ function getStageHeader(scale, spawn, compression, numTargets, stage) {
 	return header.toUpperCase();
 }
 
-function getValidCoordinates(stage, schema, mismatchMap) {
+function getValidCoordinates(stage, schema, mismatchMap, checkRandomExclusions) {
 	var invalid = true;
 	while (invalid) {
 		if (schema == 1 ||
@@ -428,14 +449,14 @@ function getValidCoordinates(stage, schema, mismatchMap) {
 			}
 		}
 
-		if (coordinatesValid(x, y, stage, schema, mismatchMap)) {
+		if (coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusions)) {
 			invalid = false;
 		}
 	}
 	return {x: x, y: y};
 }
 
-function coordinatesValid(x, y, stage, schema, mismatchMap) {
+function coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusions) {
 	if (schema == 1) {
 		if (exclusions[stage] != null) {
 			for (let i = 0; i < exclusions[stage].length; i++) {
@@ -517,6 +538,12 @@ function coordinatesValid(x, y, stage, schema, mismatchMap) {
 				if (withinBounds(x, y, vs)) {
 					return false;
 				}
+			}
+		}
+		if (checkRandomExclusions && randomExclusions[stage] != null) {
+			var vs = randomExclusions[stage].slice(1);
+			if (withinBounds(x, y, randomExclusions[stage])) {
+				return false;
 			}
 		}
 		return checkWeighted(x, y, stage);
@@ -2149,7 +2176,7 @@ mismatchExclusions[ROY][GANONDORF] = [
 ];
 
 /*
- * Weights
+ * Weights by djwang88 (with consultation by chaos6 and megaqwertification)
  */
 
 weights = [];
@@ -2257,9 +2284,9 @@ weights[PIKACHU] = [
 	[ 0.05, [60, -90], [155, -60] ],	// bottom-right
 	[ 0.8, [-130, 60], [-80, 115] ],	// top-left
 ];
-weights[JIGGLYPUFF] = [
-	[ 0.3, [-150, 70], [130, 90] ],		// top
-];
+// weights[JIGGLYPUFF] = [
+// 	[ 0.3, [-150, 70], [130, 90] ],		// top
+// ];
 weights[MEWTWO] = [
 	[ 0.3, [-120, -120], [-60, -80] ],	// bottom-left
 	[ 0.8, [40, 58], [70, 100] ],		// top-right
@@ -2270,3 +2297,6 @@ weights[ROY] = [
 	[ 0.3, [-155, 60], [-125, 115] ],	// middle-left
 	[ 0.05, [80, -30], [110, -10] ],	// bottom-right
 ];
+
+randomExclusions = [];
+randomExclusions[JIGGLYPUFF] = [ 0.3, [-150, 70], [130, 90] ];	// top
