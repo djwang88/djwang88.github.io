@@ -542,7 +542,7 @@ function coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusion
 		}
 		if (checkRandomExclusions && randomExclusions[stage] != null) {
 			var vs = randomExclusions[stage].slice(1);
-			if (withinBounds(x, y, randomExclusions[stage])) {
+			if (withinBounds(x, y, vs)) {
 				return false;
 			}
 		}
