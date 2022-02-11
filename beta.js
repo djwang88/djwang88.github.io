@@ -59,7 +59,6 @@ var optionsButton = document.querySelector('#show-options');
 var optionsDiv = document.querySelector('#options-div');
 var mismatchCheckboxDiv = document.querySelector('#mismatch-checkbox-div');
 var mismatchCheckbox = document.querySelector('#mismatch-checkbox');
-var mismatchNote = document.querySelector('#mismatch-note');
 var impossibleCheckboxDiv = document.querySelector('#impossible-checkbox-div');
 var impossibleCheckbox = document.querySelector('#impossible-checkbox');
 var idBox = document.querySelector('#randomizer-id');
@@ -68,6 +67,7 @@ var winConditionCheckbox = document.querySelector('#win-condition');
 var winConditionDiv = document.querySelector('#win-condition-div');
 var winConditionBox = document.querySelector('#win-condition-box');
 var speedrunCodesCheckbox = document.querySelector('#speedrun-codes');
+var weightedCheckbox = document.querySelector('#weighted');
 var codeDetailsDiv = document.querySelector('#code-details');
 
 var getRandom;
@@ -92,6 +92,7 @@ function randomize(seed, schema) {
 	var enableSpeedrunCodes = isSpeedrunCodes();
 	var enableWinCondition = isWinCondition();
 	var winCondition = getWinCondition();
+	var weighted = isWeighted();
 
 	if (isNaN(numTargets) || numTargets < 1 || numTargets > 255) {
 		resultBox.value = "Number of targets must be a number between 1 and 255."
@@ -108,7 +109,7 @@ function randomize(seed, schema) {
 	var code = "";
 	if (stage == ALL) {
 		if (schema == 1) {
-			code = getAllStagesCode(spawn, schema);
+			code = getAllStagesCode(spawn, weighted, schema);
 			if (mismatch) {
 				var mismatchObject = getMismatchCode();
 				code += '\n' + mismatchObject['code'];
@@ -117,21 +118,21 @@ function randomize(seed, schema) {
 			if (mismatch) {
 				mismatchObject = getMismatchCode();
 				if (reduceImpossible) {
-					code = getAllStagesCode(spawn, schema, mismatchObject['map']);
+					code = getAllStagesCode(spawn, weighted, schema, mismatchObject['map']);
 				} else {
-					code = getAllStagesCode(spawn, schema);
+					code = getAllStagesCode(spawn, weighted, schema);
 				}
 				code += '\n' + mismatchObject['code'];
 			} else {
-				code = getAllStagesCode(spawn, schema);
+				code = getAllStagesCode(spawn, weighted, schema);
 			}
 		}
 	} else if (stage == RANDOM) {
 		stage = Math.floor(getRandom() * stageHooks.length);
 		stageBox.value = stage.toString();
-		code = getCode(stage, spawn, schema);
+		code = getCode(stage, spawn, weighted, schema);
 	} else {
-		code = getCode(stage, spawn, schema);
+		code = getCode(stage, spawn, weighted, schema);
 	}
 
 	code += '\n' + defaultCodes;
@@ -151,7 +152,7 @@ function randomize(seed, schema) {
 
 	resultBox.value = code;
 	idBox.value = encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
-		reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition);
+		reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition, weighted);
 
 	var updateObject = {};
 	if (load) {
@@ -165,21 +166,22 @@ function randomize(seed, schema) {
 		if (reduceImpossible) updateObject["reduce_counter"] = firebase.database.ServerValue.increment(1);
 		if (enableSpeedrunCodes) updateObject["codes_counter"] = firebase.database.ServerValue.increment(1);
 		if (enableWinCondition) updateObject["win_counter_" + winCondition] = firebase.database.ServerValue.increment(1);
+		if (weighted) updateObject["weighted_counter"] = firebase.database.ServerValue.increment(1);
 	}
 	db.update(updateObject);
 }
 
-function getCode(stage, spawn, schema) {
+function getCode(stage, spawn, weighted, schema) {
 	var numTargets = getNumTargets(stage);
 	if ((stage != SHEIK && numTargets != 10) ||
 		(stage == SHEIK && numTargets != 3)) {
-		return getModularCode([stage], spawn, numTargets, schema);
+		return getModularCode([stage], spawn, weighted, numTargets, schema);
 	} else {
-		return getRegularCode(stage, spawn, schema);
+		return getRegularCode(stage, spawn, weighted, schema);
 	}
 }
 
-function getRegularCode(stage, spawn, schema) {
+function getRegularCode(stage, spawn, weighted, schema) {
 	var numTargets = 10;
 	var start = codeStart;
 	var end = codeEnd;
@@ -215,20 +217,17 @@ function getRegularCode(stage, spawn, schema) {
 		result += coordsToHex(x, y);
 	}
 
-	var checkRandomExclusions = false;
-	if (schema == 3) {
-		checkRandomExclusions = isCheckRandomExclusions(stage);
-	}
+	var checkRandomExclusions = isCheckRandomExclusions(stage, weighted, schema);
 
 	for (let i = 0; i < numTargets; i++) {
-		var coords = getValidCoordinates(stage, schema, null, checkRandomExclusions);
+		var coords = getValidCoordinates(stage, weighted, schema, null, checkRandomExclusions);
 		result += coordsToHex(coords.x, coords.y);
 	}
 	result += end;
 	return result;
 }
 
-function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
+function getModularCode(stages, spawn, weighted, numTargets, schema, mismatchMap) {
 	// build injection code
 	var instructions = [];
 	instructions = instructions.concat(modularInjectionStart);
@@ -301,13 +300,10 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 			}
 		}
 
-		var checkRandomExclusions = false;
-		if (schema == 3) {
-			checkRandomExclusions = isCheckRandomExclusions(stage);
-		}
+		var checkRandomExclusions = isCheckRandomExclusions(stage, weighted, schema);
 
 		for (let i = 0; i < numTargets; i++) {
-			var coords = getValidCoordinates(stage, schema, mismatchMap, checkRandomExclusions);
+			var coords = getValidCoordinates(stage, weighted, schema, mismatchMap, checkRandomExclusions);
 			stageData.push(coordsToHalfWords(coords.x, coords.y));
 		}
 	}
@@ -337,24 +333,26 @@ function getModularCode(stages, spawn, numTargets, schema, mismatchMap) {
 	return result;
 }
 
-function isCheckRandomExclusions(stage) {
-	if (randomExclusions[stage] != null) {
-		var rand = getRandomDecimal(0, 1);
-		var weight = randomExclusions[stage].slice(0, 1)[0];
-		if (rand > weight) {
-			return true;
+function isCheckRandomExclusions(stage, weighted, schema) {
+	if (schema > 2 && weighted) {
+		if (randomExclusions[stage] != null) {
+			var rand = getRandomDecimal(0, 1);
+			var weight = randomExclusions[stage].slice(0, 1)[0];
+			if (rand > weight) {
+				return true;
+			}
 		}
 	}
 	return false;
 }
 
-function getAllStagesCode(spawn, schema, mismatchMap) {
+function getAllStagesCode(spawn, weighted, schema, mismatchMap) {
 	var numTargets = getNumTargets();
 	var stages = [];
 	for (let i = 0; i < 26; i++) {
 		stages.push(i);
 	}
-	return getModularCode(stages, spawn, numTargets, schema, mismatchMap);
+	return getModularCode(stages, spawn, weighted, numTargets, schema, mismatchMap);
 }
 
 function showHideGeckoNote() {
@@ -432,7 +430,7 @@ function getStageHeader(scale, spawn, compression, numTargets, stage) {
 	return header.toUpperCase();
 }
 
-function getValidCoordinates(stage, schema, mismatchMap, checkRandomExclusions) {
+function getValidCoordinates(stage, weighted, schema, mismatchMap, checkRandomExclusions) {
 	var invalid = true;
 	while (invalid) {
 		if (schema == 1 ||
@@ -449,14 +447,14 @@ function getValidCoordinates(stage, schema, mismatchMap, checkRandomExclusions) 
 			}
 		}
 
-		if (coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusions)) {
+		if (coordinatesValid(x, y, stage, weighted, schema, mismatchMap, checkRandomExclusions)) {
 			invalid = false;
 		}
 	}
 	return {x: x, y: y};
 }
 
-function coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusions) {
+function coordinatesValid(x, y, stage, weighted, schema, mismatchMap, checkRandomExclusions) {
 	if (schema == 1) {
 		if (exclusions[stage] != null) {
 			for (let i = 0; i < exclusions[stage].length; i++) {
@@ -520,7 +518,10 @@ function coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusion
 			for (let j = 0; j < exceptions[stage].length; j++) {
 				var ex = exceptions[stage][j];
 				if (withinBounds(x, y, ex)) {
-					return checkWeighted(x, y, stage);
+					if (weighted) {
+						return checkWeighted(x, y, stage);
+					}
+					return true;
 				}
 			}
 		}
@@ -546,7 +547,10 @@ function coordinatesValid(x, y, stage, schema, mismatchMap, checkRandomExclusion
 				return false;
 			}
 		}
-		return checkWeighted(x, y, stage);
+		if (weighted) {
+			return checkWeighted(x, y, stage);
+		}
+		return true;
 	}
 }
 
@@ -714,13 +718,11 @@ function hideOptions() {
 
 function showHideMismatch(noCheck) {
 	if (isMismatch()) {
-		mismatchNote.style.display = "block";
 		impossibleCheckboxDiv.style.display = "block";
 		if (!noCheck) {
 			impossibleCheckbox.checked = true;
 		}
 	} else {
-		mismatchNote.style.display = "none";
 		impossibleCheckboxDiv.style.display = "none";
 	}
 }
@@ -802,8 +804,15 @@ function isSpeedrunCodes() {
 	return true;
 }
 
+function isWeighted() {
+	if (optionsActive() && !weightedCheckbox.checked) {
+		return false;
+	}
+	return true;
+}
+
 function encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
-	reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition) {
+	reduceImpossible, enableSpeedrunCodes, enableWinCondition, winCondition, weighted) {
 	if (!schema) schema = CURRENT_SCHEMA;
 	var options = "1";
 
@@ -813,6 +822,7 @@ function encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
 	if (mismatch && reduceImpossible) mask |= OPTION_IMPOSSIBLE;
 	if (enableSpeedrunCodes) mask |= OPTION_SPEEDRUN;
 	if (enableWinCondition) mask |= OPTION_WIN;
+	if (weighted) mask |= OPTION_WEIGHTED;
 	options += mask.toString().padStart(2, '0');
 
 	options += numTargets.toString().padStart(3, '0');
@@ -841,8 +851,7 @@ function decodeRandomizerId(id) {
 		var enableWinCondition = false;
 		var winCondition = 0;
 
-	} else if (schema == 2 ||
-			   schema == 3) {
+	} else if (schema == 2) {
 		var options = base62.decode(id.slice(1, 7)).toString();
 		var seed = base62.decode(id.slice(7));
 
@@ -852,6 +861,21 @@ function decodeRandomizerId(id) {
 		var reduceImpossible = (mask & OPTION_IMPOSSIBLE) != 0;
 		var enableSpeedrunCodes = (mask & OPTION_SPEEDRUN) != 0;
 		var enableWinCondition = (mask & OPTION_WIN) != 0;
+
+		var numTargets = parseInt(options.slice(3, 6));
+		var winCondition = parseInt(options.slice(6, 9));
+		var stage = parseInt(options.slice(9));
+	} else if (schema == 3) {
+		var options = base62.decode(id.slice(1, 7)).toString();
+		var seed = base62.decode(id.slice(7));
+
+		var mask = parseInt(options.slice(1, 3));
+		var spawn = (mask & OPTION_SPAWN) != 0;
+		var mismatch = (mask & OPTION_MISMATCH) != 0;
+		var reduceImpossible = (mask & OPTION_IMPOSSIBLE) != 0;
+		var enableSpeedrunCodes = (mask & OPTION_SPEEDRUN) != 0;
+		var enableWinCondition = (mask & OPTION_WIN) != 0;
+		var weighted = (mask & OPTION_WEIGHTED) != 0;
 
 		var numTargets = parseInt(options.slice(3, 6));
 		var winCondition = parseInt(options.slice(6, 9));
@@ -877,6 +901,7 @@ function decodeRandomizerId(id) {
 		enableSpeedrunCodes: enableSpeedrunCodes,
 		enableWinCondition: enableWinCondition,
 		winCondition: winCondition,
+		weighted: weighted,
 	}
 }
 
@@ -900,6 +925,7 @@ function loadCodeFromSeed(id) {
 		showHideWinCondition();
 		impossibleCheckbox.checked = decoded.reduceImpossible;
 		winConditionBox.value = decoded.winCondition.toString();
+		weightedCheckbox.checked = decoded.weighted;
 
 		randomize(decoded.seed, decoded.schema);
 	} else {
@@ -973,10 +999,10 @@ function initializeDatabase() {
 	firebase.initializeApp(firebaseConfig);
 
 	db = firebase.database().ref();
-	// db.on("value", function(snapshot) {
-	// 	var data = snapshot.val();
-	// 	document.querySelector('#counter').value = data.randomize_counter;
-	// });
+	db.on("value", function(snapshot) {
+		var data = snapshot.val();
+		document.querySelector('#counter').innerHTML = data.randomize_counter;
+	});
 }
 
 /*
@@ -1141,6 +1167,7 @@ const OPTION_MISMATCH = 2;
 const OPTION_IMPOSSIBLE = 4;
 const OPTION_SPEEDRUN = 8;
 const OPTION_WIN = 16;
+const OPTION_WEIGHTED = 32;
 
 /*
  * Assembly code by Punkline
