@@ -855,7 +855,7 @@ function encodeRandomizerId(schema, seed, stage, numTargets, spawn, mismatch,
 	options += enableWinCondition ? winCondition.toString().padStart(3, '0') : '000';
 	options += stage.toString().padStart(2, '0');
 
-	var extra = "+";
+	var extra = "-";
 	var mask = 0;
 	if (enableMoving) mask |= EXTRA_MOVING;
 	if (mask > 0) {
@@ -873,7 +873,7 @@ function decodeRandomizerId(id) {
 	var schema = base62.decode(id.slice(0, 1));
 
 	if (schema >= 3) {
-		var idSplit = id.split('+');
+		var idSplit = id.split('-');
 		var suffix = idSplit[1];
 		id = idSplit[0];
 	}
