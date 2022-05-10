@@ -82,13 +82,16 @@
                         <div id="seed-div" style="margin-top: 8px">
                             <label for="randomizer-id">Seed:</label>
                             <input id="randomizer-id" style="width: 160px">
-                            <button id="load" onclick="loadCode()">Load</button>
                         </div>
-                        <div id="num-targets-div" style="margin-top: 10px">
+                        <div style="margin-top: 3px">
+                            <button id="copylink" onclick="copyLink()" style="margin-left: 20px">Copy Link</button>
+                            <button id="load" onclick="loadCode()">Load Seed</button>
+                        </div>
+                        <div id="num-targets-div" style="margin-top: 13px">
                             <label for="num-targets">Number of targets: </label>
                             <input id="num-targets" style="width: 40px" value="10">
                         </div>
-                        <div style="margin-top: 8px">
+                        <div style="margin-top: 5px">
                             <input id="spawn" type="checkbox" checked>Randomize spawn location
                         </div>
                         <div id="mismatch-checkbox-div">

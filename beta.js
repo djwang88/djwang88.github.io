@@ -47,7 +47,8 @@
  * [2022-01-03] Default to spawn, mismatch, reduce impossible, speedrun
  * [2022-02-10] Display code counter, removed mismatch warning
  * [2022-05-08] Enable moving targets feature, use modular code for everything
- * Weighted areas, random exclusions (version 3.0)
+ * [2022-05-10] Copy link feature
+ * Weighted areas, random exclusions (conditional on top spawn) (version 3.0)
  */
 
 includeJs("seedrandom.js");
@@ -233,6 +234,8 @@ function getModularCode(stages, spawn, weighted, enableMoving, numTargets, schem
 	var instructions = [];
 	instructions = instructions.concat(modularInjectionStart);
 	var stageData = [];
+	var spawnPosition = -1;
+
 	for (let i = 0; i < stages.length; i++) {
 		var stage = stages[i];
 		stageData.push(getStageHeader(DEFAULT_SCALE, spawn, COMPRESSION_HWORD, numTargets, stage));
@@ -282,7 +285,8 @@ function getModularCode(stages, spawn, weighted, enableMoving, numTargets, schem
 						break;
 				}
 			} else if (spawn) {
-				var spawnCoordinates = getSpawnHalfWords(stage, enableMoving);
+				spawnPosition = Math.floor(getRandom() * spawns[stage].length);
+				var spawnCoordinates = getSpawnHalfWords(stage, enableMoving, spawnPosition);
 				if (mismatchMap && stage == ICECLIMBERS) {
 					var character = mismatchMap[stage];
 					switch (character) {
@@ -301,8 +305,7 @@ function getModularCode(stages, spawn, weighted, enableMoving, numTargets, schem
 			}
 		}
 
-		var checkRandomExclusions = isCheckRandomExclusions(stage, weighted, schema);
-
+		var checkRandomExclusions = isCheckRandomExclusions(stage, weighted, schema, spawnPosition);
 		for (let i = 0; i < numTargets; i++) {
 			var coords = getValidCoordinates(stage, weighted, schema, mismatchMap, checkRandomExclusions);
 			stageData.push(coordsToHalfWords(coords.x, coords.y));
@@ -339,8 +342,11 @@ function getModularCode(stages, spawn, weighted, enableMoving, numTargets, schem
 	return result;
 }
 
-function isCheckRandomExclusions(stage, weighted, schema) {
+function isCheckRandomExclusions(stage, weighted, schema, spawnPosition = -1) {
 	if (schema >= 3 && weighted) {
+		if (topSpawn[stage] != null && spawnPosition == topSpawn[stage]) {
+			return false;
+		}
 		if (randomExclusions[stage] != null) {
 			var rand = getRandomDecimal(0, 1);
 			var weight = randomExclusions[stage].slice(0, 1)[0];
@@ -673,11 +679,11 @@ function toHalfWord(floatNum) {
 	return fixed.toString(16).padStart(4, pad).toUpperCase();
 }
 
-function getSpawnHalfWords(stage, enableMoving = false) {
-	var index = Math.floor(getRandom() * spawns[stage].length);
+function getSpawnHalfWords(stage, enableMoving = false, spawnPosition = null) {
+	var index = spawnPosition == null ? Math.floor(getRandom() * spawns[stage].length) : spawnPosition;
 	var x = spawns[stage][index][0];
 	var y = spawns[stage][index][1];
-	
+
 	// handle bizarre offsets if MTX updates are left on
 	if (enableMoving) {
 		if (stage == MARIO) {
@@ -708,6 +714,14 @@ function isEven(num) {
 function copy() {
 	resultBox.select();
 	document.execCommand('copy');
+}
+
+function copyLink() {
+	if (idBox.value.length == 0) {
+		resultBox.value = "No seed to copy!";
+	} else {
+		navigator.clipboard.writeText(window.location.href.split('?')[0] + "?seed=" + idBox.value);
+	}
 }
 
 function onChangeStage() {
@@ -1363,20 +1377,16 @@ bounds = [
 	{ x1: -100, y1: 0, x2: 100, y2: 80 }, // 25 SHEIK
 ];
 
+/*
+ * Adjusted bounds for 3.0
+ */
 newBounds = [];
 newBounds[DRMARIO] = { x1: -145, y1: -140, x2: 150, y2: 130 };
-newBounds[BOWSER] = { x1: -105, y1: -150, x2: 250, y2: 100 },
-	newBounds[DK] = { x1: -190, y1: -30, x2: 190, y2: 225 };
-newBounds[FALCO] = { x1: -140, y1: -80, x2: 110, y2: 130 },
-	newBounds[FOX] = { x1: -150, y1: -150, x2: 145, y2: 150 },
-	newBounds[SAMUS] = { x1: -130, y1: -110, x2: 130, y2: 150 },
-
-	newExclusions = [];
-newExclusions[DK] = [
-	[[-190, -30], [-80, 0]],
-	[[-30, -30], [190, 0]],
-	[[100, 200], [190, 225]],
-];
+newBounds[BOWSER] = { x1: -105, y1: -150, x2: 250, y2: 100 };
+newBounds[DK] = { x1: -190, y1: -30, x2: 190, y2: 225 };
+newBounds[FALCO] = { x1: -140, y1: -80, x2: 110, y2: 130 };
+newBounds[FOX] = { x1: -150, y1: -150, x2: 145, y2: 150 };
+newBounds[SAMUS] = { x1: -130, y1: -110, x2: 130, y2: 150 };
 
 /*
  * Two-coordinate pairs are assumed to be bottom-left and top-right corners of a rectangle
@@ -1623,6 +1633,19 @@ exclusions[SHEIK] = [
 ];
 
 /*
+ * New exclusions for 3.0
+ */
+newExclusions = [];
+newExclusions[DK] = [
+	[[-190, -30], [-80, 0]],
+	[[-30, -30], [190, 0]],
+	[[100, 200], [190, 225]],
+];
+newExclusions[FALCO] = [
+	[[-100, -80], [-40, -70]],
+];
+
+/*
  * Exceptions to the exclusions
  */
 exceptions = [];
@@ -1828,7 +1851,6 @@ spawns[SHEIK] = [
  * Mismatch exclusions by djwang88 (with consultation by chaos6)
  * Map is stage to character
  */
-
 mismatchExclusions = [];
 
 mismatchExclusions[MARIO] = [];
@@ -2261,11 +2283,10 @@ mismatchExclusions[ROY][GANONDORF] = [
 /*
  * Weights by djwang88 (with consultation by chaos6 and megaqwertification)
  */
-
 weights = [];
 weights[DRMARIO] = [
 	[0.1, [95, 80], [150, 130]], 		// top-right
-	[0.5, [70, -105], [150, -60]],	// bottom-right
+	[0.5, [70, -105], [150, -60]],		// bottom-right
 	[0.1, [15, -140], [150, -105]],
 	[0.2, [-145, -140], [-85, -105]],	// bottom-left
 	[0.2, [-85, -140], [-45, -130]],
@@ -2281,12 +2302,12 @@ weights[BOWSER] = [
 	[0.3, [175, -5], [250, 50]],
 	[0.7, [-110, 65], [-5, 100]],		// top-left
 	[0.4, [130, -150], [250, -120]],	// bottom-right
-	[0.3, [-110, -150], [-50, -120]], // bottom-left
+	[0.3, [-110, -150], [-50, -120]], 	// bottom-left
 ];
 weights[PEACH] = [
-	[0.1, [-110, 85], [-45, 150]],	// top-left
-	[0.5, [150, 130], [180, 150]],	// top-right
-	[0.5, [150, 0], [180, 65]],		// middle-right
+	[0.1, [-110, 85], [-45, 150]],		// top-left
+	[0.5, [150, 130], [180, 150]],		// top-right
+	[0.5, [150, 0], [180, 65]],			// middle-right
 	//	[ 0.5, [150, 150], [150, 85],		// top-middle
 	//		[30, 130], [-45, 130],
 	//		[-45, 150] ],
@@ -2300,8 +2321,8 @@ weights[YOSHI] = [
 weights[DK] = [
 	[0.1, [-190, 0], [-150, 30]],		// bottom-left
 	[0.5, [-90, 190], [10, 225]],		// top-middle
-	[0.1, [130, 160], [190, 225]],	// top-right
-	//  [ 0.3, [-80, -30], [-30, 0] ],		// bottom-middle
+	[0.1, [130, 160], [190, 225]],		// top-right
+	// [ 0.3, [-80, -30], [-30, 0] ],		// bottom-middle
 ];
 weights[CFALCON] = [
 	[0.3, [-160, -130], [-130, -20]],	// bottom-left
@@ -2309,83 +2330,94 @@ weights[CFALCON] = [
 	[0.5, [-60, 70], [50, 150]],
 ];
 weights[FALCO] = [
-	[0.5, [-140, 90], [-70, 130]],	// top-left
-	[0.1, [-40, -80], [100, -70]],	// bottom-right
+	[0.5, [-140, 90], [-70, 130]],		// top-left
+	[0.1, [-40, -80], [100, -70]],		// bottom-right
 	[0.1, [10, -70], [40, -30]],
 ];
 weights[FOX] = [
 	[0.3, [-85, 120], [85, 150]],		// top-middle
 	[0.3, [85, 105], [150, 150]],		// top-right
-	[0.3, [-150, 80], [-80, 150]],	// top-left
-	[0.5, [-150, 10], [-120, 80]],	// middle-left
-	[0.3, [-150, -150], [-60, -100]],	// bottom-left
-	[0.3, [-60, -150], [150, -120]],	// bottom-right
+	[0.3, [-150, 80], [-80, 150]],		// top-left
+	[0.5, [-150, 10], [-120, 80]],		// middle-left
+	[0.3, [-150, -150], [45, -120]],	// bottom
 ];
 weights[NESS] = [
 	[0.3, [-140, -140], [-10, -100]],	// bottom-left
-	[0.2, [-35, 65], [0, 100]],		// top-middle
-	[0.2, [50, -140], [150, -100]],	// bottom-right
+	[0.2, [-35, 65], [0, 100]],			// top-middle
+	[0.2, [50, -140], [150, -100]],		// bottom-right
 ];
 weights[ICECLIMBERS] = [
-	[0.1, [-120, 440], [-80, 500]],	// top-left
+	[0.1, [-120, 440], [-80, 500]],		// top-left
 	[0.1, [80, 440], [120, 500]],		// top-right
 ];
 weights[KIRBY] = [
-	[0.1, [-150, 160], [-90, 180]],	// top-left
+	[0.1, [-150, 160], [-90, 180]],		// top-left
 	[0.3, [10, 160], [50, 180]],		// top-middle
 	[0.3, [80, -70], [130, -30]],		// bottom-right
 ];
 weights[SAMUS] = [
 	[0.5, [-130, 80], [-110, 150]], 	// top-left
-	[0.5, [100, 110], [130, 150]],	// top-right
+	[0.5, [100, 110], [130, 150]],		// top-right
 	[0.1, [20, -110], [50, -70]],		// bottom-right
 ];
 weights[ZELDA] = [
-	[0.3, [-130, 80], [115, 115]],	// top
+	[0.3, [-130, 80], [115, 115]],		// top
 	[0.1, [-130, -100], [-75, -45]],	// bottom-left
 	[0.1, [-75, -100], [-40, -90]],
 ];
 weights[LINK] = [
 	[0.1, [-150, -100], [-90, -40]],	// bottom-left
-	[0.5, [-150, -40], [-120, 70]],	// middle-left
-	[0.5, [-150, 70], [-90, 100]],	// top-left
+	[0.5, [-150, -40], [-120, 70]],		// middle-left
+	[0.5, [-150, 70], [-90, 100]],		// top-left
 ];
 weights[YLINK] = [
-	[0.3, [-190, -40], [-80, 25]],	// bottom-left
+	[0.3, [-190, -40], [-80, 25]],		// bottom-left
 	[0.3, [-190, 170], [-140, 210]],	// top-left
-	[0.5, [-190, 25], [-170, 130]],	// middle-left
+	[0.5, [-190, 25], [-170, 130]],		// middle-left
 ];
 weights[PICHU] = [
-	[0.1, [-160, 65], [-120, 110]],	// top-left
-	[0.3, [-160, -80], [-120, 22]],	// bottom-left
-	[0.3, [-120, -80], [15, -60]],	// bottom-middle
+	[0.1, [-160, 88], [-120, 110]],		// top-left
+	[0.3, [-160, -80], [-120, 22]],		// bottom-left
+	[0.3, [-120, -80], [15, -60]],		// bottom-middle
 	[0.8, [95, -80], [145, -20]],		// bottom-right
 ];
 weights[PIKACHU] = [
 	[0.05, [-130, -90], [-60, -60]],	// bottom-left
-	[0.05, [60, -90], [155, -60]],	// bottom-right
-	[0.8, [-130, 60], [-80, 115]],	// top-left
+	[0.05, [60, -90], [155, -60]],		// bottom-right
+	[0.8, [-130, 60], [-80, 115]],		// top-left
 ];
 // weights[JIGGLYPUFF] = [
 // 	[ 0.3, [-150, 70], [130, 90] ],		// top
 // ];
 weights[MEWTWO] = [
 	[0.3, [-120, -120], [-60, -80]],	// bottom-left
-	[0.8, [40, 58], [70, 100]],		// top-right
+	[0.8, [40, 58], [70, 100]],			// top-right
 	[0.3, [70, 80], [130, 100]],
 ];
 weights[ROY] = [
-	[0.1, [-155, 115], [-85, 140]],	// top-left
-	[0.3, [-155, 60], [-125, 115]],	// middle-left
-	[0.05, [80, -30], [110, -10]],	// bottom-right
+	[0.1, [-155, 115], [-85, 140]],		// top-left
+	[0.3, [-155, 60], [-125, 115]],		// middle-left
+	[0.05, [80, -30], [110, -10]],		// bottom-right
 ];
 
+/*
+ * Random exclusions
+ */
 randomExclusions = [];
-randomExclusions[PEACH] = [0.5, [-110, 120], [-110, 150],		// top
+randomExclusions[PEACH] = [0.35, [-110, 120], [-110, 150],		// top
 	[180, 150], [180, 65], [150, 65], [150, 85],
 	[30, 130], [17, 130], [17, 120]];
-randomExclusions[YOSHI] = [0.3, [-150, 135], [130, 170]];		// top
-randomExclusions[SAMUS] = [0.5, [-130, 60], [-130, 150],		// top
+randomExclusions[YOSHI] = [0.25, [-150, 135], [130, 170]];		// top
+randomExclusions[SAMUS] = [0.35, [-130, 60], [-130, 150],		// top
 	[130, 150], [130, 110], [20, 110], [20, 140],
 	[-20, 140], [-20, 110], [-70, 110], [-70, 60]];
-randomExclusions[JIGGLYPUFF] = [0.5, [-150, 70], [130, 90]];	// top
+randomExclusions[JIGGLYPUFF] = [0.35, [-150, 70], [130, 90]];	// top
+
+/*
+ * Top spawn indices
+ */
+topSpawn = [];
+topSpawn[PEACH] = 3;
+topSpawn[YOSHI] = 3;
+topSpawn[SAMUS] = 2;
+topSpawn[JIGGLYPUFF] = 3;
