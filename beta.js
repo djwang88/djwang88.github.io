@@ -760,7 +760,7 @@ function onChangeStage() {
 	var stage = getStage();
 	if (stage == ALL) {
 		mismatchCheckboxDiv.style.display = "block";
-		randomlyDistributeDiv.style.display = "block";
+//		randomlyDistributeDiv.style.display = "block";
 	} else {
 		mismatchCheckboxDiv.style.display = "none";
 		impossibleCheckboxDiv.style.display = "none";
