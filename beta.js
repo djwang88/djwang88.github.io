@@ -87,7 +87,7 @@ function randomize(seed, schema) {
 	var load = true;
 	if (!seed) {
 		getRandom = new Math.seedrandom();
-		seed = Math.floor(getRandom() * Number.MAX_SAFE_INTEGER);
+		seed = Math.floor(getRandom() * Number.MAX_SAFE_INTEGER);	// 9,007,199,254,740,991
 		load = false;
 	}
 	getRandom = new Math.seedrandom(seed);
@@ -187,51 +187,51 @@ function getCode(stage, spawn, weighted, enableMoving, schema) {
 	return getModularCode([stage], spawn, weighted, enableMoving, false, getNumTargets(stage), schema);
 }
 
-function getRegularCode(stage, spawn, weighted, schema) {
-	var numTargets = 10;
-	var start = codeStart;
-	var end = codeEnd;
+// function getRegularCode(stage, spawn, weighted, schema) {
+// 	var numTargets = 10;
+// 	var start = codeStart;
+// 	var end = codeEnd;
 
-	if (stage == 25) {
-		// sheik-specific code
-		start = codeStartSheik;
-		end = codeEndSheik;
-		numTargets = 3;
-	}
+// 	if (stage == 25) {
+// 		// sheik-specific code
+// 		start = codeStartSheik;
+// 		end = codeEndSheik;
+// 		numTargets = 3;
+// 	}
 
-	if (spawn) {
-		start = codeStartSpawn;
-		end = codeEndSpawn;
-	}
+// 	if (spawn) {
+// 		start = codeStartSpawn;
+// 		end = codeEndSpawn;
+// 	}
 
-	var result = stageHooks[stage] + start;
+// 	var result = stageHooks[stage] + start;
 
-	if (spawn) {
-		var index = Math.floor(getRandom() * spawns[stage].length);
-		var x = spawns[stage][index][0];
-		var y = spawns[stage][index][1];
+// 	if (spawn) {
+// 		var index = Math.floor(getRandom() * spawns[stage].length);
+// 		var x = spawns[stage][index][0];
+// 		var y = spawns[stage][index][1];
 
-		// handle bizarre spawn differentials for the short code
-		if (stage == MARIO) {
-			y -= 28;
-		} else if (stage == LUIGI) {
-			y -= 20;
-		} else if (stage == BOWSER) {
-			x += 50;
-			y -= 77;
-		}
-		result += coordsToHex(x, y);
-	}
+// 		// handle bizarre spawn differentials for the short code
+// 		if (stage == MARIO) {
+// 			y -= 28;
+// 		} else if (stage == LUIGI) {
+// 			y -= 20;
+// 		} else if (stage == BOWSER) {
+// 			x += 50;
+// 			y -= 77;
+// 		}
+// 		result += coordsToHex(x, y);
+// 	}
 
-	var checkRandomExclusions = isCheckRandomExclusions(stage, weighted, schema);
+// 	var checkRandomExclusions = isCheckRandomExclusions(stage, weighted, schema);
 
-	for (let i = 0; i < numTargets; i++) {
-		var coords = getValidCoordinates(stage, weighted, schema, null, checkRandomExclusions);
-		result += coordsToHex(coords.x, coords.y);
-	}
-	result += end;
-	return result;
-}
+// 	for (let i = 0; i < numTargets; i++) {
+// 		var coords = getValidCoordinates(stage, weighted, schema, null, checkRandomExclusions);
+// 		result += coordsToHex(coords.x, coords.y);
+// 	}
+// 	result += end;
+// 	return result;
+// }
 
 function getModularCode(stages, spawn, weighted, enableMoving, randomlyDistribute, numTargets, schema, mismatchMap) {
 	// build injection code
@@ -760,7 +760,7 @@ function onChangeStage() {
 	var stage = getStage();
 	if (stage == ALL) {
 		mismatchCheckboxDiv.style.display = "block";
-//		randomlyDistributeDiv.style.display = "block";
+		randomlyDistributeDiv.style.display = "block";
 	} else {
 		mismatchCheckboxDiv.style.display = "none";
 		impossibleCheckboxDiv.style.display = "none";
