@@ -81,14 +81,17 @@
                     <div id="options-div" style="display: none">
                         <div id="seed-div" style="margin-top: 8px">
                             <label for="randomizer-id">Seed:</label>
-                            <input id="randomizer-id" style="width: 140px">
-                            <button id="load" onclick="loadCode()">Load</button>
+                            <input id="randomizer-id" style="width: 160px">
                         </div>
-                        <div id="num-targets-div" style="margin-top: 10px">
+                        <div style="margin-top: 3px">
+                            <button id="copylink" onclick="copyLink()" style="margin-left: 20px">Copy Link</button>
+                            <button id="load" onclick="loadCode()">Load Seed</button>
+                        </div>
+                        <div id="num-targets-div" style="margin-top: 13px">
                             <label for="num-targets">Number of targets: </label>
                             <input id="num-targets" style="width: 40px" value="10">
                         </div>
-                        <div style="margin-top: 8px">
+                        <div style="margin-top: 5px">
                             <input id="spawn" type="checkbox" checked>Randomize spawn location
                         </div>
                         <div id="mismatch-checkbox-div">
@@ -98,6 +101,9 @@
                             </div>
                         </div>
                         <div style="margin-top: 8px">
+                            <input id="weighted" type="checkbox" checked>Use weighted randomization
+                        </div>
+                        <div>
                             <input id="speedrun-codes" type="checkbox" checked>Enable speedrun codes
                         </div>
                         <div>
@@ -108,10 +114,13 @@
                                 targets are broken
                             </div>
                         </div>
-                        <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
-                        <div id="mismatch-note" style="display: none; margin-top: 30px;">
-                            <b>NOTE: </b>Because target bounds and spawns are designed with each <br>stage's default character in mind, randomizing character mismatch may <br>result in unwinnable character & stage combinations or other issues.
+                        <div style="margin-top: 8px">
+                            <input id="enable-moving" type="checkbox"">Enable moving targets <i>(experimental)</i>
                         </div>
+                        <div id="randomly-distribute-div">
+                            <input id="randomly-distribute" type="checkbox"">Randomly distribute targets <i>(experimental)</i>
+                        </div>
+                        <button onclick="hideOptions()" style="margin-top: 8px">Cancel</button>
                     </div>
                 </td>
             </tr>
@@ -130,7 +139,7 @@
             </ul>
             <b>Advanced Options:</b>
             <ul>
-                <li>Copy the randomizer <b>Seed</b> and use the <b>Load</b> feature to share randomizer stages
+                <li>Copy the randomizer <b>Seed</b> and use the <b>Load Seed</b> feature to share randomizer stages
                     <ul><li>(<i>For long-term archival, it is recommended to copy and save the entire code</i>)</li></ul>
                 </li>
                 <li><b>Number of targets</b> places a specified number of targets on the stage (between 1 and 255)</li>
@@ -151,7 +160,9 @@
                         <li>Simple Target Counter [<b>djwang88, Punkline</b>]</li>
                     </ul></div>
                 </li>
-                <li>The <b>custom win condition</b> option ends the game after the specified number of targets are broken</li>
+                <li><b>Custom win condition</b> ends the game after the specified number of targets are broken</li>
+                <li><b>Enable moving targets</b> includes all <i>vanilla</i> moving targets on a stage</li>
+                <li><b>Randomly distribute targets</b> pools all 25 stages' targets and randomly distributes them to each stage</li>
             </ul>
             <b>FAQ/Troubleshooting:</b>
             <ul>
@@ -167,9 +178,9 @@
             Gecko code developed by <b>Punkline</b><br>
             Mismatch consultation by <b>chaos6</b><br>
             Inspired by <b>megaqwertification</b>, <b>hotdogturtle</b>, and <b>LinksDarkArrows</b><br>
-            Playtesting and feature suggestions by the <b><a href="https://discord.gg/AfEaYaE">Smash Stadium Discord</a></b>
+            Playtesting and feature suggestions by the <b><a href="https://discord.gg/AfEaYaE">Smash Stadium Discord</a></b><br>
+            Number of codes served: <b><span id="counter"></span></b>
         </p>
-        <!-- <input id="counter" type="hidden" value=""> -->
     </body>
 </html>
 <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
